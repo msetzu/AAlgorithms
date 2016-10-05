@@ -1,0 +1,96 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{amsmath}
+\usepackage{mathtools}
+%
+\title{ALG2 Problems}
+\author{Mattia Setzu}
+\date{October 2016}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\section{Hogwarts}
+\href{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_16/hogwarts.pdf}{Problem description}.
+
+\subsection{Dijkstra}
+\subsubsection{Computational cost}
+\begin{itemize}
+    \item $\mathcal{O}(n^{2})$
+    \item $\Theta(n^{2})$
+    \item $\mathcal{o}(n^{2})$
+\end{itemize}
+\subsubsection{Description -} Dijkstra is able to find the shortest path in a graph with non-negative weights on its edges.
+Our main idea is to create a Dijkstra compatible graph through a \emph{normalize} function, then apply Dijkstra to it in order to find the shortest path.
+
+\paragraph{Normalize -} Normalizes is a recursive procedure starting from node \emph{v}:
+\begin{enumerate}
+    \item Collect all neighbors of \emph{v} at given time \emph{}.
+    \item For each of them, collect the traversal way:
+\end{enumerate}
+
+    \begin{equation}
+    traversal_time(v', t) = 1 + \begin{cases}
+                                t           &   if start[v'] <= t < end[v']     \\
+                                start[v']   &   if t < start[v']                \\
+                                \infty      &   it t >= end[v']                 \\
+                                \end{cases}
+    \end{equation}
+\begin{enumerate}
+    \item For each of \emph{v'} apply \emph{normalize(v', t)} .
+\end{enumerate}
+Once all neighbors are visited, the algorithm terminates.
+
+\section{Breadth first}
+\subsubsection{Computational cost}
+\begin{itemize}
+    \item $\mathcal{O}(n^{2})$
+    \item $\Theta(n^{2})$
+    \item $\mathcal{o}(n^{2})$
+\end{itemize}
+
+\section{Paletta}
+\href{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_16/paletta.pdf}{Problem description}.
+\subsection{Split and order}
+\subsubsection{Computational cost}
+\begin{itemize}
+    \item $\mathcal{O}(n^{2})$
+    \item $\Theta(n^{2})$
+    \item $\mathcal{o}(n^{2})$
+\end{itemize}
+
+\section{Nemesis}
+\href{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_16/nemesi.pdf}{Problem description}.
+\subsection{Naive}
+\subsubsection{Computational cost}
+\begin{itemize}
+    \item $\mathcal{O}(n^{2})$
+    \item $\Theta(n^{2})$
+    \item $\mathcal{o}(n^{2})$
+\end{itemize}
+
+\subsection{Coloring}
+\subsubsection{Computational cost}
+\begin{itemize}
+    \item $\mathcal{O}(n^{2})$
+    \item $\Theta(n^{2})$
+    \item $\mathcal{o}(n^{2})$
+\end{itemize}
+
+\subsection{Ordered matrix}
+\subsubsection{Computational cost}
+\begin{itemize}
+    \item $\mathcal{O}(n^{2})$
+    \item $\Theta(n^{2})$
+    \item $\mathcal{o}(n^{2})$
+\end{itemize}
+
+
+\end{document}
