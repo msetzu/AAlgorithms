@@ -1,96 +1,141 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
-\usepackage{hyperref}
-\usepackage{amssymb}
-\usepackage{amsmath}
-\usepackage{mathtools}
-\usepackage{amsmath}
-\usepackage{mathtools}
-%
-\title{ALG2 Problems}
+\usepackage{hyperref}       % For \url{...}
+\usepackage{amssymb}        % Math symbols 
+\usepackage{amsmath}        % Various commands like \text{...}
+\usepackage{mathtools}      %
+\usepackage{algpseudocode}  % Pseudocode printer
+\usepackage{listings}       % Source code printer
+\usepackage{framed}         % To frame the computational cost
+
+\title{Advanced Algorithms Problems and Solutions}
 \author{Mattia Setzu}
 \date{October 2016}
+
+\lstset{numbers=left} % Print line numbers in \begin{lstlisting}...
 
 \begin{document}
 
 \maketitle
 
 \tableofcontents
+\clearpage
 
 \section{Hogwarts}
-\href{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_16/hogwarts.pdf}{Problem description}.
 
-\subsection{Dijkstra}
-\subsubsection{Computational cost}
-\begin{itemize}
-    \item $\mathcal{O}(n^{2})$
-    \item $\Theta(n^{2})$
-    \item $\mathcal{o}(n^{2})$
-\end{itemize}
-\subsubsection{Description -} Dijkstra is able to find the shortest path in a graph with non-negative weights on its edges.
-Our main idea is to create a Dijkstra compatible graph through a \emph{normalize} function, then apply Dijkstra to it in order to find the shortest path.
+The Hogwarts School\footnote{\url{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_16/hogwarts.pdf}} is modeled as a graph $G=(V, E)$ where $V$ is the set of castle's rooms and $E \subseteq V \times V$ is the set of the stairs. Each stair is labelled with the time of appearance and disappearance, and can be walked in both directions, therefore the graph is undirected. The goal is to find, if possible, the minimum amount of time required to go from the first to the last room.
+
+\subsection{Solution 1: Preprocessing-then-Dijkstra}
+
+Dijkstra is able to find the shortest path in a graph with non-negative weights on its edges. Our main idea is to create a Dijkstra compatible graph through a \emph{normalize} function, then apply Dijkstra to it in order to find the shortest path.
 
 \paragraph{Normalize -} Normalizes is a recursive procedure starting from node \emph{v}:
 \begin{enumerate}
-    \item Collect all neighbors of \emph{v} at given time \emph{}.
-    \item For each of them, collect the traversal way:
+  \item Collect all neighbors of $v$ at given time.
+  \item For each of them, collect the traversal time:
+  \begin{equation}
+    traversal\_time(v', t) = 1 + \begin{cases}
+    t           &   \mbox{if } start[v'] \leq t < end[v']   \\
+    start[v']   &   \mbox{if } t < start[v']                \\
+    \infty      &   \mbox{if } t \geq end[v']               \\
+  \end{cases}
+\end{equation}
+
+  \item For each of $v'$ apply $normalize(v', t)$.
 \end{enumerate}
 
-    \begin{equation}
-    traversal_time(v', t) = 1 + \begin{cases}
-                                t           &   if start[v'] <= t < end[v']     \\
-                                start[v']   &   if t < start[v']                \\
-                                \infty      &   it t >= end[v']                 \\
-                                \end{cases}
-    \end{equation}
-\begin{enumerate}
-    \item For each of \emph{v'} apply \emph{normalize(v', t)} .
-\end{enumerate}
 Once all neighbors are visited, the algorithm terminates.
 
-\section{Breadth first}
-\subsubsection{Computational cost}
-\begin{itemize}
-    \item $\mathcal{O}(n^{2})$
-    \item $\Theta(n^{2})$
-    \item $\mathcal{o}(n^{2})$
-\end{itemize}
+\begin{framed}
+  \noindent
+  \textbf{Computational cost}: $\Theta(n^{2})$ if the vertex set is implemented as an array. $O(|E|+|V|\log |V|)$ with Fibonacci heap.
+\end{framed}
+
+\subsection{Solution 2: HogwartsDijkstra}
+
+\begin{algorithmic}[1]
+  \Function{HogwartsDijkstra}{$G$}:
+  \State create vertex set $Q$ of unvisited nodes
+  \For{each vertex $v \in V$}      \Comment{initialization}
+      \State $time[v] \gets \infty$  \Comment{unknown time from source to v}
+      \State add $v$ to $Q$          \Comment{all nodes initially in Q}
+  \EndFor
+  \State $time[0] \gets 0$ \Comment{time from source to source}
+  \While{$Q\ne \emptyset$}
+      \State $u \gets x \in Q$ with $\min\{time[x]\}$
+      \State remove $u$ from $Q$
+      \For{each neighbor $v$ of $u$}:
+          \If{$time[u] \leq appear[v]$}       
+              \State $alt \gets appear[v] + 1$ \Comment{wait the appearance of the stair}
+          \ElsIf{$time[u] < disappear[v]$}       
+              \State $alt \gets time[u] + 1$       \Comment{use the stair}
+          \Else                        
+              \State $alt \gets \infty$            \Comment{the stair has already disappeared}
+          \EndIf
+          \If{$alt < time[v]$}
+              \State $time[v] \gets alt$           \Comment{a quicker path to $v$ has been found}
+          \EndIf
+      \EndFor
+  \EndWhile
+  \State \Return{$time[|N|-1]$}
+  \EndFunction
+\end{algorithmic}
+
+\begin{framed}
+  \noindent
+  \textbf{Computational cost}. See the previous section.
+\end{framed}
+
+\subsection{Solution 3: BFS-like traversal}
+
+\begin{algorithmic}[1]
+  \Function{reach}{$N$, $M$, $A[]$, $B[]$, $appear[]$, $disappear[]$}
+      \For{$i=0$ to $M-1$}
+          \State $edges\_[A[i]].push\_back(make\_pair(i, B[i]))$
+          \State $edges\_[B[i]].push\_back(make\_pair(i, A[i]))$
+      \EndFor
+      \For{$i=0$ to $N-1$}
+          \State $done\_[i] \gets false$
+          \State $distance\_[i] \gets \infty$
+      \EndFor
+      \State $reached\_[0].push\_back(0)$
+    \State $distance\_[0] \gets 0$
+    \For{$t=0$ to $MAX\_TIME$}
+      \For{$v \in reached\_[t]$}
+          \If{not $done\_[v]$}
+          \For{$edge \in edges\_[v]$}
+            \State $staircase \gets edge.first$
+            \State $neighbor \gets edge.second$
+            \State $time \gets max(distance_[v], appear[staircase])+1$
+            \If{not $done\_[neighbor]$ \\ \hfill and $distance\_[v] < disappear[staircase]$ \\ \hfill and  $time < distance\_[neighbor]$}
+              \State $distance\_[neighbor] \gets time$
+              \State $reached\_[time].push\_back(neighbor)$
+            \EndIf
+          \EndFor
+        \State $done\_[v] \gets true$
+          \EndIf
+      \EndFor
+    \EndFor
+    \State \Return{$(distance\_[N-1] == \infty) ? -1 : distance\_[N-1]$}
+  \EndFunction
+\end{algorithmic}
+
+\begin{framed}
+  \noindent
+  \textbf{Computational cost}: $O(m + MAX\_TIME)$.
+\end{framed}
 
 \section{Paletta}
 \href{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_16/paletta.pdf}{Problem description}.
-\subsection{Split and order}
-\subsubsection{Computational cost}
-\begin{itemize}
-    \item $\mathcal{O}(n^{2})$
-    \item $\Theta(n^{2})$
-    \item $\mathcal{o}(n^{2})$
-\end{itemize}
+\subsection{Solution 1: Split and count-inversions}
 
 \section{Nemesis}
 \href{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_16/nemesi.pdf}{Problem description}.
-\subsection{Naive}
-\subsubsection{Computational cost}
-\begin{itemize}
-    \item $\mathcal{O}(n^{2})$
-    \item $\Theta(n^{2})$
-    \item $\mathcal{o}(n^{2})$
-\end{itemize}
+\subsection{Solution 1: Naive}
 
-\subsection{Coloring}
-\subsubsection{Computational cost}
-\begin{itemize}
-    \item $\mathcal{O}(n^{2})$
-    \item $\Theta(n^{2})$
-    \item $\mathcal{o}(n^{2})$
-\end{itemize}
+\subsection{Solution 2: Coloring}
 
-\subsection{Ordered matrix}
-\subsubsection{Computational cost}
-\begin{itemize}
-    \item $\mathcal{O}(n^{2})$
-    \item $\Theta(n^{2})$
-    \item $\mathcal{o}(n^{2})$
-\end{itemize}
+\subsection{Solution 3: Ordered matrix}
 
 
 \end{document}
