@@ -1,10 +1,11 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
 \usepackage{hyperref}       % For \url{...}
-\usepackage{amssymb}        % Math symbols 
+\usepackage{amssymb}        % Math symbols
 \usepackage{amsmath}        % Various commands like \text{...}
-\usepackage{mathtools}      %
+\usepackage{mathtools}      % Various math tool
 \usepackage{algpseudocode}  % Pseudocode printer
+\usepackage{algorithmic}    % Pseudocode printer
 \usepackage{listings}       % Source code printer
 \usepackage{framed}         % To frame the computational cost
 
@@ -51,6 +52,41 @@ Once all neighbors are visited, the algorithm terminates.
   \textbf{Computational cost}: $\Theta(n^{2})$ if the vertex set is implemented as an array. $O(|E|+|V|\log |V|)$ with Fibonacci heap.
 \end{framed}
 
+\begin{algorithmic}[1]
+  \State create vertex set Q of unvisited nodes
+  \State create vertexes set E' of edges weight
+  \State time = 0                   \Comment{Initial time for traversal}
+  \State edges = stairs\_of(0)      \Comment{Get the incoming and outcoming edges of the starting node}
+
+  \Function{normalize}{$node$, $time$}
+  \State \If{$edge \in visited\_edges$}
+    \Return{}
+  \EndIf
+
+  \State $traversal\_time = \infty$
+  \For{each $neighbor \in neighbors\_of\_node$}
+      \State traversal\_time = traversal\_time(node, neighbor, time)
+      \State E'[0][node] = traversal\_time   \Comment{E'[i][j] holds the weight/traversal}
+      \State \Comment{time for the stair between i and j}
+
+      \For{each $new\_neighbor \in neighbors\_of\_neighbor$}
+      \State normalize(neighbor, new\_neighbor, traversal\_time)
+      \EndFor
+  \EndFor
+
+  \State dijkstra\_graph = \{V, E'\}
+  \State t = dijkstra(dijkstra\_graph)
+  \State \If{$t == \infty$} \Return{-1};
+        \Else \Return{$t$};
+        \EndIf
+  \EndFunction
+\end{algorithmic}
+
+\begin{framed}
+  \noindent
+  \textbf{Computational cost}. See the previous section.
+\end{framed}
+
 \subsection{Solution 2: HogwartsDijkstra}
 
 \begin{algorithmic}[1]
@@ -65,11 +101,11 @@ Once all neighbors are visited, the algorithm terminates.
       \State $u \gets x \in Q$ with $\min\{time[x]\}$
       \State remove $u$ from $Q$
       \For{each neighbor $v$ of $u$}:
-          \If{$time[u] \leq appear[v]$}       
+          \If{$time[u] \leq appear[v]$}
               \State $alt \gets appear[v] + 1$ \Comment{wait the appearance of the stair}
-          \ElsIf{$time[u] < disappear[v]$}       
+          \ElsIf{$time[u] < disappear[v]$}
               \State $alt \gets time[u] + 1$       \Comment{use the stair}
-          \Else                        
+          \Else
               \State $alt \gets \infty$            \Comment{the stair has already disappeared}
           \EndIf
           \If{$alt < time[v]$}
