@@ -3,9 +3,8 @@
 \usepackage{hyperref}       % For \url{...}
 \usepackage{amssymb}        % Math symbols
 \usepackage{amsmath}        % Various commands like \text{...}
-\usepackage{mathtools}      % Various math tool
+\usepackage{mathtools}      %
 \usepackage{algpseudocode}  % Pseudocode printer
-\usepackage{algorithmic}    % Pseudocode printer
 \usepackage{listings}       % Source code printer
 \usepackage{framed}         % To frame the computational cost
 
@@ -29,36 +28,37 @@ The Hogwarts School\footnote{\url{http://didawiki.cli.di.unipi.it/lib/exe/fetch.
 \subsection{Solution 1: Preprocessing-then-Dijkstra}
 
 Dijkstra is able to find the shortest path in a graph with non-negative weights on its edges. Our main idea is to create a Dijkstra compatible graph through a \emph{normalize} function, then apply Dijkstra to it in order to find the shortest path.
-
-\paragraph{Normalize -} Normalizes is a recursive procedure starting from node \emph{v}:
-\begin{enumerate}
-  \item Collect all neighbors of $v$ at given time.
-  \item For each of them, collect the traversal time:
-  \begin{equation}
-    traversal\_time(v', t) = 1 + \begin{cases}
-    t           &   \mbox{if } start[v'] \leq t < end[v']   \\
-    start[v']   &   \mbox{if } t < start[v']                \\
-    \infty      &   \mbox{if } t \geq end[v']               \\
-  \end{cases}
-\end{equation}
-
-  \item For each of $v'$ apply $normalize(v', t)$.
-\end{enumerate}
-
-Once all neighbors are visited, the algorithm terminates.
+The core of the preprocessing is the normalize function which computes traversal times between nodes at a given time \emph{time}:
+\begin{algorithmic}[1]
+  \Function{normalize}{$from$, $to$, $time$}:
+    \State $t = \infty$
+    \State \If{$start[v'] \leq t < end[v']$}    \Comment{No waiting time}
+        \State t = t + 1\;
+    \State \ElsIf{$t < start[v']$}              \Comment{Waiting time}
+      \State t = start[v'] + 1\;
+    \State \Else
+      \State $t = \infty$\;                     \Comment{Available time already expired}
+    \EndIf \\
+      \Return{t}
+    \EndFunction
+\end{algorithmic}
 
 \begin{framed}
   \noindent
   \textbf{Computational cost}: $\Theta(n^{2})$ if the vertex set is implemented as an array. $O(|E|+|V|\log |V|)$ with Fibonacci heap.
 \end{framed}
 
-\begin{algorithmic}[1]
-  \State create vertex set Q of unvisited nodes
-  \State create vertexes set E' of edges weight
-  \State time = 0                   \Comment{Initial time for traversal}
-  \State edges = stairs\_of(0)      \Comment{Get the incoming and outcoming edges of the starting node}
+The normalize function is then applied to a node traversal:
 
-  \Function{normalize}{$node$, $time$}
+\subsubsection{Pseudo-code}
+
+\begin{algorithmic}[1]
+  \State create vertex set Q of unvisited nodes\;
+  \State create vertexes set E' of edges weight\;
+  \State time = 0\;                   \Comment{Initial time for traversal}
+  \State edges = stairs\_of(0)\;      \Comment{Get the incoming and outcoming edges of the starting node}
+
+  \Function{process}{$node$, $time$}
   \State \If{$edge \in visited\_edges$}
     \Return{}
   \EndIf
@@ -87,11 +87,8 @@ Once all neighbors are visited, the algorithm terminates.
   \textbf{Computational cost}. See the previous section.
 \end{framed}
 
+
 \subsection{Solution 2: HogwartsDijkstra}
-
-This solution is a modified version of the Dijkstra’s algorithm. After the initialization, the set $Q$ contains all the vertices that needs to be analyzed, and $V \setminus Q$ contains all the vertices whose minimum amount of time has been determined. In the for loop, the algorithm checks whether the estimation of $time[v]$ can be improved by going through $u$: if this alternative ($alt$) improves the walk from the source to $v$, $time[v]$ is updated with the new estimate. At the end of the function, $time[v]$ is the minimum amount of time to reach $v$ from the source node.
-
-\bigskip
 
 \begin{algorithmic}[1]
   \Function{HogwartsDijkstra}{$G$}:
