@@ -89,6 +89,10 @@ Once all neighbors are visited, the algorithm terminates.
 
 \subsection{Solution 2: HogwartsDijkstra}
 
+This solution is a modified version of the Dijkstra’s algorithm. After the initialization, the set $Q$ contains all the vertices that needs to be analyzed, and $V \setminus Q$ contains all the vertices whose minimum amount of time has been determined. In the for loop, the algorithm checks whether the estimation of $time[v]$ can be improved by going through $u$: if this alternative ($alt$) improves the walk from the source to $v$, $time[v]$ is updated with the new estimate. At the end of the function, $time[v]$ is the minimum amount of time to reach $v$ from the source node.
+
+\bigskip
+
 \begin{algorithmic}[1]
   \Function{HogwartsDijkstra}{$G$}:
   \State create vertex set $Q$ of unvisited nodes
