@@ -16,7 +16,27 @@ understandable take care to be formal and include pseudo-code and use case examp
 A detailed description of the computational classes and memory cost can help greatly.
 You can add any credits you deem necessary, and link to your implementation, if you like.
 
+# Style guide
+The following style guide shall be followed:
+
+- **Indentation:** 2 spaces.
+- **Packages:** Included at the start of the document, add a brief description and try
+to indent them as the previous ones.
+- **Computational cost:** You should add it in a __hbox__ like this:
+
+    ``\begin{framed}
+    \noindent
+    \textbf{Computational cost}: $O(m + MAX\_TIME)$.
+    \end{framed}``
 
 # Collaboration
-New solutions can be submitted through pull requests. If you are not familiar with them,
+New solutions can be submitted through pull requests.
+No new branches will be added.
+If you are not familiar with them,
 you can find an in-depth description [here](https://help.github.com/articles/about-pull-requests/).
+
+## Issues
+If you find any problem in the solutions or any other detail, please use the repository's **Issues** section.
+
+## Slack
+I'm using [slack](slack.com) to organize, if you want to synchronize our efforts, you should find the team at [unipi-inf-lm.slack.com](https://unipi-inf-lm.slack.com)
