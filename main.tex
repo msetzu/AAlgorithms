@@ -1,7 +1,7 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
 \usepackage{hyperref}       % For \url{...}
-\usepackage{amssymb}        % Math symbols 
+\usepackage{amssymb}        % Math symbols
 \usepackage{amsmath}        % Various commands like \text{...}
 \usepackage{mathtools}      %
 \usepackage{algpseudocode}  % Pseudocode printer
@@ -28,34 +28,67 @@ The Hogwarts School\footnote{\url{http://didawiki.cli.di.unipi.it/lib/exe/fetch.
 \subsection{Solution 1: Preprocessing-then-Dijkstra}
 
 Dijkstra is able to find the shortest path in a graph with non-negative weights on its edges. Our main idea is to create a Dijkstra compatible graph through a \emph{normalize} function, then apply Dijkstra to it in order to find the shortest path.
-
-\paragraph{Normalize -} Normalizes is a recursive procedure starting from node \emph{v}:
-\begin{enumerate}
-  \item Collect all neighbors of $v$ at given time.
-  \item For each of them, collect the traversal time:
-  \begin{equation}
-    traversal\_time(v', t) = 1 + \begin{cases}
-    t           &   \mbox{if } start[v'] \leq t < end[v']   \\
-    start[v']   &   \mbox{if } t < start[v']                \\
-    \infty      &   \mbox{if } t \geq end[v']               \\
-  \end{cases}
-\end{equation}
-
-  \item For each of $v'$ apply $normalize(v', t)$.
-\end{enumerate}
-
-Once all neighbors are visited, the algorithm terminates.
+The core of the preprocessing is the normalize function which computes traversal times between nodes at a given time \emph{time}:
+\begin{algorithmic}[1]
+  \Function{normalize}{$from$, $to$, $time$}:
+    \State $t = \infty$
+    \State \If{$start[v'] \leq t < end[v']$}    \Comment{No waiting time}
+        \State t = t + 1\;
+    \State \ElsIf{$t < start[v']$}              \Comment{Waiting time}
+      \State t = start[v'] + 1\;
+    \State \Else
+      \State $t = \infty$\;                     \Comment{Available time already expired}
+    \EndIf \\
+      \Return{t}
+    \EndFunction
+\end{algorithmic}
 
 \begin{framed}
   \noindent
   \textbf{Computational cost}: $\Theta(n^{2})$ if the vertex set is implemented as an array. $O(|E|+|V|\log |V|)$ with Fibonacci heap.
 \end{framed}
 
+The normalize function is then applied to a node traversal:
+
+\subsubsection{Pseudo-code}
+
+\begin{algorithmic}[1]
+  \State create vertex set Q of unvisited nodes\;
+  \State create vertexes set E' of edges weight\;
+  \State time = 0\;                   \Comment{Initial time for traversal}
+  \State edges = stairs\_of(0)\;      \Comment{Get the incoming and outcoming edges of the starting node}
+
+  \Function{process}{$node$, $time$}
+  \State \If{$edge \in visited\_edges$}
+    \Return{}
+  \EndIf
+
+  \State $traversal\_time = \infty$
+  \For{each $neighbor \in neighbors\_of\_node$}
+      \State traversal\_time = traversal\_time(node, neighbor, time)
+      \State E'[0][node] = traversal\_time   \Comment{E'[i][j] holds the weight/traversal}
+      \State \Comment{time for the stair between i and j}
+
+      \For{each $new\_neighbor \in neighbors\_of\_neighbor$}
+      \State normalize(neighbor, new\_neighbor, traversal\_time)
+      \EndFor
+  \EndFor
+
+  \State dijkstra\_graph = \{V, E'\}
+  \State t = dijkstra(dijkstra\_graph)
+  \State \If{$t == \infty$} \Return{-1};
+        \Else \Return{$t$};
+        \EndIf
+  \EndFunction
+\end{algorithmic}
+
+\begin{framed}
+  \noindent
+  \textbf{Computational cost}. See the previous section.
+\end{framed}
+
+
 \subsection{Solution 2: HogwartsDijkstra}
-
-This solution is a modified version of the Dijkstra’s algorithm. After the initialization, the set $Q$ contains all the vertices that needs to be analyzed, and $V \setminus Q$ contains all the vertices whose minimum amount of time has been determined. In the for loop, the algorithm checks whether the estimation of $time[v]$ can be improved by going through $u$: if this alternative ($alt$) improves the walk from the source to $v$, $time[v]$ is updated with the new estimate. At the end of the function, $time[v]$ is the minimum amount of time to reach $v$ from the source node.
-
-\bigskip
 
 \begin{algorithmic}[1]
   \Function{HogwartsDijkstra}{$G$}:
@@ -69,11 +102,11 @@ This solution is a modified version of the Dijkstra’s algorithm. After the ini
       \State $u \gets x \in Q$ with $\min\{time[x]\}$
       \State remove $u$ from $Q$
       \For{each neighbor $v$ of $u$}:
-          \If{$time[u] \leq appear[v]$}       
+          \If{$time[u] \leq appear[v]$}
               \State $alt \gets appear[v] + 1$ \Comment{wait the appearance of the stair}
-          \ElsIf{$time[u] < disappear[v]$}       
+          \ElsIf{$time[u] < disappear[v]$}
               \State $alt \gets time[u] + 1$       \Comment{use the stair}
-          \Else                        
+          \Else
               \State $alt \gets \infty$            \Comment{the stair has already disappeared}
           \EndIf
           \If{$alt < time[v]$}
@@ -130,8 +163,43 @@ This solution is a modified version of the Dijkstra’s algorithm. After the ini
 \end{framed}
 
 \section{Paletta}
-\href{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_16/paletta.pdf}{Problem description}.
+Paletta ordering\footnote{\url{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_16/paletta.pdf}} is a peculiar ordering technique: given a 3-tuple of elements, paletta takes the central element as pivot and swaps the two elements right before and next to it. To make an example:
+\begin{equation}
+  \textrm{\{3, 2, 1\}} \xrightarrow[]{paletta} \textrm{\{1, 2, 3\}}
+\end{equation}
+We now want to develop an algorithm to order any array through paletta ordering with the minimal number of swaps.
+You should see as not every array can be ordered like this:
+  \begin{equation}
+  \textrm{\{3, , 1\}} \xrightarrow[]{paletta} \textrm{\{1, 2, 3\}}
+  \end{equation}
+
 \subsection{Solution 1: Split and count-inversions}
+We should note that the following properties hold:
+\begin{enumerate}
+    \item Every element can be a pivot, but the first and the last one, as they have respectevly
+    no elements before and after them.
+    \item Every element can be swapped as many times as necessary, but only with elements of the
+    same 2-remainder (numbers in even positions can only be swapped with numbers in even positions,
+    the same holds for odd indexes).
+    More formally $|a| = N, \forall i \in [1, N - 2], \neg \exists swap(i, j): i \mod 2 \neq i \mod j$
+    \item The least number of swaps does not backtrack any element. Formally, let \emph{k} be the minimal number
+    of swaps applied to an array, backtracks included. By hypothesis, \emph{k} is minimal, but at least \emph{m},
+    $m > 0$ backtrack swaps have been operated, therefore we found a $k' = k - m: k' < k$, a new minimal number
+    of swaps: contradiction.
+\end{enumerate}
+Given item 2, we can split our array in two, even and odd numbers, and order them counting the swaps.
+In our example we'll use \emph{mergesort}, as it runs in \emph{\log_2 n}, does not backtrack elements,
+and is very well-known.
+Clearly, given an array, a swap happens when an element is pushed back, pulling the one between its new position
+and the old one ahead: we can map this behaviour in the merge routine of mergesort: the array merged is able to
+push back elements from its right pointer to the new array, moving them back of $(m - i) + (j - m)$ positions,
+where \emph{m} is the dimension of the current two sub-arrays to merge.
+Provided that our edited version of mergesort ran succesfully on both the even-index and odd-index, we now need
+to verify if by merging them we obtain an ordered array.
+Intituively, the merged array will start with the first element of the even-index arrays, followed by the first
+of the odd-index array, followed by the second of the even-index array, and so on.
+To check for these elements is pretty trivial and can be done in linear time.
+Follows the pseudo-code for the edited version and \emph{snake_check} function:
 
 \section{Nemesis}
 \href{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_16/nemesi.pdf}{Problem description}.
