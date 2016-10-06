@@ -163,8 +163,43 @@ The normalize function is then applied to a node traversal:
 \end{framed}
 
 \section{Paletta}
-\href{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_16/paletta.pdf}{Problem description}.
+Paletta ordering\footnote{\url{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_16/paletta.pdf}} is a peculiar ordering technique: given a 3-tuple of elements, paletta takes the central element as pivot and swaps the two elements right before and next to it. To make an example:
+\begin{equation}
+  \textrm{\{3, 2, 1\}} \xrightarrow[]{paletta} \textrm{\{1, 2, 3\}}
+\end{equation}
+We now want to develop an algorithm to order any array through paletta ordering with the minimal number of swaps.
+You should see as not every array can be ordered like this:
+  \begin{equation}
+  \textrm{\{3, , 1\}} \xrightarrow[]{paletta} \textrm{\{1, 2, 3\}}
+  \end{equation}
+
 \subsection{Solution 1: Split and count-inversions}
+We should note that the following properties hold:
+\begin{enumerate}
+    \item Every element can be a pivot, but the first and the last one, as they have respectevly
+    no elements before and after them.
+    \item Every element can be swapped as many times as necessary, but only with elements of the
+    same 2-remainder (numbers in even positions can only be swapped with numbers in even positions,
+    the same holds for odd indexes).
+    More formally $|a| = N, \forall i \in [1, N - 2], \neg \exists swap(i, j): i \mod 2 \neq i \mod j$
+    \item The least number of swaps does not backtrack any element. Formally, let \emph{k} be the minimal number
+    of swaps applied to an array, backtracks included. By hypothesis, \emph{k} is minimal, but at least \emph{m},
+    $m > 0$ backtrack swaps have been operated, therefore we found a $k' = k - m: k' < k$, a new minimal number
+    of swaps: contradiction.
+\end{enumerate}
+Given item 2, we can split our array in two, even and odd numbers, and order them counting the swaps.
+In our example we'll use \emph{mergesort}, as it runs in \emph{\log_2 n}, does not backtrack elements,
+and is very well-known.
+Clearly, given an array, a swap happens when an element is pushed back, pulling the one between its new position
+and the old one ahead: we can map this behaviour in the merge routine of mergesort: the array merged is able to
+push back elements from its right pointer to the new array, moving them back of $(m - i) + (j - m)$ positions,
+where \emph{m} is the dimension of the current two sub-arrays to merge.
+Provided that our edited version of mergesort ran succesfully on both the even-index and odd-index, we now need
+to verify if by merging them we obtain an ordered array.
+Intituively, the merged array will start with the first element of the even-index arrays, followed by the first
+of the odd-index array, followed by the second of the even-index array, and so on.
+To check for these elements is pretty trivial and can be done in linear time.
+Follows the pseudo-code for the edited version and \emph{snake_check} function:
 
 \section{Nemesis}
 \href{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_16/nemesi.pdf}{Problem description}.
