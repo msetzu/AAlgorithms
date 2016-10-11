@@ -7,6 +7,7 @@
 \usepackage{algpseudocode}  % Pseudocode printer
 \usepackage{listings}       % Source code printer
 \usepackage{framed}         % To frame the computational cost
+\usepackage{qtree}          % Draw simple binary trees
 
 \title{Advanced Algorithms Problems and Solutions}
 \author{Mattia Setzu}
@@ -163,9 +164,9 @@ The normalize function is then applied to a node traversal:
 \end{framed}
 
 \section{Paletta}
-Paletta-sort\footnote{\url{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_16/paletta.pdf}} is a peculiar ordering technique: given a 3-tuple of elements, paletta takes the central element as pivot and swaps the two elements right before and next to it. To make an example:
+Paletta ordering\footnote{\url{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_16/paletta.pdf}} is a peculiar ordering technique: given a 3-tuple of elements, paletta takes the central element as pivot and swaps the two elements right before and next to it. To make an example:
 \begin{equation}
-  \textrm{\[3, 2, 1\]} \xrightarrow[]{paletta} \textrm{\[1, 2, 3\]}
+  \textrm{\{3, 2, 1\}} \xrightarrow{paletta} \textrm{\{1, 2, 3\}}
 \end{equation}
 We now want to develop an algorithm to order any array through paletta ordering with the minimal number of swaps.
 You should see as not every array can be ordered like this:
@@ -176,38 +177,109 @@ You should see as not every array can be ordered like this:
 \subsection{Solution 1: Split and count-inversions}
 We should note that the following properties hold:
 \begin{enumerate}
-    \item Every element can be a pivot, but the first and the last one, as they have respectively
+    \item Every element can be a pivot, but the first and the last one, as they have respectevly
     no elements before and after them.
     \item Every element can be swapped as many times as necessary, but only with elements of the
     same 2-remainder (numbers in even positions can only be swapped with numbers in even positions,
     the same holds for odd indexes).
-    More formally given an array a, $|a| = N, \forall i \in [1, N - 2], \neg \exists swap(i, j): i \mod 2 \neq i \mod j$
+    More formally $|a| = N, \forall i \in [1, N - 2], \neg \exists swap(i, j): i \mod 2 \neq i \mod j$
     \item The least number of swaps does not backtrack any element. Formally, let \emph{k} be the minimal number
-    of swaps applied to an array, backtracks included. By hypothesis, k is minimal, but at least m,
+    of swaps applied to an array, backtracks included. By hypothesis, \emph{k} is minimal, but at least \emph{m},
     $m > 0$ backtrack swaps have been operated, therefore we found a $k' = k - m: k' < k$, a new minimal number
     of swaps: contradiction.
 \end{enumerate}
 Given item 2, we can split our array in two, even and odd numbers, and order them counting the swaps.
-In our example we'll use \emph{mergesort}, as it runs in $O(n \log n)$, does not backtrack elements,
+In our example we'll use \emph{mergesort}, as it runs in $\log_2 n$, does not backtrack elements,
 and is very well-known.
 Clearly, given an array, a swap happens when an element is pushed back, pulling the one between its new position
 and the old one ahead: we can map this behaviour in the merge routine of mergesort: the array merged is able to
 push back elements from its right pointer to the new array, moving them back of $(m - i) + (j - m)$ positions,
 where \emph{m} is the dimension of the current two sub-arrays to merge.
-Provided that our edited version of mergesort ran succesfully on both the even-index and odd-index, we now need
+Provided that our edited version of mergesort ran successfully on both the even-index and odd-index, we now need
 to verify if by merging them we obtain an ordered array.
-Intituively, the merged array will start with the first element of the even-index arrays, followed by the first
+Intuitively, the merged array will start with the first element of the even-index arrays, followed by the first
 of the odd-index array, followed by the second of the even-index array, and so on.
 To check for these elements is pretty trivial and can be done in linear time.
-Follows the pseudo-code for the edited version and \emph{snake_check} function:
+Follows the pseudo-code for the edited version and \emph{snake\_check} function:
 
-\section{Nemesis}
-\href{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_16/nemesi.pdf}{Problem description}.
-\subsection{Solution 1: Naive}
+\begin{algorithmic}[1]
+  \Function{merge\_with\_paletta}{$left$, $right$, $k$}:
+    \State ...\;                        \Comment{merge instructions}
+    \State \If{$right > left$}
+      \State paletta\_count = paletta\_count + 1\;
+      \State ...\;
+      \EndIf
+    \EndFunction
+\end{algorithmic}
 
-\subsection{Solution 2: Coloring}
+\begin{algorithmic}[1]
+  \Function{snake\_check}{}:
+    \State even, odd = 0\;
+    \For{;$even, odd < N\;even = even + 1, odd = odd + 1$}
+      \State \If{$a[even] > a[odd]$}
+        \State \Return{-1}\;
+        \EndIf
+    \EndFor
 
-\subsection{Solution 3: Ordered matrix}
+    \Return{paletta\_count}\;
+    \EndFunction
+\end{algorithmic}
+
+\begin{framed}
+  \noindent
+  \textbf{Computational cost}: $\Omega(n\log_2(n)), \Theta(n\log_2(n)), O(n\log_2(n))$.
+\end{framed}
 
 
+\newpage
+\section{Range updates}
+Consider an array \emph{C} of n integers, initially all equal to zero. We want to support the following operations:
+\begin{itemize}
+    \item \textbf{update(i, j, c):} where $0 \leq i \leq j \leq n - 1$ and $c$ is an integer: it changes $C$ such that $C[k] = C[k] + c$ for every $i \leq k \leq j$.
+    \item \textbf{query(i)} where $0 \leq i \leq n - 1$: it returns the value of $C[i]$.
+    \item \textbf{sum(i,j)} where $0 \leq i \leq j \leq n - 1$: it returns $\Sigma_{k = 1}^{j}(C[k])$.
+\end{itemize}
+Design a data structure that uses $O(n)$ space and implements each operation above in $O(\log(n))$ time. Note that $query(i) = sum(i, i)$ but it helps to reason. [Hint to further save space: use an implicit tree such as the Fenwick tree (see wikipedia).]
+
+\subsection{Solution 1: Fenwick lazy a-b sums}
+Let $T$ be an segmented binary tree over a continuous interval $I: [0, N - 1]$ s.t. its leafs are the points in I, and the parent of two nodes comprises of their interval:
+\begin{equation*}
+  n' \cup n'' = n, n' \cap n'' = \emptyset   \textrm{ s.t. n is the father of n', n''}
+\end{equation*}
+$T$ will keep track of the prefix sums for every interval.
+We define a function $s': [0, n - 1] \to \mathbb{N}$ that given a node in $T$ returns the sum of that interval.
+The lazy algorithm doesn't propagate sums over $T$ as they are streamed in the input, which means $s'(i)$ might not be accurate.
+In order to obtain our \emph{lazy} approach we define a function
+$l: \mathbb{N} \to (\mathbb{N} \cup \{\epsilon\}, \mathbb{N})$
+to keep track of our lazy sums:
+\begin{equation*}
+    s(n) = \begin{cases}
+            \epsilon, _             &   \textrm{if no lazy prefix sum is in that interval} \\
+            k, m                    &   \textrm{if a lazy sum of k is to be propagated to m}\\
+            \end{cases}
+\end{equation*}
+The \emph{query} function is then trivial:
+
+\begin{algorithmic}[1]
+  \Function{query}{$I$, $i$, $sum$}:
+    \State \If{$I.size == 1$}                       \Comment{Return found value}
+        \State \Return $I.sum$\;
+
+    \State \If{lazy(I), $i \in I.left$}             \Comment{Lazy on left child}
+        \State lazy(I) = \False\;
+        \State query($I.left$, $i$, $sum + I.sum$)
+    \EndIf
+    \State \If{lazy(I), $i \in right_child$}        \Comment{Lazy on right child}
+        \State lazy(I) = \False\;
+        \State query($I.right$, $i$, $sum + I.sum$)
+    \EndIf
+
+    \State \If{!lazy(I), $i \in I.left$}             \Comment{Not lazy on left child}
+        \State query($I.left$, $i$, $sum$)
+    \EndIf
+    \State \If{!lazy(I), $i \in right_child$}        \Comment{Not lazy on right child}
+        \State query($I.right$, $i$, $sum$)
+    \EndIf
+    \EndFunction
+\end{algorithmic}
 \end{document}
