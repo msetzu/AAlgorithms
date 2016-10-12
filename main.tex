@@ -242,19 +242,31 @@ Consider an array \emph{C} of n integers, initially all equal to zero. We want t
 Design a data structure that uses $O(n)$ space and implements each operation above in $O(\log(n))$ time. Note that $query(i) = sum(i, i)$ but it helps to reason. [Hint to further save space: use an implicit tree such as the Fenwick tree (see wikipedia).]
 
 \subsection{Solution 1: Fenwick lazy a-b sums}
-Let $T$ be an segmented binary tree over a continuous interval $I: [0, N - 1]$ s.t. its leafs are the points in I, and the parent of two nodes comprises of their interval:
+Let $T$ be a segmented binary tree over a continuous interval $I: [0, N - 1]$ s.t. its leafs are the points in I, and the parent of two nodes comprises of their interval:
 \begin{equation*}
   n' \cup n'' = n, n' \cap n'' = \emptyset   \textrm{ s.t. n is the father of n', n''}
 \end{equation*}
 $T$ will keep track of the prefix sums for every interval.
-We define a function $s': [0, n - 1] \to \mathbb{N}$ that given a node in $T$ returns the sum of that interval.
-The lazy algorithm doesn't propagate sums over $T$ as they are streamed in the input, which means $s'(i)$ might not be accurate.
-In order to obtain our \emph{lazy} approach we define a function
-$l: \mathbb{N} \to (\mathbb{N} \cup \{\epsilon\}, \mathbb{N})$
+We define a function
+\begin{equation}
+    s': [0, n - 1] \to \mathbb{N}
+\end{equation}
+that given a node in $T$ returns the value associated with $I$, namely the cumulative sum of that interval.
+
+In order to reduce the computational cost, we introduce a lazy algorithm
+that doesn't propagate sums over $T$ as they are streamed in the input,
+which means $s'(i)$ might not be accurate at a given time $t$ for any of the
+requested operation.
+
+We'll instead either compute over $T$ or update $T$ as necessary.
+Let us define a function to do so:
+\begin{equation}
+    l: \mathbb{N} \to (\mathbb{N} \cup \{\epsilon\}, \mathbb{N})
+\end{equation}
 to keep track of our lazy sums:
 \begin{equation*}
     s(n) = \begin{cases}
-            \epsilon, _             &   \textrm{if no lazy prefix sum is in that interval} \\
+            \epsilon, \_            &   \textrm{if no lazy prefix sum is in that interval} \\
             k, m                    &   \textrm{if a lazy sum of k is to be propagated to m}\\
             \end{cases}
 \end{equation*}
@@ -265,21 +277,99 @@ The \emph{query} function is then trivial:
     \State \If{$I.size == 1$}                       \Comment{Return found value}
         \State \Return $I.sum$\;
 
-    \State \If{lazy(I), $i \in I.left$}             \Comment{Lazy on left child}
+    \State \If{lazy(I), $i \in I.left, i \neg \in I.right$}     \Comment{Lazy on left child}
         \State lazy(I) = \False\;
         \State query($I.left$, $i$, $sum + I.sum$)
     \EndIf
-    \State \If{lazy(I), $i \in right_child$}        \Comment{Lazy on right child}
+    
+    \State \If{lazy(I), $i \in right_child, i \neg \in I.left$} \Comment{Lazy on right child}
         \State lazy(I) = \False\;
         \State query($I.right$, $i$, $sum + I.sum$)
+    \EndIf
+
+    \State \If{lazy(I), $i \in right_child, i \in I.left$}      \Comment{Lazy on both}
+        \State lazy(I) = \False\;
+        \State query($I.right$, $i$, $j$, $sum + I.sum$) +
+                query($I.left$, $i$, $j$, $sum + I.sum$)
     \EndIf
 
     \State \If{!lazy(I), $i \in I.left$}             \Comment{Not lazy on left child}
         \State query($I.left$, $i$, $sum$)
     \EndIf
+
     \State \If{!lazy(I), $i \in right_child$}        \Comment{Not lazy on right child}
         \State query($I.right$, $i$, $sum$)
     \EndIf
+
+    \State \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy on both}
+        \State sum($I.right$, $i$, $sum$)
+    \EndIf
     \EndFunction
 \end{algorithmic}
+
+\begin{algorithmic}[1]
+  \Function{sum}{$I$, $i$, $j$, $sum$}:
+    \State \If{$I.size == 1$}                                   \Comment{Return found value}
+        \State \Return $I.sum + sum$\;
+
+    \State \If{lazy(I), $i \in I.left, i \neg \in I.right$}     \Comment{Lazy on left child}
+        \State lazy(I) = \False\;
+        \State sum($I.left$, $i$, $j$, $sum + I.sum$)
+    \EndIf
+    \State \If{lazy(I), $i \in right_child, i \neg \in I.left$} \Comment{Lazy on right child}
+        \State lazy(I) = \False\;
+        \State sum($I.right$, $i$, $j$, $sum + I.sum$)
+    \EndIf
+
+    \State \If{lazy(I), $i \in right_child, i \in I.left$}      \Comment{Lazy on both}
+        \State lazy(I) = \False\;
+        \State sum($I.right$, $i$, $j$, $sum + I.sum$) +
+                sum($I.left$, $i$, $j$, $sum + I.sum$)
+    \EndIf
+
+    \State \If{!lazy(I), $i \in I.left$}                        \Comment{Not lazy on left child}
+        \State sum($I.left$, $i$, $sum$)
+    \EndIf
+    \State \If{!lazy(I), $i \in I.right$}                       \Comment{Not lazy on right child}
+        \State sum($I.right$, $i$, $sum$)
+    \EndIf
+
+    \State \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy on both}
+        \State sum($I.right$, $i$, $sum$)
+    \EndIf
+    \EndFunction
+\end{algorithmic}
+
+\begin{algorithmic}[1]
+  \Function{update}{$I$, $i$, $j$, $k$}:
+    \State \If{$I.size == 1$}                                   \Comment{Return found value}
+        \State \Return $I.val += update$\;
+
+    \State \If{lazy(I), $i \in I.left, i \neg \in I.right$}     \Comment{Lazy on left child}
+        \State lazy(I.left) = \True\;
+        \State I.left.val = k\;
+    \EndIf
+    \State \If{lazy(I), $i \in right_child, i \neg \in I.left$} \Comment{Lazy on right child}
+        \State lazy(I.right) = \True\;
+        \State I.right.val = k\;
+    \EndIf
+
+    \State \If{lazy(I), $i \in right_child, i \in I.left$}      \Comment{Lazy on both}
+        \State lazy(I) = \True\;
+        \State I.val = k\;
+    \EndIf
+
+    \State \If{!lazy(I), $i \in I.left$}                        \Comment{Not lazy on left child}
+        \State update($I.left$, $i$, $update$)
+    \EndIf
+    \State \If{!lazy(I), $i \in I.right$}                       \Comment{Not lazy on right child}
+        \State update($I.right$, $i$, $update$)
+    \EndIf
+
+    \State \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy on both}
+        \State update($I.right$, $i$, $update$)
+    \EndIf
+    \EndFunction
+\end{algorithmic}
+
 \end{document}
