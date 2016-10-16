@@ -3,7 +3,7 @@
 \usepackage{hyperref}       % For \url{...}
 \usepackage{amssymb}        % Math symbols
 \usepackage{amsmath}        % Various commands like \text{...}
-\usepackage{mathtools}      %
+\usepackage{mathtools}      % Maths
 \usepackage{algpseudocode}  % Pseudocode printer
 \usepackage{listings}       % Source code printer
 \usepackage{framed}         % To frame the computational cost
@@ -24,12 +24,23 @@
 
 \section{Hogwarts}
 
-The Hogwarts School\footnote{\url{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_16/hogwarts.pdf}} is modeled as a graph $G=(V, E)$ where $V$ is the set of castle's rooms and $E \subseteq V \times V$ is the set of the stairs. Each stair is labelled with the time of appearance and disappearance, and can be walked in both directions, therefore the graph is undirected. The goal is to find, if possible, the minimum amount of time required to go from the first to the last room.
+The Hogwarts School\footnote{\url{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_16/hogwarts.pdf}}
+is modeled as a graph $G=(V, E)$ where $V$ is the set of castle's rooms and $E \subseteq V \times V$
+is the set of the stairs.
+Each stair is labelled with the time of appearance and disappearance, and can be
+walked in both directions, therefore the graph is undirected.
+The goal is to find, if possible, the minimum amount of time required to go from
+the first to the last room.
 
 \subsection{Solution 1: Preprocessing-then-Dijkstra}
 
-Dijkstra is able to find the shortest path in a graph with non-negative weights on its edges. Our main idea is to create a Dijkstra compatible graph through a \emph{normalize} function, then apply Dijkstra to it in order to find the shortest path.
-The core of the preprocessing is the normalize function which computes traversal times between nodes at a given time \emph{time}:
+Dijkstra is able to find the shortest path in a graph with non-negative weights
+on its edges.
+Our main idea is to create a Dijkstra compatible graph through a \emph{normalize}
+function, then apply Dijkstra to it in order to find the shortest path.
+The core of the preprocessing is the normalize function which computes traversal
+times between nodes at a given time \emph{time}:
+
 \begin{algorithmic}[1]
   \Function{normalize}{$from$, $to$, $time$}:
     \State $t = \infty$
@@ -46,7 +57,8 @@ The core of the preprocessing is the normalize function which computes traversal
 
 \begin{framed}
   \noindent
-  \textbf{Computational cost}: $\Theta(n^{2})$ if the vertex set is implemented as an array. $O(|E|+|V|\log |V|)$ with Fibonacci heap.
+  \textbf{Computational cost}: $\Theta(n^{2})$ if the vertex set is implemented
+  as an array. $O(|E|+|V|\log |V|)$ with Fibonacci heap.
 \end{framed}
 
 The normalize function is then applied to a node traversal:
@@ -57,7 +69,8 @@ The normalize function is then applied to a node traversal:
   \State create vertex set Q of unvisited nodes\;
   \State create vertexes set E' of edges weight\;
   \State time = 0\;                   \Comment{Initial time for traversal}
-  \State edges = stairs\_of(0)\;      \Comment{Get the incoming and outcoming edges of the starting node}
+  \State edges = stairs\_of(0)\;      \Comment{Get the incoming and outcoming
+                                                edges of the starting node}
 
   \Function{process}{$node$, $time$}
   \State \If{$edge \in visited\_edges$}
@@ -67,7 +80,8 @@ The normalize function is then applied to a node traversal:
   \State $traversal\_time = \infty$
   \For{each $neighbor \in neighbors\_of\_node$}
       \State traversal\_time = traversal\_time(node, neighbor, time)
-      \State E'[0][node] = traversal\_time   \Comment{E'[i][j] holds the weight/traversal}
+      \State E'[0][node] = traversal\_time   \Comment{E'[i][j] holds the
+                                                        weight/traversal}
       \State \Comment{time for the stair between i and j}
 
       \For{each $new\_neighbor \in neighbors\_of\_neighbor$}
@@ -100,18 +114,21 @@ The normalize function is then applied to a node traversal:
   \EndFor
   \State $time[0] \gets 0$ \Comment{time from source to source}
   \While{$Q\ne \emptyset$}
-      \State $u \gets x \in Q$ with $\min\{time[x]\}$
+      \State $u \gets x \in Q$ with $\min \{time[x]\}$
       \State remove $u$ from $Q$
       \For{each neighbor $v$ of $u$}:
           \If{$time[u] \leq appear[v]$}
-              \State $alt \gets appear[v] + 1$ \Comment{wait the appearance of the stair}
+              \State $alt \gets appear[v] + 1$ \Comment{wait the appearance of
+                                                                    the stair}
           \ElsIf{$time[u] < disappear[v]$}
               \State $alt \gets time[u] + 1$       \Comment{use the stair}
           \Else
-              \State $alt \gets \infty$            \Comment{the stair has already disappeared}
+              \State $alt \gets \infty$            \Comment{the stair has
+                                                        already disappeared}
           \EndIf
           \If{$alt < time[v]$}
-              \State $time[v] \gets alt$           \Comment{a quicker path to $v$ has been found}
+              \State $time[v] \gets alt$           \Comment{a quicker path to
+                                                            $v$ has been found}
           \EndIf
       \EndFor
   \EndWhile
@@ -144,7 +161,7 @@ The normalize function is then applied to a node traversal:
           \For{$edge \in edges\_[v]$}
             \State $staircase \gets edge.first$
             \State $neighbor \gets edge.second$
-            \State $time \gets max(distance_[v], appear[staircase])+1$
+            \State $time \gets \max(distance_[v], appear[staircase])+1$
             \If{not $done\_[neighbor]$ \\ \hfill and $distance\_[v] < disappear[staircase]$ \\ \hfill and  $time < distance\_[neighbor]$}
               \State $distance\_[neighbor] \gets time$
               \State $reached\_[time].push\_back(neighbor)$
@@ -164,11 +181,15 @@ The normalize function is then applied to a node traversal:
 \end{framed}
 
 \section{Paletta}
-Paletta ordering\footnote{\url{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_16/paletta.pdf}} is a peculiar ordering technique: given a 3-tuple of elements, paletta takes the central element as pivot and swaps the two elements right before and next to it. To make an example:
+Paletta ordering\footnote{\url{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_16/paletta.pdf}}
+is a peculiar ordering technique: given a 3-tuple of elements, paletta takes the
+central element as pivot and swaps the two elements right before and next to it.
+To make an example:
 \begin{equation}
   \textrm{\{3, 2, 1\}} \xrightarrow{paletta} \textrm{\{1, 2, 3\}}
 \end{equation}
-We now want to develop an algorithm to order any array through paletta ordering with the minimal number of swaps.
+We now want to develop an algorithm to order any array through paletta ordering
+with the minimal number of swaps.
 You should see as not every array can be ordered like this:
   \begin{equation}
   \textrm{\{3, , 1\}} \xrightarrow[]{paletta} \textrm{\{1, 2, 3\}}
@@ -177,28 +198,35 @@ You should see as not every array can be ordered like this:
 \subsection{Solution 1: Split and count-inversions}
 We should note that the following properties hold:
 \begin{enumerate}
-    \item Every element can be a pivot, but the first and the last one, as they have respectevly
-    no elements before and after them.
-    \item Every element can be swapped as many times as necessary, but only with elements of the
-    same 2-remainder (numbers in even positions can only be swapped with numbers in even positions,
-    the same holds for odd indexes).
-    More formally $|a| = N, \forall i \in [1, N - 2], \neg \exists swap(i, j): i \mod 2 \neq i \mod j$
-    \item The least number of swaps does not backtrack any element. Formally, let \emph{k} be the minimal number
-    of swaps applied to an array, backtracks included. By hypothesis, \emph{k} is minimal, but at least \emph{m},
-    $m > 0$ backtrack swaps have been operated, therefore we found a $k' = k - m: k' < k$, a new minimal number
-    of swaps: contradiction.
+    \item Every element can be a pivot, but the first and the last one, as they
+    have respectevly no elements before and after them.
+    \item Every element can be swapped as many times as necessary, but only with
+    elements of the same 2-remainder (numbers in even positions can only be
+    swapped with numbers in even positions, the same holds for odd indexes).
+    More formally $|a| = N, \forall i \in [1, N - 2], \neg \exists swap(i, j):
+                    i \mod 2 \neq i \mod j$
+    \item The least number of swaps does not backtrack any element.
+    Formally, let \emph{k} be the minimal number of swaps applied to an array,
+    backtracks included. By hypothesis, \emph{k} is minimal, but at least \emph{m},
+    $m > 0$ backtrack swaps have been operated, therefore we found a
+    $k' = k - m: k' < k$, a new minimal number of swaps: contradiction.
 \end{enumerate}
-Given item 2, we can split our array in two, even and odd numbers, and order them counting the swaps.
-In our example we'll use \emph{mergesort}, as it runs in $\log_2 n$, does not backtrack elements,
-and is very well-known.
-Clearly, given an array, a swap happens when an element is pushed back, pulling the one between its new position
-and the old one ahead: we can map this behaviour in the merge routine of mergesort: the array merged is able to
-push back elements from its right pointer to the new array, moving them back of $(m - i) + (j - m)$ positions,
+
+Given item 2, we can split our array in two, even and odd numbers, and order
+them counting the swaps.
+In our example we'll use \emph{mergesort}, as it runs in $\log_2 n$, does
+backtrack elements, and is very well-known.
+Clearly, given an array, a swap happens when an element is pushed back, pulling
+the one between its new position and the old one ahead: we can map this behaviour
+in the merge routine of mergesort: the array merged is able to push back elements
+from its right pointer to the new array, moving them back of $(m - i) + (j - m)$ positions,
 where \emph{m} is the dimension of the current two sub-arrays to merge.
-Provided that our edited version of mergesort ran successfully on both the even-index and odd-index, we now need
-to verify if by merging them we obtain an ordered array.
-Intuitively, the merged array will start with the first element of the even-index arrays, followed by the first
-of the odd-index array, followed by the second of the even-index array, and so on.
+Provided that our edited version of mergesort ran successfully on both the
+even-index and odd-index, we now need to verify if by merging them we obtain an
+ordered array.
+Intuitively, the merged array will start with the first element of the even-index
+arrays, followed by the first of the odd-index array, followed by the second of
+the even-index array, and so on.
 To check for these elements is pretty trivial and can be done in linear time.
 Follows the pseudo-code for the edited version and \emph{snake\_check} function:
 
@@ -233,25 +261,35 @@ Follows the pseudo-code for the edited version and \emph{snake\_check} function:
 
 \newpage
 \section{Range updates}
-Consider an array \emph{C} of n integers, initially all equal to zero. We want to support the following operations:
+Consider an array \emph{C} of n integers, initially all equal to zero.
+We want to support the following operations:
 \begin{itemize}
-    \item \textbf{update(i, j, c):} where $0 \leq i \leq j \leq n - 1$ and $c$ is an integer: it changes $C$ such that $C[k] = C[k] + c$ for every $i \leq k \leq j$.
+    \item \textbf{update(i, j, c):} where $0 \leq i \leq j \leq n - 1$ and $c$ is
+    an integer: it changes $C$ such that $C[k] = C[k] + c$ for every $i \leq k \leq j$.
     \item \textbf{query(i)} where $0 \leq i \leq n - 1$: it returns the value of $C[i]$.
-    \item \textbf{sum(i,j)} where $0 \leq i \leq j \leq n - 1$: it returns $\Sigma_{k = 1}^{j}(C[k])$.
+    \item \textbf{sum(i,j)} where $0 \leq i \leq j \leq n - 1$: it returns
+                    $\Sigma_{k = 1}^{j}(C[k])$.
 \end{itemize}
-Design a data structure that uses $O(n)$ space and implements each operation above in $O(\log(n))$ time. Note that $query(i) = sum(i, i)$ but it helps to reason. [Hint to further save space: use an implicit tree such as the Fenwick tree (see wikipedia).]
+
+Design a data structure that uses $O(n)$ space and implements each operation above
+in $O(\log(n))$ time. Note that $query(i) = sum(i, i)$ but it helps to reason.
+[Hint to further save space: use an implicit tree such as the Fenwick tree (see wikipedia).]
 
 \subsection{Solution 1: Fenwick lazy a-b sums}
-Let $T$ be a segmented binary tree over a continuous interval $I: [0, N - 1]$ s.t. its leafs are the points in I, and the parent of two nodes comprises of their interval:
+Let $T$ be a segmented binary tree over a continuous interval $I: [0, N - 1]$
+s.t.\ its leafs are the points in I, and the parent of two nodes comprises of their interval:
+
 \begin{equation*}
   n' \cup n'' = n, n' \cap n'' = \emptyset   \textrm{ s.t. n is the father of n', n''}
 \end{equation*}
+
 $T$ will keep track of the prefix sums for every interval.
 We define a function
 \begin{equation}
     s': [0, n - 1] \to \mathbb{N}
 \end{equation}
-that given a node in $T$ returns the value associated with $I$, namely the cumulative sum of that interval.
+that given a node in $T$ returns the value associated with $I$, namely the
+cumulative sum of that interval.
 
 In order to reduce the computational cost, we introduce a lazy algorithm
 that doesn't propagate sums over $T$ as they are streamed in the input,
@@ -276,32 +314,37 @@ The \emph{query} function is then trivial:
   \Function{query}{$I$, $i$, $sum$}:
     \State \If{$I.size == 1$}                       \Comment{Return found value}
         \State \Return $I.sum$\;
+    \EndIf
 
-    \State \If{lazy(I), $i \in I.left, i \neg \in I.right$}     \Comment{Lazy on left child}
-        \State lazy(I) = \False\;
+    \State \If{lazy(I), $i \in I.left, i \neg \in I.right$}     \Comment{Lazy on
+                                                                    left child}
+        \State lazy(I) = False\;
         \State query($I.left$, $i$, $sum + I.sum$)
     \EndIf
-    
-    \State \If{lazy(I), $i \in right_child, i \neg \in I.left$} \Comment{Lazy on right child}
-        \State lazy(I) = \False\;
+
+    \State \If{lazy(I), $i \in I.right, i \neg \in I.left$} \Comment{Lazy on
+                                                                    right child}
+        \State lazy(I) = False\;
         \State query($I.right$, $i$, $sum + I.sum$)
     \EndIf
 
-    \State \If{lazy(I), $i \in right_child, i \in I.left$}      \Comment{Lazy on both}
-        \State lazy(I) = \False\;
+    \State \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on both}
+        \State lazy(I) = False\;
         \State query($I.right$, $i$, $j$, $sum + I.sum$) +
                 query($I.left$, $i$, $j$, $sum + I.sum$)
     \EndIf
 
-    \State \If{!lazy(I), $i \in I.left$}             \Comment{Not lazy on left child}
+    \State \If{!lazy(I), $i \in I.left$}             \Comment{Not lazy on left
+                                                                        child}
         \State query($I.left$, $i$, $sum$)
     \EndIf
 
-    \State \If{!lazy(I), $i \in right_child$}        \Comment{Not lazy on right child}
+    \State \If{!lazy(I), $i \in I.right$}        \Comment{Not lazy on right child}
         \State query($I.right$, $i$, $sum$)
     \EndIf
 
-    \State \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy on both}
+    \State \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy
+                                                                        on both}
         \State sum($I.right$, $i$, $sum$)
     \EndIf
     \EndFunction
@@ -309,32 +352,40 @@ The \emph{query} function is then trivial:
 
 \begin{algorithmic}[1]
   \Function{sum}{$I$, $i$, $j$, $sum$}:
-    \State \If{$I.size == 1$}                                   \Comment{Return found value}
+    \State \If{$I.size == 1$}                                   \Comment{Return
+                                                                    found value}
         \State \Return $I.sum + sum$\;
+    \EndIf
 
-    \State \If{lazy(I), $i \in I.left, i \neg \in I.right$}     \Comment{Lazy on left child}
-        \State lazy(I) = \False\;
+    \State \If{lazy(I), $i \in I.left, i \neg \in I.right$}     \Comment{Lazy on
+                                                                    left child}
+        \State lazy(I) = False\;
         \State sum($I.left$, $i$, $j$, $sum + I.sum$)
     \EndIf
-    \State \If{lazy(I), $i \in right_child, i \neg \in I.left$} \Comment{Lazy on right child}
-        \State lazy(I) = \False\;
+    \State \If{lazy(I), $i \in I.right, i \neg \in I.left$} \Comment{Lazy on
+                                                                    right child}
+        \State lazy(I) = False\;
         \State sum($I.right$, $i$, $j$, $sum + I.sum$)
     \EndIf
 
-    \State \If{lazy(I), $i \in right_child, i \in I.left$}      \Comment{Lazy on both}
-        \State lazy(I) = \False\;
+    \State \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on
+                                                                        both}
+        \State lazy(I) = False\;
         \State sum($I.right$, $i$, $j$, $sum + I.sum$) +
                 sum($I.left$, $i$, $j$, $sum + I.sum$)
     \EndIf
 
-    \State \If{!lazy(I), $i \in I.left$}                        \Comment{Not lazy on left child}
+    \State \If{!lazy(I), $i \in I.left$}                        \Comment{Not lazy
+                                                                    on left child}
         \State sum($I.left$, $i$, $sum$)
     \EndIf
-    \State \If{!lazy(I), $i \in I.right$}                       \Comment{Not lazy on right child}
+    \State \If{!lazy(I), $i \in I.right$}                       \Comment{Not lazy
+                                                                    on right child}
         \State sum($I.right$, $i$, $sum$)
     \EndIf
 
-    \State \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy on both}
+    \State \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy
+                                                                        on both}
         \State sum($I.right$, $i$, $sum$)
     \EndIf
     \EndFunction
@@ -342,34 +393,127 @@ The \emph{query} function is then trivial:
 
 \begin{algorithmic}[1]
   \Function{update}{$I$, $i$, $j$, $k$}:
-    \State \If{$I.size == 1$}                                   \Comment{Return found value}
+    \State \If{$I.size == 1$}                                   \Comment{Return
+                                                                    found value}
         \State \Return $I.val += update$\;
+    \EndIf
 
-    \State \If{lazy(I), $i \in I.left, i \neg \in I.right$}     \Comment{Lazy on left child}
-        \State lazy(I.left) = \True\;
+    \State \If{lazy(I), $i \in I.left, i \neg \in I.right$}     \Comment{Lazy on
+                                                                    left child}
+        \State lazy(I.left) = True\;
         \State I.left.val = k\;
     \EndIf
-    \State \If{lazy(I), $i \in right_child, i \neg \in I.left$} \Comment{Lazy on right child}
-        \State lazy(I.right) = \True\;
+    \State \If{lazy(I), $i \in I.right, i \neg \in I.left$} \Comment{Lazy on right
+                                                                            child}
+        \State lazy(I.right) = True\;
         \State I.right.val = k\;
     \EndIf
 
-    \State \If{lazy(I), $i \in right_child, i \in I.left$}      \Comment{Lazy on both}
-        \State lazy(I) = \True\;
+    \State \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on both}
+        \State lazy(I) = True\;
         \State I.val = k\;
     \EndIf
 
-    \State \If{!lazy(I), $i \in I.left$}                        \Comment{Not lazy on left child}
+    \State \If{!lazy(I), $i \in I.left$}                        \Comment{Not lazy
+                                                                    on left child}
         \State update($I.left$, $i$, $update$)
     \EndIf
-    \State \If{!lazy(I), $i \in I.right$}                       \Comment{Not lazy on right child}
+    \State \If{!lazy(I), $i \in I.right$}                       \Comment{Not lazy
+                                                                on right child}
         \State update($I.right$, $i$, $update$)
     \EndIf
 
-    \State \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy on both}
+    \State \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy
+                                                                        on both}
         \State update($I.right$, $i$, $update$)
     \EndIf
     \EndFunction
 \end{algorithmic}
+
+\newpage
+\section{Depth of a node in a random search tree}
+A random search tree for a set S can be defined as follows: if $S$ is empty, then
+the null tree is a random search tree; otherwise, choose uniformly at random a key
+$k \in S$: the random search tree is obtained by picking
+$k$ as root, and the random search trees on $L = {x \in S : x < k} and R = {x \in S :
+x > k}$ become, respectively, the left and right subtree of the root $k$.
+Consider the randomized QuickSort discussed in class and analyzed with indicator
+variables \href{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_13/randqs.pdf}{CLRS 7.3},
+and observe that the random selection of the pivots follows the above process,
+thus producing a random search tree of n nodes. Using a variation of the analysis
+with indicator variables, prove that the expected depth of a node (i.e.\ the random variable
+representing the distance of the node from the root) is nearly $2\log_2 (n)$.
+Prove that the probability that the expected depth of a node exceeds $2\log_2 (n)$ is small for
+any given constant $c > 1$. [Note: the latter point can be solved after we see
+\href{https://en.wikipedia.org/wiki/Chernoff_bound}{Chernoff’s bounds}.]
+
+\subsection{Recursive balanced proof}
+Let $n$ be the number of nodes in the input list $l$, $h = \log_2(n)$ the height
+of a balanced tree over $l$, $T(p)$ the tree built over the permutation $p$ of pivots,
+$d(m)$ be the positional distance of a value $m$ of a partition from the median
+value of the said partition.
+Then the following holds:
+
+    \begin{itemize}
+    \item $height(T) = h \iff |T.left| = |T.right| \pm 1$ Trivially, let $r$ be
+    the root  of a 3-nodes partition: then, if the partition is unbalanced, the
+    lesser one will comprise of 0 nodes, while the greater one of 2, which implies
+    that $height(T.right) == 2$.
+    \label{k_distance} \item P = pivot,
+    $d(m) = \pm k \implies height(T.left) = height(T.right) \pm k$.
+    Recursively from the previous statement, a partition unbalanced of one element
+    generates subtrees whose levels differ on a factor of $1$.
+    By iterating recursively, their subtrees, if unbalanced by $1$, will yield
+    one more level difference.
+    Over $k$ unbalanced pivots on a single subtree, at most $k$ levels will be
+    added to $h$.
+    \item By the previous statement, it follows that $\nexists T, T': height(T) >= height(T')$,
+    T balanced, T' unbalanced.
+    As stated, let $T', T$ be the unbalanced/balanced tree respectively; let us
+    cheat with $T$ and switch the root pivot with the first element in its subtree.
+    Now, let us prove by contradiction that $T$ can't stay balanced and that its
+    height will increase.
+    By shifting the tree to the left we have deprived $T.right$ of either 0 levels
+    (in case $T.right$ is able to switch every pivot in its tree with its right
+    subtree root, ending with the rightmost leaf in its subtree) or 1, in case no
+    rightmost leaf is present.
+    Therefore $height(T) <= height(T')$.
+    \item The completely unbalanced tree is the tree with the most levels.
+    By taking partitions of size 0 we costantly force, at each level, one subtree
+    to disappear.
+    Therefore, its level(s) has to be necessarly transferred to its brother.
+    We then have exactly one node per level, therefore $n$ levels.
+    \end{itemize}
+
+    \subparagraph{Behaviour on random permutations}
+    Now let us analyse how the tree depth varies according to random pivot selection.
+    We start by applying the~\ref{k_distance}k-distance to a tree $T$ with $n = 3$
+    nodes.
+    Trivially, $height(T)$ with balanced tree is equal to two.
+    Now, let us pick either the lowest or the greatest pivot possible: the tree
+    is unbalanced towards either the left or the right, but $height(T) = 2$ in
+    both cases.
+    As the reader can see from~\ref{k_distance}, the distance works in absolute
+    value; it is then clear how, at every permutation for a pivot $p$, out of the
+    $n$, there are $2$ that generate a tree of the same height:
+    $p = d(P) + k, p = d(P) - k$.
+    Given that at every iteration a node $x$ in a completely unbalanced tree $T$'
+    has a probability of $\frac{1}{n - i}$, we can define the probability of $x$
+    being a pivot at level $l$ as:
+        \begin{equation}
+        P(x_{k}) = \frac{1}{n - l}
+        \end{equation}
+    Now, in order for $x$ not to be chosen as pivot in the previous $l - 1$
+    levels we have:
+        \begin{equation}
+        P(x_{k}) = \Sigma_{k = 1}^{l - 1} (\frac{1}{n - l + 1})
+        \end{equation}
+    Given the height of $T$, the (harmonic) partial series converges to
+    $\ln{(n)} + 1$.
+    Let us now add a root $r$ s.t. $T'.right = T, T'.left = T$.
+    We now have to consider the mirror case $\ln{(n')} + \ln{(n')}$,
+    given by the previous $n' = n/2$ in the logarithm, since the number of nodes
+    doubled, the $+1$ removed for both, since now neither of $T'.left, T.right$
+    is the root, and a $+1$ added since a new level has been added.
 
 \end{document}
