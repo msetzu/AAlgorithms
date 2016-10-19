@@ -183,7 +183,9 @@ The normalize function is then applied to a node traversal:
   \textbf{Computational cost}: $O(m + MAX\_TIME)$.
 \end{framed}
 
+
 \section{Paletta}
+
 Paletta ordering\footnote{\url{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_16/paletta.pdf}}
 is a peculiar ordering technique: given a 3-tuple of elements, paletta takes the
 central element as pivot and swaps the two elements right before and next to it.
@@ -199,6 +201,7 @@ You should see as not every array can be ordered like this:
   \end{equation}
 
 \subsection{Solution 1: Split and count-inversions}
+
 We should note that the following properties hold:
 \begin{enumerate}
     \item Every element can be a pivot, but the first and the last one, as they
@@ -264,6 +267,7 @@ Follows the pseudo-code for the edited version and \emph{snake\_check} function:
 
 \newpage
 \section{Range updates}
+
 Consider an array \emph{C} of n integers, initially all equal to zero.
 We want to support the following operations:
 \begin{itemize}
@@ -433,8 +437,10 @@ The \emph{query} function is then trivial:
     \EndFunction
 \end{algorithmic}
 
+
 \newpage
 \section{Depth of a node in a random search tree}
+
 A random search tree for a set S can be defined as follows: if $S$ is empty, then
 the null tree is a random search tree; otherwise, choose uniformly at random a key
 $k \in S$: the random search tree is obtained by picking
@@ -451,6 +457,7 @@ any given constant $c > 1$. [Note: the latter point can be solved after we see
 \href{https://en.wikipedia.org/wiki/Chernoff_bound}{Chernoff’s bounds}.]
 
 \subsection{Recursive balanced proof}
+
 Let $n$ be the number of nodes in the input list $l$, $h = \log_2(n)$ the height
 of a balanced tree over $l$, $T(p)$ the tree built over the permutation $p$ of pivots,
 $d(m)$ be the positional distance of a value $m$ of a partition from the median
@@ -488,52 +495,54 @@ Then the following holds:
     We then have exactly one node per level, therefore $n$ levels.
     \end{itemize}
 
-    \subparagraph{Behaviour on random permutations}
-    Now let us analyse how the tree depth varies according to random pivot selection.
-    We start by applying the~\ref{k_distance}k-distance to a tree $T$ with $n = 3$
-    nodes.
-    Trivially, $height(T)$ with balanced tree is equal to two.
-    Now, let us pick either the lowest or the greatest pivot possible: the tree
-    is unbalanced towards either the left or the right, but $height(T) = 2$ in
-    both cases.
-    As the reader can see from~\ref{k_distance}, the distance works in absolute
-    value; it is then clear how, at every permutation for a pivot $p$, out of the
-    $n$, there are $2$ that generate a tree of the same height:
-    $p = d(P) + k, p = d(P) - k$.
-    Given that at every iteration a node $x$ in a completely unbalanced tree $T$'
-    has a probability of $\frac{1}{n - i}$, we can define the probability of $x$
-    being a pivot at level $l$ as:
-        \begin{equation}
-        P(x_{k}) = \frac{1}{n - l}
-        \end{equation}
-    Now, in order for $x$ not to be chosen as pivot in the previous $l - 1$
-    levels we have:
-        \begin{equation}
-        P(x_{k}) = \Sigma_{k = 1}^{l - 1} (\frac{1}{n - l + 1})
-        \end{equation}
-    Given the height of $T$, the (harmonic) partial series converges to
-    $\ln{(n)} + 1$.
-    Let us now add a root $r$ s.t. $T'.right = T, T'.left = T$.
-    We now have to consider the mirror case $\ln{(n')} + \ln{(n')}$,
-    given by the previous $n' = n/2$ in the logarithm, since the number of nodes
-    doubled, the $+1$ removed for both, since now neither of $T'.left, T.right$
-    is the root, and a $+1$ added since a new level has been added.
+\subparagraph{Behaviour on random permutations}
+Now let us analyse how the tree depth varies according to random pivot selection.
+We start by applying the~\ref{k_distance}k-distance to a tree $T$ with $n = 3$
+nodes.
+Trivially, $height(T)$ with balanced tree is equal to two.
+Now, let us pick either the lowest or the greatest pivot possible: the tree
+is unbalanced towards either the left or the right, but $height(T) = 2$ in
+both cases.
+As the reader can see from~\ref{k_distance}, the distance works in absolute
+value; it is then clear how, at every permutation for a pivot $p$, out of the
+$n$, there are $2$ that generate a tree of the same height:
+$p = d(P) + k, p = d(P) - k$.
+Given that at every iteration a node $x$ in a completely unbalanced tree $T$'
+has a probability of $\frac{1}{n - i}$, we can define the probability of $x$
+being a pivot at level $l$ as:
+    \begin{equation}
+    P(x_{k}) = \frac{1}{n - l}
+    \end{equation}
+Now, in order for $x$ not to be chosen as pivot in the previous $l - 1$
+levels we have:
+    \begin{equation}
+    P(x_{k}) = \Sigma_{k = 1}^{l - 1} (\frac{1}{n - l + 1})
+    \end{equation}
+Given the height of $T$, the (harmonic) partial series converges to
+$\ln{(n)} + 1$.
+Let us now add a root $r$ s.t. $T'.right = T, T'.left = T$.
+We now have to consider the mirror case $\ln{(n')} + \ln{(n')}$,
+given by the previous $n' = n/2$ in the logarithm, since the number of nodes
+doubled, the $+1$ removed for both, since now neither of $T'.left, T.right$
+is the root, and a $+1$ added since a new level has been added.
 
-    \subsection{Upper bound}
-    By hypothesis,
-        \begin{equation}
-        E[d(x) > 2 c \ln(n)] <<< 1
-        \end{equation}
-    By definition the ancestor of a node $i$ are indipendent random variables,
-    and we can apply the \href{https://en.wikipedia.org/wiki/Chernoff_bound}{Chernoff
-    bounds} over the set ${x: d(x) >= 2 \ln(n)}$ of random variables determining
-    the expected distance of nodes.
-    \begin{equation*}
-        \prob[X \geq c \expect[X]] < e^{-c \ln(\frac{c}{e})\expect[X]}
-    \end{equation*}
-    Let us consider $X = 1 \forall i == \ln(n)$, the expected depth of $\ln(n)$,
-    then
-    \begin{equation*}
-        \prob[X \geq c \ln(n)] < e^{-c \ln(\frac{c}{e})\ln(n)}
-    \end{equation*}
+\subsection{Upper bound}
+
+By hypothesis,
+    \begin{equation}
+    E[d(x) > 2 c \ln(n)] <<< 1
+    \end{equation}
+By definition the ancestor of a node $i$ are indipendent random variables,
+and we can apply the \href{https://en.wikipedia.org/wiki/Chernoff_bound}{Chernoff
+bounds} over the set ${x: d(x) >= 2 \ln(n)}$ of random variables determining
+the expected distance of nodes.
+\begin{equation*}
+    \prob[X \geq c \expect[X]] < e^{-c \ln(\frac{c}{e})\expect[X]}
+\end{equation*}
+Let us consider $X = 1 \forall i == \ln(n)$, the expected depth of $\ln(n)$,
+then
+\begin{equation*}
+    \prob[X \geq c \ln(n)] < e^{-c \ln(\frac{c}{e})\ln(n)}
+\end{equation*}
+
 \end{document}
