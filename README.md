@@ -19,7 +19,13 @@ You can add any credits you deem necessary, and link to your implementation, if 
 # Style guide
 The following style guide shall be followed:
 
-- **Indentation:** 2 spaces.
+- **Sections:** New sections should go in a new page, with two blank lines over in
+the .tex file, and one before the following .tex.
+- **Subsections:** New subsections and subsubsections should have one blank line
+right after them.
+- **Line limit:** Try to stay under the 120 characters per line, break over the 120
+and after you end a sentence.
+- **Indentation:** 4 spaces.
 - **Packages:** Included at the start of the document, add a brief description and try
 to indent them as the previous ones.
 - **Computational cost:** You should add it in a __hbox__ like this:
