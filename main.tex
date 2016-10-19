@@ -9,6 +9,9 @@
 \usepackage{framed}         % To frame the computational cost
 \usepackage{qtree}          % Draw simple binary trees
 
+\newcommand*{\expect}{\mathsf{E}}   % Define statistical expected value
+\newcommand*{\prob}{\mathsf{P}}     % Define statistical probability
+
 \title{Advanced Algorithms Problems and Solutions}
 \author{Mattia Setzu}
 \date{October 2016}
@@ -517,15 +520,20 @@ Then the following holds:
     is the root, and a $+1$ added since a new level has been added.
 
     \subsection{Upper bound}
+    By hypothesis,
+        \begin{equation}
+        E[d(x) > 2 c \ln(n)] <<< 1
+        \end{equation}
     By definition the ancestor of a node $i$ are indipendent random variables,
     and we can apply the \href{https://en.wikipedia.org/wiki/Chernoff_bound}{Chernoff
     bounds} over the set ${x: d(x) >= 2 \ln(n)}$ of random variables determining
-    the expected distance of nodes:
-    \begin{gather*}
-    \Pr(X\geq a)=\Pr(e^{t\cdot X}\geq e^{t\cdot a})\leq {\frac {\mathrm {E}
-                                    \left[e^{t\cdot X}\right]}{e^{t\cdot a}}}.  \\
-    \Pr(X_{l}\geq \ln(n))=\Pr(e^{t\cdot _{l}}\geq e^{t\cdot \ln(n)})\leq {\frac {\mathrm {E}
-                                    \left[e^{t\cdot X_{l}}\right]}{e^{t\cdot \ln(n)}}}.
-    \end{gather*}
-
+    the expected distance of nodes.
+    \begin{equation*}
+        \prob[X \geq c \expect[X]] < e^{-c \ln(\frac{c}{e})\expect[X]}
+    \end{equation*}
+    Let us consider $X = 1 \forall i == \ln(n)$, the expected depth of $\ln(n)$,
+    then
+    \begin{equation*}
+        \prob[X \geq c \ln(n)] < e^{-c \ln(\frac{c}{e})\ln(n)}
+    \end{equation*}
 \end{document}
