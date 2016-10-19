@@ -545,4 +545,47 @@ then
     \prob[X \geq c \ln(n)] < e^{-c \ln(\frac{c}{e})\ln(n)}
 \end{equation*}
 
+
+\newpage
+\section{Hashing sets}
+
+Your company has a database $S \subseteq U$ of keys. For this database, it uses
+a randomly chosen hash function $h$ from a universal family $H$ (as seen in class);
+it also keeps a bit vector $B_S$ of $m$ entries, initialized to zeroes, which are
+then set $B_S[h(k)] = 1 \forall k \in S$ (note that collisions may happen).
+Unfortunately, the database has been lost, thus only BS and h are known, and the
+rest is no more accessible.
+Now, given $k \in U$, how can you establish if $k$ was in $S$ or not?
+What is the probability of error? (Optional: can you estimate the size $|S|$ of
+$S$ looking at h and $B_S$ and what is the probability of error?)
+Later, another database R has been found to be lost: it was using the same hash
+function h, and the bit vector BR defined analogously as above.
+Using $h, B_S, B_R$, how can you establish if $k$ was in $S \cap R$ (union), $S \cup R$
+(intersection), or $S \\ R$ (difference)? What is the probability of error?
+
+\subsection{$k \in S$}
+\label{k_in_s}
+
+Since $h$ is bijective, $h(k) \in [m] \iff k \in S$.
+
+\subsection{$|S|$}
+\label{size_of_S}
+
+Since $h$ is bijective, and we know $h$, we can identify a lower bound, but are
+not able to estimate correctly the exact number.
+Trivially, we count the insertions in $B_S$ with a $\phi(B_S)$, and we'll have
+$|S| \geq \phi(B_S)$.
+Since we have no access to the collision list, we dont know how many collisions
+there are on every $B_S$ entry to 1.
+
+\subsection{Set operations}
+
+\begin{itemize}
+    \item \textbf{Union} Trivially proven by~\ref{k_in_s} applied to $R, S$.
+    If any of them $\in [m]$, then $k \in S \cup R$.
+    \item \textbf{Intersection} Trivially proven by~\ref{k_in_s} applied to $R, S$.
+    If both $\in [m]$, then $k \in S \cap R$.
+    \item \textbf{Difference} Trivially proven by complement on union.
+\end{itemize}
+
 \end{document}
