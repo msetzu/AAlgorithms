@@ -13,8 +13,7 @@
 \newcommand*{\prob}{\mathsf{P}}     % Define statistical probability
 
 \title{Advanced Algorithms Problems and Solutions}
-\author{Mattia Setzu}
-\author{Giorgio Vinciguerra}
+\author{Mattia Setzu \and Giorgio Vinciguerra}
 \date{October 2016}
 
 \lstset{numbers=left} % Print line numbers in \begin{lstlisting}...
@@ -709,12 +708,21 @@ If we were to cap $ak \mod p = c \forall k \in K, K_{N} = {k_{i}: k_{i} < N}$
 \begin{equation}
 \prob(h(x_{i} = c_{i})) = \frac{1}{m^{2}} = \prob(h(x_{1} = c_{1}), h(x_{2} = c_{2}))
 \end{equation}
-Given $x_{i}$ we define as $m_{i}$ its universal prime hashing $m_{i} = (ax_{i} + b) \mod p$.
-Given $x_{i}, m_{i}$, with $x_{i}$ free to change we have $p$ possible
-$m_{i}$ as, by hypothesis, $h$ is universal.
-Let us pick the probability for $m_{1}$: $\prob(m_{1} = k) = \frac{k}{p}\frac{1}{p}$.
-We then have that the probability of $h(x_{i}) = c_{i} \implies m_{i} \mod m = c_{i}$
-therefore $\prob(h(x_{i}) = c_{i}) = \frac{1}{(p)(p - 1)} \frac{p}{m}$.
-Given $m_{i}, m_{j}$
-
+Given $x_{i}$ we define as $m_{i} = (a x_{i} + b) \mod p$; since $(a x_{i} + b)$
+is a \emph{linear transformation} $m_{i}$ is unique.
+It follows trivially that $\prob((a x_{i} + b) = d) = \frac{1}{p}$.
+Now, the same goes for $x_{1}, x_{2}$:
+    \begin{gather}
+    (a x_{1} + b) = d                                                           \\
+    (a x_{2} + b) = e
+    \end{gather}
+By the \href{http://en.wikipedia.org/wiki/Chinese_remainder_theorem}{Chinese reminder theorem}
+the above system has only one solution, therefore $\prob((a x_{1} + b) = d) = \frac{1}{p}$ and
+$e$ become independent of $d$.
+Having
+\begin{equation}
+    \prob(h(x_{1} = c_{1}), h(x_{2} = c_{2})) =
+    \prob(h(x_{1} = c_{1})) * \prob(h(x_{2} = c_{2})) =\frac{1}{p} * \frac{1}{p} = \frac{1}{p^{2}}
+\end{equation}
+Which proves the assumption.
 \end{document}
