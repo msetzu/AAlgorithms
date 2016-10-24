@@ -1,16 +1,16 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
-\usepackage{hyperref}              % For \url{...}
-\usepackage{amssymb}               % Math symbols
-\usepackage{amsmath}               % Various commands like \text{...}
-\usepackage{mathtools}             % Maths
-\usepackage[noend]{algpseudocode}  % Pseudocode printer
-\usepackage{listings}              % Source code printer
-\usepackage{framed}                % To frame the computational cost
-\usepackage{qtree}                 % Draw simple binary trees
+\usepackage{hyperref}       % For \url{...}
+\usepackage{amssymb}        % Math symbols
+\usepackage{amsmath}        % Various commands like \text{...}
+\usepackage{mathtools}      % Maths
+\usepackage{algpseudocode}  % Pseudocode printer
+\usepackage{listings}       % Source code printer
+\usepackage{framed}         % To frame the computational cost
+\usepackage{qtree}          % Draw simple binary trees
 
-\newcommand*{\expect}{\mathsf{E}}  % Define statistical expected value
-\newcommand*{\prob}{\mathsf{P}}    % Define statistical probability
+\newcommand*{\expect}{\mathsf{E}}   % Define statistical expected value
+\newcommand*{\prob}{\mathsf{P}}     % Define statistical probability
 
 \title{Advanced Algorithms Problems and Solutions}
 \author{Mattia Setzu}
@@ -39,71 +39,79 @@ the first to the last room.
 
 Dijkstra is able to find the shortest path in a graph with non-negative weights
 on its edges.
-Our main idea is to create a Dijkstra compatible graph through a \textsc{normalize}
+Our main idea is to create a Dijkstra compatible graph through a \emph{normalize}
 function, then apply Dijkstra to it in order to find the shortest path.
-The core of the preprocessing is the \textsc{normalize} function which computes traversal
+The core of the preprocessing is the normalize function which computes traversal
 times between nodes at a given time \emph{time}:
 
 \begin{algorithmic}[1]
   \Function{normalize}{$from$, $to$, $time$}:
-    \State $t \gets \infty$
-    \If{$start[v'] \leq t < end[v']$}  \Comment{No waiting time}
-      \State $t \gets t + 1$
-    \ElsIf{$t < start[v']$}            \Comment{Waiting time}
-      \State $t \gets start[v'] + 1$
-    \Else
-      \State $t \gets \infty$          \Comment{Available time already expired}
-    \EndIf
-      \State \Return{$t$}
+    \State $t = \infty$
+    \State \If{$start[v'] \leq t < end[v']$}    \Comment{No waiting time}
+        \State t = t + 1\;
+    \State \ElsIf{$t < start[v']$}              \Comment{Waiting time}
+      \State t = start[v'] + 1\;
+    \State \Else
+      \State $t = \infty$\;                     \Comment{Available time already expired}
+    \EndIf \\
+      \Return{t}
     \EndFunction
 \end{algorithmic}
+
+\begin{framed}
+  \noindent
+  \textbf{Computational cost}: $\Theta(n^{2})$ if the vertex set is implemented
+  as an array. $O(|E|+|V|\log |V|)$ with Fibonacci heap.
+\end{framed}
 
 The normalize function is then applied to a node traversal:
 
 \subsubsection{Pseudo-code}
 
 \begin{algorithmic}[1]
-  \State create vertex set $Q$ of unvisited nodes\;
-  \State create vertexes set $E'$ of edges weight\;
-  \State $time \gets 0$                   \Comment{Initial time for traversal}
-  \State $edges \gets$ \Call{stairs\_of}{0}\;      \Comment{Get incoming/outgoing edges
-   of the source node}
+  \State create vertex set Q of unvisited nodes\;
+  \State create vertexes set E' of edges weight\;
+  \State time = 0\;                   \Comment{Initial time for traversal}
+  \State edges = stairs\_of(0)\;      \Comment{Get the incoming and outcoming
+                                                edges of the starting node}
+
   \Function{process}{$node$, $time$}
-    \If{$edge \in visited\_edges$}
-      \State \Return{}
-    \EndIf
+  \State \If{$edge \in visited\_edges$}
+    \Return{}
+  \EndIf
 
-    \State $traversal\_time \gets \infty$
-    \ForAll{$neighbor \in neighbors\_of\_node$}
-      \State $traversal\_time \gets$ \Call{traversal\_time}{$node$, $neighbor$, $time$}
-      \State $E'[0][node] \gets traversal\_time$   \Comment{$E'[i][j]$ holds the
+  \State $traversal\_time = \infty$
+  \For{each $neighbor \in neighbors\_of\_node$}
+      \State traversal\_time = traversal\_time(node, neighbor, time)
+      \State E'[0][node] = traversal\_time   \Comment{E'[i][j] holds the
                                                         weight/traversal}
-      \State \Comment{time for the stair between $i$ and $j$}
+      \State \Comment{time for the stair between i and j}
 
-      \ForAll{$new\_neighbor \in neighbors\_of\_neighbor$}
-        \State \Call{normalize}{$neighbor$, $new\_neighbor$, $traversal\_time$}
+      \For{each $new\_neighbor \in neighbors\_of\_neighbor$}
+      \State normalize(neighbor, new\_neighbor, traversal\_time)
       \EndFor
-    \EndFor
-    \If{\Call{dijkstra}{$V, E'$} = $\infty$}
-    	\State \Return{-1}
-    \Else
-      \State \Return{$t$}
-    \EndIf
+  \EndFor
+
+  \State dijkstra\_graph = \{V, E'\}
+  \State t = dijkstra(dijkstra\_graph)
+  \State \If{$t == \infty$} \Return{-1};
+        \Else \Return{$t$};
+        \EndIf
   \EndFunction
 \end{algorithmic}
 
 \begin{framed}
   \noindent
-  \textbf{Computational cost}: $\Theta(n^{2})$ if the vertex set in \textsc{dijkstra} is implemented
-  as an array. $O(|E|+|V|\log |V|)$ with Fibonacci heap.
+  \textbf{Computational cost}. See the previous section.
 \end{framed}
+
 
 \subsection{Solution 2: HogwartsDijkstra}
 
 \begin{algorithmic}[1]
   \Function{HogwartsDijkstra}{$G$}:
   \State create vertex set $Q$ of unvisited nodes
-  \ForAll{vertex $v \in V$}      \Comment{initialization}
+  \For{each vertex $v \in V$}      \Comment{initialization}
       \State $time[v] \gets \infty$  \Comment{unknown time from source to v}
       \State add $v$ to $Q$          \Comment{all nodes initially in Q}
   \EndFor
@@ -111,7 +119,7 @@ The normalize function is then applied to a node traversal:
   \While{$Q\ne \emptyset$}
       \State $u \gets x \in Q$ with $\min \{time[x]\}$
       \State remove $u$ from $Q$
-      \ForAll{neighbor $v$ of $u$}:
+      \For{each neighbor $v$ of $u$}:
           \If{$time[u] \leq appear[v]$}
               \State $alt \gets appear[v] + 1$ \Comment{wait the appearance of
                                                                     the stair}
@@ -151,9 +159,9 @@ The normalize function is then applied to a node traversal:
       \State $reached\_[0].push\_back(0)$
     \State $distance\_[0] \gets 0$
     \For{$t=0$ to $MAX\_TIME$}
-      \ForAll{$v \in reached\_[t]$}
+      \For{$v \in reached\_[t]$}
           \If{not $done\_[v]$}
-          \ForAll{$edge \in edges\_[v]$}
+          \For{$edge \in edges\_[v]$}
             \State $staircase \gets edge.first$
             \State $neighbor \gets edge.second$
             \State $time \gets \max(distance_[v], appear[staircase])+1$
@@ -166,7 +174,7 @@ The normalize function is then applied to a node traversal:
           \EndIf
       \EndFor
     \EndFor
-    \State \Return{$(distance\_[N-1] = \infty) ? -1 : distance\_[N-1]$}
+    \State \Return{$(distance\_[N-1] == \infty) ? -1 : distance\_[N-1]$}
   \EndFunction
 \end{algorithmic}
 
@@ -182,22 +190,27 @@ Paletta ordering\footnote{\url{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php
 is a peculiar ordering technique: given a 3-tuple of elements, paletta takes the
 central element as pivot and swaps the two elements right before and next to it.
 To make an example:
-$$(3, 2, 1) \xrightarrow{paletta} (1, 2, 3)$$
+\begin{equation}
+  \textrm{\{3, 2, 1\}} \xrightarrow{paletta} \textrm{\{1, 2, 3\}}
+\end{equation}
 We now want to develop an algorithm to order any array through paletta ordering
 with the minimal number of swaps.
-You should see as not every array can be ordered (e.g. [1, 3, 2]).
+You should see as not every array can be ordered like this:
+  \begin{equation}
+  \textrm{\{3, , 1\}} \xrightarrow[]{paletta} \textrm{\{1, 2, 3\}}
+  \end{equation}
 
 \subsection{Solution 1: Split and count-inversions}
 
 We should note that the following properties hold:
 \begin{enumerate}
     \item Every element can be a pivot, but the first and the last one, as they
-    have respectively no elements before and after them.
+    have respectevly no elements before and after them.
     \item Every element can be swapped as many times as necessary, but only with
     elements of the same 2-remainder (numbers in even positions can only be
     swapped with numbers in even positions, the same holds for odd indexes).
-    More formally, if $n$ is the size of the array $A$ we want to sort,
-    $i,j \in [1, n - 2]$, $A[i]$ can be swapped with $A[j]$ if and only if $i \equiv j \pmod{2}$.
+    More formally $|a| = N, \forall i \in [1, N - 2], \neg \exists swap(i, j):
+                    i \mod 2 \neq i \mod j$
     \item The least number of swaps does not backtrack any element.
     Formally, let \emph{k} be the minimal number of swaps applied to an array,
     backtracks included. By hypothesis, \emph{k} is minimal, but at least \emph{m},
@@ -207,7 +220,7 @@ We should note that the following properties hold:
 
 Given item 2, we can split our array in two, even and odd numbers, and order
 them counting the swaps.
-In our example we'll use \emph{mergesort}, as it runs in $O(n\log n)$, does
+In our example we'll use \emph{mergesort}, as it runs in $\log_2 n$, does
 backtrack elements, and is very well-known.
 Clearly, given an array, a swap happens when an element is pushed back, pulling
 the one between its new position and the old one ahead: we can map this behaviour
@@ -221,33 +234,34 @@ Intuitively, the merged array will start with the first element of the even-inde
 arrays, followed by the first of the odd-index array, followed by the second of
 the even-index array, and so on.
 To check for these elements is pretty trivial and can be done in linear time.
-Follows the pseudo-code for the edited version and \textsc{snake\_check} function:
+Follows the pseudo-code for the edited version and \emph{snake\_check} function:
 
 \begin{algorithmic}[1]
   \Function{merge\_with\_paletta}{$left$, $right$, $k$}:
-    \State ...                        \Comment{merge instructions}
-    \If{$right > left$}
-      \State $paletta\_count \gets paletta\_count + 1$
-      \State ...
+    \State ...\;                        \Comment{merge instructions}
+    \State \If{$right > left$}
+      \State paletta\_count = paletta\_count + 1\;
+      \State ...\;
       \EndIf
     \EndFunction
 \end{algorithmic}
 
 \begin{algorithmic}[1]
-  \Function{snake\_check}{}
-    \State $even, odd \gets 0$
-    \For{;$even, odd < N;even = even + 1, odd = odd + 1$}
-      \If{$a[even] > a[odd]$}
-        \State \Return{$-1$}\;
-      \EndIf
+  \Function{snake\_check}{}:
+    \State even, odd = 0\;
+    \For{;$even, odd < N\;even = even + 1, odd = odd + 1$}
+      \State \If{$a[even] > a[odd]$}
+        \State \Return{-1}\;
+        \EndIf
     \EndFor
-    \State \Return{$paletta\_count$}\;
+
+    \Return{paletta\_count}\;
     \EndFunction
 \end{algorithmic}
 
 \begin{framed}
   \noindent
-  \textbf{Computational cost}: $\Theta(n\log n)$.
+  \textbf{Computational cost}: $\Omega(n\log_2(n)), \Theta(n\log_2(n)), O(n\log_2(n))$.
 \end{framed}
 
 
@@ -271,7 +285,10 @@ in $O(\log(n))$ time. Note that $query(i) = sum(i, i)$ but it helps to reason.
 \subsection{Solution 1: Fenwick lazy a-b sums}
 Let $T$ be a segmented binary tree over a continuous interval $I: [0, N - 1]$
 s.t.\ its leafs are the points in I, and the parent of two nodes comprises of their interval:
-$$  n' \cup n'' = n, n' \cap n'' = \emptyset   \textrm{ s.t. } n \text{ is the parent of } n', n''$$
+
+\begin{equation*}
+  n' \cup n'' = n, n' \cap n'' = \emptyset   \textrm{ s.t. n is the father of n', n''}
+\end{equation*}
 
 $T$ will keep track of the prefix sums for every interval.
 We define a function
@@ -298,119 +315,124 @@ to keep track of our lazy sums:
             k, m                    &   \textrm{if a lazy sum of k is to be propagated to m}\\
             \end{cases}
 \end{equation*}
-The \textsc{query} function is then trivial:
+The \emph{query} function is then trivial:
 
 \begin{algorithmic}[1]
   \Function{query}{$I$, $i$, $sum$}:
-    \If{$I.size = 1$}                       \Comment{Return found value}
-      \State \Return $I.sum$
+    \State \If{$I.size == 1$}                       \Comment{Return found value}
+        \State \Return $I.sum$\;
     \EndIf
-    \If{lazy(I), $i \in I.left, i \notin I.right$}     \Comment{Lazy on
+
+    \State \If{lazy(I), $i \in I.left, i \neg \in I.right$}     \Comment{Lazy on
                                                                     left child}
-      \State $lazy(I) \gets False$
-      \State \Call{query}{$I.left$, $i$, $sum + I.sum$}
+        \State lazy(I) = False\;
+        \State query($I.left$, $i$, $sum + I.sum$)
     \EndIf
 
-    \If{lazy(I), $i \in I.right, i \notin I.left$} \Comment{Lazy on
+    \State \If{lazy(I), $i \in I.right, i \neg \in I.left$} \Comment{Lazy on
                                                                     right child}
-      \State $lazy(I) \gets False$
-      \State \Call{query}{$I.right$, $i$, $sum + I.sum$}
+        \State lazy(I) = False\;
+        \State query($I.right$, $i$, $sum + I.sum$)
     \EndIf
 
-    \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on both}
-      \State $lazy(I) \gets False$
-      \State \Call{query}{$I.right$, $i$, $j$, $sum + I.sum$} +
-                \Call{query}{$I.left$, $i$, $j$, $sum + I.sum$}
+    \State \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on both}
+        \State lazy(I) = False\;
+        \State query($I.right$, $i$, $j$, $sum + I.sum$) +
+                query($I.left$, $i$, $j$, $sum + I.sum$)
     \EndIf
 
-    \If{!lazy(I), $i \in I.left$}             \Comment{Not lazy on left
+    \State \If{!lazy(I), $i \in I.left$}             \Comment{Not lazy on left
                                                                         child}
-      \State \Call{query}{$I.left$, $i$, $sum$}
+        \State query($I.left$, $i$, $sum$)
     \EndIf
 
-    \If{!lazy(I), $i \in I.right$}        \Comment{Not lazy on right child}
-      \State \Call{query}{$I.right$, $i$, $sum$}
+    \State \If{!lazy(I), $i \in I.right$}        \Comment{Not lazy on right child}
+        \State query($I.right$, $i$, $sum$)
     \EndIf
 
-    \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy
+    \State \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy
                                                                         on both}
-      \State \Call{sum}{$I.right$, $i$, $sum$}
+        \State sum($I.right$, $i$, $sum$)
     \EndIf
     \EndFunction
 \end{algorithmic}
 
 \begin{algorithmic}[1]
   \Function{sum}{$I$, $i$, $j$, $sum$}:
-    \If{$I.size = 1$}                                   \Comment{Return
+    \State \If{$I.size == 1$}                                   \Comment{Return
                                                                     found value}
-      \State \Return $I.sum + sum$\;
+        \State \Return $I.sum + sum$\;
     \EndIf
 
-    \If{lazy(I), $i \in I.left, i \notin I.right$}     \Comment{Lazy on
+    \State \If{lazy(I), $i \in I.left, i \neg \in I.right$}     \Comment{Lazy on
                                                                     left child}
-      \State $lazy(I) \gets False$
-      \State \Call{sum}{$I.left$, $i$, $j$, $sum + I.sum$}
+        \State lazy(I) = False\;
+        \State sum($I.left$, $i$, $j$, $sum + I.sum$)
     \EndIf
-    \If{lazy(I), $i \in I.right, i \notin I.left$} \Comment{Lazy on
+    \State \If{lazy(I), $i \in I.right, i \neg \in I.left$} \Comment{Lazy on
                                                                     right child}
-      \State $lazy(I) \gets False$
-      \State \Call{sum}{$I.right$, $i$, $j$, $sum + I.sum$}
+        \State lazy(I) = False\;
+        \State sum($I.right$, $i$, $j$, $sum + I.sum$)
     \EndIf
 
-    \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on
+    \State \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on
                                                                         both}
-      \State $lazy(I) \gets False$
-      \State \Call{sum}{$I.right$, $i$, $j$, $sum + I.sum$} +
-                \Call{sum}{$I.left$, $i$, $j$, $sum + I.sum$}
-    \EndIf
-    \If{!lazy(I), $i \in I.left$}                        \Comment{Not lazy
-                                                                    on left child}
-      \State \Call{sum}{$I.left$, $i$, $sum$}
-    \EndIf
-    \If{!lazy(I), $i \in I.right$}                       \Comment{Not lazy
-                                                                    on right child}
-      \State \Call{sum}{$I.right$, $i$, $sum$}
+        \State lazy(I) = False\;
+        \State sum($I.right$, $i$, $j$, $sum + I.sum$) +
+                sum($I.left$, $i$, $j$, $sum + I.sum$)
     \EndIf
 
-    \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy
+    \State \If{!lazy(I), $i \in I.left$}                        \Comment{Not lazy
+                                                                    on left child}
+        \State sum($I.left$, $i$, $sum$)
+    \EndIf
+    \State \If{!lazy(I), $i \in I.right$}                       \Comment{Not lazy
+                                                                    on right child}
+        \State sum($I.right$, $i$, $sum$)
+    \EndIf
+
+    \State \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy
                                                                         on both}
-      \State \Call{sum}{$I.right$, $i$, $sum$}
+        \State sum($I.right$, $i$, $sum$)
     \EndIf
     \EndFunction
 \end{algorithmic}
 
 \begin{algorithmic}[1]
   \Function{update}{$I$, $i$, $j$, $k$}:
-    \If{$I.size = 1$}                                   \Comment{Return
+    \State \If{$I.size == 1$}                                   \Comment{Return
                                                                     found value}
-        \State \Return $I.val \gets I.val + update$\;
+        \State \Return $I.val += update$\;
     \EndIf
-    \If{lazy(I), $i \in I.left, i \notin I.right$}     \Comment{Lazy on
+
+    \State \If{lazy(I), $i \in I.left, i \neg \in I.right$}     \Comment{Lazy on
                                                                     left child}
-        \State $lazy(I.left) \gets True$
-        \State $I.left.val \gets k$
+        \State lazy(I.left) = True\;
+        \State I.left.val = k\;
     \EndIf
-    \If{lazy(I), $i \in I.right, i \notin I.left$} \Comment{Lazy on right
+    \State \If{lazy(I), $i \in I.right, i \neg \in I.left$} \Comment{Lazy on right
                                                                             child}
-        \State $lazy(I.right) \gets True$
-        \State $I.right.val \gets k$
+        \State lazy(I.right) = True\;
+        \State I.right.val = k\;
     \EndIf
-    \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on both}
-        \State $lazy(I) \gets True$
-        \State $I.val \gets k$
+
+    \State \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on both}
+        \State lazy(I) = True\;
+        \State I.val = k\;
     \EndIf
-    \If{!lazy(I), $i \in I.left$}                        \Comment{Not lazy
+
+    \State \If{!lazy(I), $i \in I.left$}                        \Comment{Not lazy
                                                                     on left child}
-        \State \Call{update}{$I.left$, $i$, $update$}
+        \State update($I.left$, $i$, $update$)
     \EndIf
-    \If{!lazy(I), $i \in I.right$}                       \Comment{Not lazy
+    \State \If{!lazy(I), $i \in I.right$}                       \Comment{Not lazy
                                                                 on right child}
-        \State \Call{update}{$I.right$, $i$, $update$}
+        \State update($I.right$, $i$, $update$)
     \EndIf
 
     \State \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy
                                                                         on both}
-        \State \Call{update}{$I.right$, $i$, $update$}
+        \State update($I.right$, $i$, $update$)
     \EndIf
     \EndFunction
 \end{algorithmic}
