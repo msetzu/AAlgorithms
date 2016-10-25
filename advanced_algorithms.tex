@@ -713,8 +713,8 @@ is a \emph{linear transformation} $m_{i}$ is unique.
 It follows trivially that $\prob((a x_{i} + b) = d) = \frac{1}{p}$.
 Now, the same goes for $x_{1}, x_{2}$:
     \begin{gather}
-    (a x_{1} + b) = d                                                           \\
-    (a x_{2} + b) = e
+    (a x_{1} + b) \equiv d                                                           \\
+    (a x_{2} + b) \equiv e
     \end{gather}
 By the \href{http://en.wikipedia.org/wiki/Chinese_remainder_theorem}{Chinese reminder theorem}
 the above system has only one solution, therefore $\prob((a x_{1} + b) = d) = \frac{1}{p}$ and
@@ -724,5 +724,5 @@ Having
     \prob(h(x_{1} = c_{1}), h(x_{2} = c_{2})) =
     \prob(h(x_{1} = c_{1})) * \prob(h(x_{2} = c_{2})) =\frac{1}{p} * \frac{1}{p} = \frac{1}{p^{2}}
 \end{equation}
-Which proves the assumption.
+Which, since $m + 1 \leq p \leq 2m$, proves the assumption.
 \end{document}
