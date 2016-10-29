@@ -8,7 +8,7 @@
 \usepackage{listings}              % Source code printer
 \usepackage{framed}                % To frame the computational cost
 \usepackage{qtree}                 % Draw simple binary trees
-
+\usepackage{amsthm}                % \proof environment
 \newcommand*{\expect}{\mathsf{E}}  % Define statistical expected value
 \newcommand*{\prob}{\mathsf{P}}    % Define statistical probability
 
@@ -508,24 +508,24 @@ We define \textsc{lce} as an auxiliary function
     \EndFunction
 \end{algorithmic}
 
-
 \newpage
 \section{Depth of a node in a random search tree}
 
 A random search tree for a set S can be defined as follows: if $S$ is empty, then
 the null tree is a random search tree; otherwise, choose uniformly at random a key
 $k \in S$: the random search tree is obtained by picking
-$k$ as root, and the random search trees on $L = {x \in S : x < k} and R = {x \in S :
-x > k}$ become, respectively, the left and right subtree of the root $k$.
+$k$ as root, and the random search trees on $L = \{x \in S : x < k\}$ and $R = \{x \in S :
+x > k\}$ become, respectively, the left and right subtree of the root $k$.
 Consider the randomized QuickSort discussed in class and analyzed with indicator
 variables \href{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_13/randqs.pdf}{CLRS 7.3},
 and observe that the random selection of the pivots follows the above process,
 thus producing a random search tree of n nodes. Using a variation of the analysis
-with indicator variables, prove that the expected depth of a node (i.e.\ the random variable
-representing the distance of the node from the root) is nearly $2\log_2 (n)$.
-Prove that the probability that the expected depth of a node exceeds $2\log_2 (n)$ is small for
-any given constant $c > 1$. [Note: the latter point can be solved after we see
-\href{https://en.wikipedia.org/wiki/Chernoff_bound}{Chernoff’s bounds}.]
+with indicator variables, prove that:
+\begin{enumerate}
+  \item the expected depth of a node (i.e.\ the random variable representing the distance of the node from the root) is nearly $2 \ln n$;
+  \item the expected size of its subtree is nearly $2 \ln n$ too, observing that it is a simple variation of the previous analysis;
+  \item the probability that the expected depth of a node exceeds $2\ln n$ is small for any given constant $c > 1$.
+\end{enumerate}
 
 \subsection{Recursive balanced proof}
 
@@ -616,6 +616,65 @@ then
     \prob[X \geq c \ln(n)] < e^{-c \ln(\frac{c}{e})\ln(n)}
 \end{equation*}
 
+\subsection{Proof with indicator variable}
+
+\textbf{Prove that the expected depth of a node is nearly $2 \ln n$.}
+
+\begin{proof}
+  Let $z_m$ the $m$th smallest element in $S$ and $$X_{ij}=
+  \left\{
+    \begin{array}{ll}
+      1 & \mbox{if $z_j$ is an ancestor of $z_i$ in the random search tree} \\
+      0 & \mbox{otherwise}
+    \end{array}
+  \right.$$
+  The depth of the node $i$ in the tree is given by the number of its ancestors:
+  \begin{equation}
+    X=\sum_{\substack{j=1 \\ j\ne i}}^n X_{ij}
+    \label{equation:node-depth}
+  \end{equation}
+
+  Note that the depth of a node is also equal to the number of comparison it's
+  involved in (in other words, the number of times it became the left or the
+  right child of a randomly chosen pivot).
+
+  Once a pivot $k$ is chosen from $S$, $S$ is partitioned in two subsets $L$ and
+  $R$. The elements in the set $L$ will not be compared with the elements in $R$
+  at any subsequent time. The event $E_1=$``$z_j$ is an ancestor of $z_i$ in the
+  random search tree" occurs if $z_j$ and $z_i$ belongs to the same partition
+  \emph{and} $z_j$ was chosen as pivot before $z_i$. The probability that $E_1$
+  occurs, since it is the intersection of two events, can be upper bounded by:
+  $$\text{Pr}\{ z_j \text{ was chosen as pivot before } z_i
+  \}=\frac{1}{\text{size of the partition}}\leq\frac{1}{|j-i|+1}$$ because
+  pivots are chosen randomly and independently, and because the partition that
+  contains both $z_j$ and $z_i$ must contain \emph{at least} the $|j-i|+1$
+  numbers between $z_j$ and $z_i$.
+
+  Taking expectations of both sides of \eqref{equation:node-depth}, and then
+  using linearity of expectation, we have:
+  \begin{align*}
+    E[X] & = \sum_{\substack{j=1\\ j\ne i}}^n E[X_{ij}] \\
+    & = \sum_{\substack{j=1\\ j\ne i}}^n \text{Pr}\{ z_j \text{ is an ancestor
+      of } z_i \text{ in the random search tree} \} \\
+    & \le \sum_{\substack{j=1\\ j\ne i}}^n \frac{1}{|j-i|} \\
+    & = \sum_{j=1}^{i-1} \frac{1}{i-j} + \sum_{j=i+1}^{n} \frac{1}{j-i}
+  \end{align*}
+  With the change of variables $l=i-j$ and $m=j-i$:
+  \begin{equation*}
+    = \sum_{l=1}^{i-1} \frac{1}{l} + \sum_{m=1}^{n} \frac{1}{m} \approx 2\ln n
+  \end{equation*}
+
+\end{proof}
+
+\textbf{Prove that the expected size of its subtree is nearly $2 \ln n$ too,
+observing that it is a simple variation of the previous analysis.}
+
+\begin{proof}
+  The size of the subtree of a randomly chosen pivot of $z_j\in S$ is given by
+  the number of it's descendants. Since \eqref{equation:node-depth} is the
+  number of ancestors of a node $z_i$, we can find the number of descendants of
+  $z_j$ by changing the summation from $j=1,\dotsc,n$ to $i=1,\dotsc,n$.
+\end{proof}
 
 \newpage
 \section{Hashing sets}
