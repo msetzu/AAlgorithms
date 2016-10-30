@@ -1,16 +1,16 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
-\usepackage{hyperref}              % For \url{...}
-\usepackage{amssymb}               % Math symbols
-\usepackage{amsmath}               % Various commands like \text{...}
-\usepackage{mathtools}             % Maths
-\usepackage[noend]{algpseudocode}  % Pseudocode printer
-\usepackage{listings}              % Source code printer
-\usepackage{framed}                % To frame the computational cost
-\usepackage{qtree}                 % Draw simple binary trees
-\usepackage{amsthm}                % \proof environment
-\newcommand*{\expect}{\mathsf{E}}  % Define statistical expected value
-\newcommand*{\prob}{\mathsf{P}}    % Define statistical probability
+\usepackage{hyperref}       % For \url{...}
+\usepackage{amssymb}        % Math symbols
+\usepackage{amsmath}        % Various commands like \text{...}
+\usepackage{mathtools}      % Maths
+\usepackage{algpseudocode}  % Pseudocode printer
+\usepackage{listings}       % Source code printer
+\usepackage{framed}         % To frame the computational cost
+\usepackage{qtree}          % Draw simple binary trees
+
+\newcommand*{\expect}{\mathsf{E}}   % Define statistical expected value
+\newcommand*{\prob}{\mathsf{P}}     % Define statistical probability
 
 \title{Advanced Algorithms Problems and Solutions}
 \author{Mattia Setzu \and Giorgio Vinciguerra}
@@ -39,71 +39,79 @@ the first to the last room.
 
 Dijkstra is able to find the shortest path in a graph with non-negative weights
 on its edges.
-Our main idea is to create a Dijkstra compatible graph through a \textsc{normalize}
+Our main idea is to create a Dijkstra compatible graph through a \emph{normalize}
 function, then apply Dijkstra to it in order to find the shortest path.
-The core of the preprocessing is the \textsc{normalize} function which computes traversal
+The core of the preprocessing is the normalize function which computes traversal
 times between nodes at a given time \emph{time}:
 
 \begin{algorithmic}[1]
   \Function{normalize}{$from$, $to$, $time$}:
-    \State $t \gets \infty$
-    \If{$start[v'] \leq t < end[v']$}  \Comment{No waiting time}
-      \State $t \gets t + 1$
-    \ElsIf{$t < start[v']$}            \Comment{Waiting time}
-      \State $t \gets start[v'] + 1$
-    \Else
-      \State $t \gets \infty$          \Comment{Available time already expired}
-    \EndIf
-      \State \Return{$t$}
+    \State $t = \infty$
+    \State \If{$start[v'] \leq t < end[v']$}    \Comment{No waiting time}
+        \State t = t + 1\;
+    \State \ElsIf{$t < start[v']$}              \Comment{Waiting time}
+      \State t = start[v'] + 1\;
+    \State \Else
+      \State $t = \infty$\;                     \Comment{Available time already expired}
+    \EndIf \\
+      \Return{t}
     \EndFunction
 \end{algorithmic}
+
+\begin{framed}
+  \noindent
+  \textbf{Computational cost}: $\Theta(n^{2})$ if the vertex set is implemented
+  as an array. $O(|E|+|V|\log |V|)$ with Fibonacci heap.
+\end{framed}
 
 The normalize function is then applied to a node traversal:
 
 \subsubsection{Pseudo-code}
 
 \begin{algorithmic}[1]
-  \State create vertex set $Q$ of unvisited nodes\;
-  \State create vertexes set $E'$ of edges weight\;
-  \State $time \gets 0$                   \Comment{Initial time for traversal}
-  \State $edges \gets$ \Call{stairs\_of}{0}\;      \Comment{Get incoming/outgoing edges
-   of the source node}
+  \State create vertex set Q of unvisited nodes\;
+  \State create vertexes set E' of edges weight\;
+  \State time = 0\;                   \Comment{Initial time for traversal}
+  \State edges = stairs\_of(0)\;      \Comment{Get the incoming and outcoming
+                                                edges of the starting node}
+
   \Function{process}{$node$, $time$}
-    \If{$edge \in visited\_edges$}
-      \State \Return{}
-    \EndIf
+  \State \If{$edge \in visited\_edges$}
+    \Return{}
+  \EndIf
 
-    \State $traversal\_time \gets \infty$
-    \ForAll{$neighbor \in neighbors\_of\_node$}
-      \State $traversal\_time \gets$ \Call{traversal\_time}{$node$, $neighbor$, $time$}
-      \State $E'[0][node] \gets traversal\_time$   \Comment{$E'[i][j]$ holds the
+  \State $traversal\_time = \infty$
+  \For{each $neighbor \in neighbors\_of\_node$}
+      \State traversal\_time = traversal\_time(node, neighbor, time)
+      \State E'[0][node] = traversal\_time   \Comment{E'[i][j] holds the
                                                         weight/traversal}
-      \State \Comment{time for the stair between $i$ and $j$}
+      \State \Comment{time for the stair between i and j}
 
-      \ForAll{$new\_neighbor \in neighbors\_of\_neighbor$}
-        \State \Call{normalize}{$neighbor$, $new\_neighbor$, $traversal\_time$}
+      \For{each $new\_neighbor \in neighbors\_of\_neighbor$}
+      \State normalize(neighbor, new\_neighbor, traversal\_time)
       \EndFor
-    \EndFor
-    \If{\Call{dijkstra}{$V, E'$} = $\infty$}
-    	\State \Return{-1}
-    \Else
-      \State \Return{$t$}
-    \EndIf
+  \EndFor
+
+  \State dijkstra\_graph = \{V, E'\}
+  \State t = dijkstra(dijkstra\_graph)
+  \State \If{$t == \infty$} \Return{-1};
+        \Else \Return{$t$};
+        \EndIf
   \EndFunction
 \end{algorithmic}
 
 \begin{framed}
   \noindent
-  \textbf{Computational cost}: $\Theta(n^{2})$ if the vertex set in \textsc{dijkstra} is implemented
-  as an array. $O(|E|+|V|\log |V|)$ with Fibonacci heap.
+  \textbf{Computational cost}. See the previous section.
 \end{framed}
+
 
 \subsection{Solution 2: HogwartsDijkstra}
 
 \begin{algorithmic}[1]
   \Function{HogwartsDijkstra}{$G$}:
   \State create vertex set $Q$ of unvisited nodes
-  \ForAll{vertex $v \in V$}      \Comment{initialization}
+  \For{each vertex $v \in V$}      \Comment{initialization}
       \State $time[v] \gets \infty$  \Comment{unknown time from source to v}
       \State add $v$ to $Q$          \Comment{all nodes initially in Q}
   \EndFor
@@ -111,7 +119,7 @@ The normalize function is then applied to a node traversal:
   \While{$Q\ne \emptyset$}
       \State $u \gets x \in Q$ with $\min \{time[x]\}$
       \State remove $u$ from $Q$
-      \ForAll{neighbor $v$ of $u$}:
+      \For{each neighbor $v$ of $u$}:
           \If{$time[u] \leq appear[v]$}
               \State $alt \gets appear[v] + 1$ \Comment{wait the appearance of
                                                                     the stair}
@@ -151,9 +159,9 @@ The normalize function is then applied to a node traversal:
       \State $reached\_[0].push\_back(0)$
     \State $distance\_[0] \gets 0$
     \For{$t=0$ to $MAX\_TIME$}
-      \ForAll{$v \in reached\_[t]$}
+      \For{$v \in reached\_[t]$}
           \If{not $done\_[v]$}
-          \ForAll{$edge \in edges\_[v]$}
+          \For{$edge \in edges\_[v]$}
             \State $staircase \gets edge.first$
             \State $neighbor \gets edge.second$
             \State $time \gets \max(distance_[v], appear[staircase])+1$
@@ -166,7 +174,7 @@ The normalize function is then applied to a node traversal:
           \EndIf
       \EndFor
     \EndFor
-    \State \Return{$(distance\_[N-1] = \infty) ? -1 : distance\_[N-1]$}
+    \State \Return{$(distance\_[N-1] == \infty) ? -1 : distance\_[N-1]$}
   \EndFunction
 \end{algorithmic}
 
@@ -182,22 +190,27 @@ Paletta ordering\footnote{\url{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php
 is a peculiar ordering technique: given a 3-tuple of elements, paletta takes the
 central element as pivot and swaps the two elements right before and next to it.
 To make an example:
-$$(3, 2, 1) \xrightarrow{paletta} (1, 2, 3)$$
+\begin{equation}
+  \textrm{\{3, 2, 1\}} \xrightarrow{paletta} \textrm{\{1, 2, 3\}}
+\end{equation}
 We now want to develop an algorithm to order any array through paletta ordering
 with the minimal number of swaps.
-You should see as not every array can be ordered (e.g. [1, 3, 2]).
+You should see as not every array can be ordered like this:
+  \begin{equation}
+  \textrm{\{3, , 1\}} \xrightarrow[]{paletta} \textrm{\{1, 2, 3\}}
+  \end{equation}
 
 \subsection{Solution 1: Split and count-inversions}
 
 We should note that the following properties hold:
 \begin{enumerate}
     \item Every element can be a pivot, but the first and the last one, as they
-    have respectively no elements before and after them.
+    have respectevly no elements before and after them.
     \item Every element can be swapped as many times as necessary, but only with
     elements of the same 2-remainder (numbers in even positions can only be
     swapped with numbers in even positions, the same holds for odd indexes).
-    More formally, if $n$ is the size of the array $A$ we want to sort,
-    $i,j \in [1, n - 2]$, $A[i]$ can be swapped with $A[j]$ if and only if $i \equiv j \pmod{2}$.
+    More formally $|a| = N, \forall i \in [1, N - 2], \neg \exists swap(i, j):
+                    i \mod 2 \neq i \mod j$
     \item The least number of swaps does not backtrack any element.
     Formally, let \emph{k} be the minimal number of swaps applied to an array,
     backtracks included. By hypothesis, \emph{k} is minimal, but at least \emph{m},
@@ -207,7 +220,7 @@ We should note that the following properties hold:
 
 Given item 2, we can split our array in two, even and odd numbers, and order
 them counting the swaps.
-In our example we'll use \emph{mergesort}, as it runs in $O(n\log n)$, does
+In our example we'll use \emph{mergesort}, as it runs in $\log_2 n$, does
 backtrack elements, and is very well-known.
 Clearly, given an array, a swap happens when an element is pushed back, pulling
 the one between its new position and the old one ahead: we can map this behaviour
@@ -221,33 +234,34 @@ Intuitively, the merged array will start with the first element of the even-inde
 arrays, followed by the first of the odd-index array, followed by the second of
 the even-index array, and so on.
 To check for these elements is pretty trivial and can be done in linear time.
-Follows the pseudo-code for the edited version and \textsc{snake\_check} function:
+Follows the pseudo-code for the edited version and \emph{snake\_check} function:
 
 \begin{algorithmic}[1]
   \Function{merge\_with\_paletta}{$left$, $right$, $k$}:
-    \State ...                        \Comment{merge instructions}
-    \If{$right > left$}
-      \State $paletta\_count \gets paletta\_count + 1$
-      \State ...
+    \State ...\;                        \Comment{merge instructions}
+    \State \If{$right > left$}
+      \State paletta\_count = paletta\_count + 1\;
+      \State ...\;
       \EndIf
     \EndFunction
 \end{algorithmic}
 
 \begin{algorithmic}[1]
-  \Function{snake\_check}{}
-    \State $even, odd \gets 0$
-    \For{;$even, odd < N;even = even + 1, odd = odd + 1$}
-      \If{$a[even] > a[odd]$}
-        \State \Return{$-1$}\;
-      \EndIf
+  \Function{snake\_check}{}:
+    \State even, odd = 0\;
+    \For{;$even, odd < N\;even = even + 1, odd = odd + 1$}
+      \State \If{$a[even] > a[odd]$}
+        \State \Return{-1}\;
+        \EndIf
     \EndFor
-    \State \Return{$paletta\_count$}\;
+
+    \Return{paletta\_count}\;
     \EndFunction
 \end{algorithmic}
 
 \begin{framed}
   \noindent
-  \textbf{Computational cost}: $\Theta(n\log n)$.
+  \textbf{Computational cost}: $\Omega(n\log_2(n)), \Theta(n\log_2(n)), O(n\log_2(n))$.
 \end{framed}
 
 
@@ -271,7 +285,10 @@ in $O(\log(n))$ time. Note that $query(i) = sum(i, i)$ but it helps to reason.
 \subsection{Solution 1: Fenwick lazy a-b sums}
 Let $T$ be a segmented binary tree over a continuous interval $I: [0, N - 1]$
 s.t.\ its leafs are the points in I, and the parent of two nodes comprises of their interval:
-$$  n' \cup n'' = n, n' \cap n'' = \emptyset   \textrm{ s.t. } n \text{ is the parent of } n', n''$$
+
+\begin{equation*}
+  n' \cup n'' = n, n' \cap n'' = \emptyset   \textrm{ s.t. n is the father of n', n''}
+\end{equation*}
 
 $T$ will keep track of the prefix sums for every interval.
 We define a function
@@ -298,119 +315,124 @@ to keep track of our lazy sums:
             k, m                    &   \textrm{if a lazy sum of k is to be propagated to m}\\
             \end{cases}
 \end{equation*}
-The \textsc{query} function is then trivial:
+The \emph{query} function is then trivial:
 
 \begin{algorithmic}[1]
   \Function{query}{$I$, $i$, $sum$}:
-    \If{$I.size = 1$}                       \Comment{Return found value}
-      \State \Return $I.sum$
+    \State \If{$I.size == 1$}                       \Comment{Return found value}
+        \State \Return $I.sum$\;
     \EndIf
-    \If{lazy(I), $i \in I.left, i \notin I.right$}     \Comment{Lazy on
+
+    \State \If{lazy(I), $i \in I.left, i \neg \in I.right$}     \Comment{Lazy on
                                                                     left child}
-      \State $lazy(I) \gets False$
-      \State \Call{query}{$I.left$, $i$, $sum + I.sum$}
+        \State lazy(I) = False\;
+        \State query($I.left$, $i$, $sum + I.sum$)
     \EndIf
 
-    \If{lazy(I), $i \in I.right, i \notin I.left$} \Comment{Lazy on
+    \State \If{lazy(I), $i \in I.right, i \neg \in I.left$} \Comment{Lazy on
                                                                     right child}
-      \State $lazy(I) \gets False$
-      \State \Call{query}{$I.right$, $i$, $sum + I.sum$}
+        \State lazy(I) = False\;
+        \State query($I.right$, $i$, $sum + I.sum$)
     \EndIf
 
-    \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on both}
-      \State $lazy(I) \gets False$
-      \State \Call{query}{$I.right$, $i$, $j$, $sum + I.sum$} +
-                \Call{query}{$I.left$, $i$, $j$, $sum + I.sum$}
+    \State \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on both}
+        \State lazy(I) = False\;
+        \State query($I.right$, $i$, $j$, $sum + I.sum$) +
+                query($I.left$, $i$, $j$, $sum + I.sum$)
     \EndIf
 
-    \If{!lazy(I), $i \in I.left$}             \Comment{Not lazy on left
+    \State \If{!lazy(I), $i \in I.left$}             \Comment{Not lazy on left
                                                                         child}
-      \State \Call{query}{$I.left$, $i$, $sum$}
+        \State query($I.left$, $i$, $sum$)
     \EndIf
 
-    \If{!lazy(I), $i \in I.right$}        \Comment{Not lazy on right child}
-      \State \Call{query}{$I.right$, $i$, $sum$}
+    \State \If{!lazy(I), $i \in I.right$}        \Comment{Not lazy on right child}
+        \State query($I.right$, $i$, $sum$)
     \EndIf
 
-    \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy
+    \State \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy
                                                                         on both}
-      \State \Call{sum}{$I.right$, $i$, $sum$}
+        \State sum($I.right$, $i$, $sum$)
     \EndIf
     \EndFunction
 \end{algorithmic}
 
 \begin{algorithmic}[1]
   \Function{sum}{$I$, $i$, $j$, $sum$}:
-    \If{$I.size = 1$}                                   \Comment{Return
+    \State \If{$I.size == 1$}                                   \Comment{Return
                                                                     found value}
-      \State \Return $I.sum + sum$\;
+        \State \Return $I.sum + sum$\;
     \EndIf
 
-    \If{lazy(I), $i \in I.left, i \notin I.right$}     \Comment{Lazy on
+    \State \If{lazy(I), $i \in I.left, i \neg \in I.right$}     \Comment{Lazy on
                                                                     left child}
-      \State $lazy(I) \gets False$
-      \State \Call{sum}{$I.left$, $i$, $j$, $sum + I.sum$}
+        \State lazy(I) = False\;
+        \State sum($I.left$, $i$, $j$, $sum + I.sum$)
     \EndIf
-    \If{lazy(I), $i \in I.right, i \notin I.left$} \Comment{Lazy on
+    \State \If{lazy(I), $i \in I.right, i \neg \in I.left$} \Comment{Lazy on
                                                                     right child}
-      \State $lazy(I) \gets False$
-      \State \Call{sum}{$I.right$, $i$, $j$, $sum + I.sum$}
+        \State lazy(I) = False\;
+        \State sum($I.right$, $i$, $j$, $sum + I.sum$)
     \EndIf
 
-    \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on
+    \State \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on
                                                                         both}
-      \State $lazy(I) \gets False$
-      \State \Call{sum}{$I.right$, $i$, $j$, $sum + I.sum$} +
-                \Call{sum}{$I.left$, $i$, $j$, $sum + I.sum$}
-    \EndIf
-    \If{!lazy(I), $i \in I.left$}                        \Comment{Not lazy
-                                                                    on left child}
-      \State \Call{sum}{$I.left$, $i$, $sum$}
-    \EndIf
-    \If{!lazy(I), $i \in I.right$}                       \Comment{Not lazy
-                                                                    on right child}
-      \State \Call{sum}{$I.right$, $i$, $sum$}
+        \State lazy(I) = False\;
+        \State sum($I.right$, $i$, $j$, $sum + I.sum$) +
+                sum($I.left$, $i$, $j$, $sum + I.sum$)
     \EndIf
 
-    \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy
+    \State \If{!lazy(I), $i \in I.left$}                        \Comment{Not lazy
+                                                                    on left child}
+        \State sum($I.left$, $i$, $sum$)
+    \EndIf
+    \State \If{!lazy(I), $i \in I.right$}                       \Comment{Not lazy
+                                                                    on right child}
+        \State sum($I.right$, $i$, $sum$)
+    \EndIf
+
+    \State \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy
                                                                         on both}
-      \State \Call{sum}{$I.right$, $i$, $sum$}
+        \State sum($I.right$, $i$, $sum$)
     \EndIf
     \EndFunction
 \end{algorithmic}
 
 \begin{algorithmic}[1]
   \Function{update}{$I$, $i$, $j$, $k$}:
-    \If{$I.size = 1$}                                   \Comment{Return
+    \State \If{$I.size == 1$}                                   \Comment{Return
                                                                     found value}
-        \State \Return $I.val \gets I.val + update$\;
+        \State \Return $I.val += update$\;
     \EndIf
-    \If{lazy(I), $i \in I.left, i \notin I.right$}     \Comment{Lazy on
+
+    \State \If{lazy(I), $i \in I.left, i \neg \in I.right$}     \Comment{Lazy on
                                                                     left child}
-        \State $lazy(I.left) \gets True$
-        \State $I.left.val \gets k$
+        \State lazy(I.left) = True\;
+        \State I.left.val = k\;
     \EndIf
-    \If{lazy(I), $i \in I.right, i \notin I.left$} \Comment{Lazy on right
+    \State \If{lazy(I), $i \in I.right, i \neg \in I.left$} \Comment{Lazy on right
                                                                             child}
-        \State $lazy(I.right) \gets True$
-        \State $I.right.val \gets k$
+        \State lazy(I.right) = True\;
+        \State I.right.val = k\;
     \EndIf
-    \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on both}
-        \State $lazy(I) \gets True$
-        \State $I.val \gets k$
+
+    \State \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on both}
+        \State lazy(I) = True\;
+        \State I.val = k\;
     \EndIf
-    \If{!lazy(I), $i \in I.left$}                        \Comment{Not lazy
+
+    \State \If{!lazy(I), $i \in I.left$}                        \Comment{Not lazy
                                                                     on left child}
-        \State \Call{update}{$I.left$, $i$, $update$}
+        \State update($I.left$, $i$, $update$)
     \EndIf
-    \If{!lazy(I), $i \in I.right$}                       \Comment{Not lazy
+    \State \If{!lazy(I), $i \in I.right$}                       \Comment{Not lazy
                                                                 on right child}
-        \State \Call{update}{$I.right$, $i$, $update$}
+        \State update($I.right$, $i$, $update$)
     \EndIf
 
     \State \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy
                                                                         on both}
-        \State \Call{update}{$I.right$, $i$, $update$}
+        \State update($I.right$, $i$, $update$)
     \EndIf
     \EndFunction
 \end{algorithmic}
@@ -508,24 +530,24 @@ We define \textsc{lce} as an auxiliary function
     \EndFunction
 \end{algorithmic}
 
+
 \newpage
 \section{Depth of a node in a random search tree}
 
 A random search tree for a set S can be defined as follows: if $S$ is empty, then
 the null tree is a random search tree; otherwise, choose uniformly at random a key
 $k \in S$: the random search tree is obtained by picking
-$k$ as root, and the random search trees on $L = \{x \in S : x < k\}$ and $R = \{x \in S :
-x > k\}$ become, respectively, the left and right subtree of the root $k$.
+$k$ as root, and the random search trees on $L = {x \in S : x < k} and R = {x \in S :
+x > k}$ become, respectively, the left and right subtree of the root $k$.
 Consider the randomized QuickSort discussed in class and analyzed with indicator
 variables \href{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_13/randqs.pdf}{CLRS 7.3},
 and observe that the random selection of the pivots follows the above process,
 thus producing a random search tree of n nodes. Using a variation of the analysis
-with indicator variables, prove that:
-\begin{enumerate}
-  \item the expected depth of a node (i.e.\ the random variable representing the distance of the node from the root) is nearly $2 \ln n$;
-  \item the expected size of its subtree is nearly $2 \ln n$ too, observing that it is a simple variation of the previous analysis;
-  \item the probability that the expected depth of a node exceeds $2\ln n$ is small for any given constant $c > 1$.
-\end{enumerate}
+with indicator variables, prove that the expected depth of a node (i.e.\ the random variable
+representing the distance of the node from the root) is nearly $2\log_2 (n)$.
+Prove that the probability that the expected depth of a node exceeds $2\log_2 (n)$ is small for
+any given constant $c > 1$. [Note: the latter point can be solved after we see
+\href{https://en.wikipedia.org/wiki/Chernoff_bound}{Chernoff’s bounds}.]
 
 \subsection{Recursive balanced proof}
 
@@ -616,65 +638,6 @@ then
     \prob[X \geq c \ln(n)] < e^{-c \ln(\frac{c}{e})\ln(n)}
 \end{equation*}
 
-\subsection{Proof with indicator variable}
-
-\textbf{Prove that the expected depth of a node is nearly $2 \ln n$.}
-
-\begin{proof}
-  Let $z_m$ the $m$th smallest element in $S$ and $$X_{ij}=
-  \left\{
-    \begin{array}{ll}
-      1 & \mbox{if $z_j$ is an ancestor of $z_i$ in the random search tree} \\
-      0 & \mbox{otherwise}
-    \end{array}
-  \right.$$
-  The depth of the node $i$ in the tree is given by the number of its ancestors:
-  \begin{equation}
-    X=\sum_{\substack{j=1 \\ j\ne i}}^n X_{ij}
-    \label{equation:node-depth}
-  \end{equation}
-
-  Note that the depth of a node is also equal to the number of comparison it's
-  involved in (in other words, the number of times it became the left or the
-  right child of a randomly chosen pivot).
-
-  Once a pivot $k$ is chosen from $S$, $S$ is partitioned in two subsets $L$ and
-  $R$. The elements in the set $L$ will not be compared with the elements in $R$
-  at any subsequent time. The event $E_1=$``$z_j$ is an ancestor of $z_i$ in the
-  random search tree" occurs if $z_j$ and $z_i$ belongs to the same partition
-  \emph{and} $z_j$ was chosen as pivot before $z_i$. The probability that $E_1$
-  occurs, since it is the intersection of two events, can be upper bounded by:
-  $$\text{Pr}\{ z_j \text{ was chosen as pivot before } z_i
-  \}=\frac{1}{\text{size of the partition}}\leq\frac{1}{|j-i|+1}$$ because
-  pivots are chosen randomly and independently, and because the partition that
-  contains both $z_j$ and $z_i$ must contain \emph{at least} the $|j-i|+1$
-  numbers between $z_j$ and $z_i$.
-
-  Taking expectations of both sides of \eqref{equation:node-depth}, and then
-  using linearity of expectation, we have:
-  \begin{align*}
-    E[X] & = \sum_{\substack{j=1\\ j\ne i}}^n E[X_{ij}] \\
-    & = \sum_{\substack{j=1\\ j\ne i}}^n \text{Pr}\{ z_j \text{ is an ancestor
-      of } z_i \text{ in the random search tree} \} \\
-    & \le \sum_{\substack{j=1\\ j\ne i}}^n \frac{1}{|j-i|} \\
-    & = \sum_{j=1}^{i-1} \frac{1}{i-j} + \sum_{j=i+1}^{n} \frac{1}{j-i}
-  \end{align*}
-  With the change of variables $l=i-j$ and $m=j-i$:
-  \begin{equation*}
-    = \sum_{l=1}^{i-1} \frac{1}{l} + \sum_{m=1}^{n} \frac{1}{m} \approx 2\ln n
-  \end{equation*}
-
-\end{proof}
-
-\textbf{Prove that the expected size of its subtree is nearly $2 \ln n$ too,
-observing that it is a simple variation of the previous analysis.}
-
-\begin{proof}
-  The size of the subtree of a randomly chosen pivot of $z_j\in S$ is given by
-  the number of it's descendants. Since \eqref{equation:node-depth} is the
-  number of ancestors of a node $z_i$, we can find the number of descendants of
-  $z_j$ by changing the summation from $j=1,\dotsc,n$ to $i=1,\dotsc,n$.
-\end{proof}
 
 \newpage
 \section{Hashing sets}
@@ -694,35 +657,30 @@ Using $h, B_S, B_R$, how can you establish if $k$ was in $S \cap R$ (union), $S 
 (intersection), or $S \\ R$ (difference)? What is the probability of error?
 
 \subsection{$k \in S$}
-\label{k_in_s}
-
-Let $k \in [0, m - 1]: B_s[k] = 1 \implies h(k) \in S$, but not conclusive, as
-$\exists h \in H_{a,b}, l \in U: h(l) = k$.
-Out of the $|H_{a, b}| = (p)(p - 1)$ functions $\in H_{a, b}$ the probability
-    \begin{equation}
-    \prob(h_{a_{i},b_{i}}(l) = h_{a_{0},b_{0}}(k))
-    \end{equation}
-
-\subsection{$|S|$}
-\label{size_of_S}
-
-Since $h$ is bijective, and we know $h$, we can identify a lower bound, but are
-not able to estimate correctly the exact number.
-Trivially, we count the insertions in $B_S$ with a $\phi(B_S)$, and we'll have
-$|S| \geq \phi(B_S)$.
-Since we have no access to the collision list, we dont know how many collisions
-there are on every $B_S$ entry to 1.
-
-\subsection{Set operations}
-
+Trivially for $B_s[h(k)] = 0$ we can answer \textsc{false} with $\prob(error) = 0$.
+Let us analyse the opposite case, $B_s[h(k)] = 1$.
+Let $i \in [0,m]$ be some index s.t. $B_s[i] = 1$, and let $cl_{S}(i)$ be the list of
+$k \in S: h(k) = 1$ for some set $S \in \displaystyle {\mathcal {P}}(S)$.
+We can then denote the sets $cl_{U} := {k_{U} : k_{U} \in U, h(k) = i},
+cl_{S} := {k_{S} : k_{S} \in S, h(k) = i}$; it is trivial to show that
 \begin{itemize}
-    \item \textbf{Union} Trivially proven by~\ref{k_in_s} applied to $R, S$.
-    If any of them $\in [m]$, then $k \in S \cup R$.
-    \item \textbf{Intersection} Trivially proven by~\ref{k_in_s} applied to $R, S$.
-    If both $\in [m]$, then $k \in S \cap R$.
-    \item \textbf{Difference} Trivially proven by complement on union.
+    \label{6_cl_inclusion} \item $cl_{S} \subseteq cl_{U}$ as $S \in U$.
+    \label{6_cl_length} \item $| cl_{S}(k) | \leq | cl_{U}(k) | \forall k \in U$ as $S \in U$.
 \end{itemize}
+Let us not try and estimate $|cl_{S}(k)|$: given $h$ is universal, we have an expected value of collisions of $\expect[X_{k}] \approx \frac{1}{m} \forall k \in S$, that is
+\begin{align*}
+    \prob(h(k^{0}) = c) = \frac{1}{m}                               \\
+    \prob(h(k^{1}) = c) = \frac{1}{m^{2}}                           \\
+    \prob(h(k^{i - 1}) = c \and h(k^{i} = c) = \frac{1}{m^{i}}      \\
+    \prob(h(k) = c, \forall k \in S) = \frac{1}{m^{|S|}}
+\end{align*}
+We can similarly compute the probability of not collision by simply replacing $\frac{1}{m}$ with $(1 - \frac{1}{m}): \prob(h(k) != c, \forall k \in S) = 1 - \frac{1}{m^{|S|}}$.
 
+Given our estimate of the collision list, we can now compute an estimate of the error probability: by \ref{6_cl_inclusion}, we give an erroneous answer whenever $k \in cl_{U}(k), k \notin cl_{S}(k)$, that is we have a margin of error of $cl_{U}(k) \setminus cl_{S}(k)$ whose size is $|cl_{U}(k)| - |cl_{S}(k)|$.
+Given the set of $k$ for which $h(k) = i$ the \emph{bad answers} are then
+\begin{equation}
+    1 - \prob(\textrm{good answer}) = 1 - (1 - \frac{1}{m})^{|S|}
+\end{equation}
 
 \newpage
 \section{Family of uniform hash functions}
