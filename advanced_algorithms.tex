@@ -292,125 +292,126 @@ Let us define a function to do so:
     l: \mathbb{N} \to (\mathbb{N} \cup \{\epsilon\}, \mathbb{N})
 \end{equation}
 to keep track of our lazy sums:
-\begin{equation*}
+\begin{equation}
     s(n) = \begin{cases}
             \epsilon, \_            &   \textrm{if no lazy prefix sum is in that interval} \\
             k, m                    &   \textrm{if a lazy sum of k is to be propagated to m}\\
             \end{cases}
-\end{equation*}
+\end{equation}
 The \textsc{query} function is then trivial:
+The \emph{query} function is then trivial:
 
 \begin{algorithmic}[1]
-  \Function{query}{$I$, $i$, $sum$}:
     \If{$I.size = 1$}                       \Comment{Return found value}
       \State \Return $I.sum$
-    \EndIf
+        \State \Return $I.sum$\;
     \If{lazy(I), $i \in I.left, i \notin I.right$}     \Comment{Lazy on
-                                                                    left child}
+    \State \If{lazy(I), $i \in I.left, i \neg \in I.right$}     \Comment{Lazy on
       \State $lazy(I) \gets False$
       \State \Call{query}{$I.left$, $i$, $sum + I.sum$}
+        \State query($I.left$, $i$, $sum + I.sum$)
     \EndIf
-
     \If{lazy(I), $i \in I.right, i \notin I.left$} \Comment{Lazy on
-                                                                    right child}
+    \State \If{lazy(I), $i \in I.right, i \neg \in I.left$} \Comment{Lazy on
       \State $lazy(I) \gets False$
       \State \Call{query}{$I.right$, $i$, $sum + I.sum$}
+        \State query($I.right$, $i$, $sum + I.sum$)
     \EndIf
-
     \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on both}
       \State $lazy(I) \gets False$
       \State \Call{query}{$I.right$, $i$, $j$, $sum + I.sum$} +
                 \Call{query}{$I.left$, $i$, $j$, $sum + I.sum$}
+                query($I.left$, $i$, $j$, $sum + I.sum$)
     \EndIf
-
     \If{!lazy(I), $i \in I.left$}             \Comment{Not lazy on left
-                                                                        child}
+    \State \If{!lazy(I), $i \in I.left$}             \Comment{Not lazy on left
       \State \Call{query}{$I.left$, $i$, $sum$}
+        \State query($I.left$, $i$, $sum$)
     \EndIf
-
     \If{!lazy(I), $i \in I.right$}        \Comment{Not lazy on right child}
       \State \Call{query}{$I.right$, $i$, $sum$}
+        \State query($I.right$, $i$, $sum$)
     \EndIf
-
     \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy
-                                                                        on both}
+    \State \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy
       \State \Call{sum}{$I.right$, $i$, $sum$}
+        \State sum($I.right$, $i$, $sum$)
     \EndIf
     \EndFunction
 \end{algorithmic}
 
 \begin{algorithmic}[1]
-  \Function{sum}{$I$, $i$, $j$, $sum$}:
     \If{$I.size = 1$}                                   \Comment{Return
-                                                                    found value}
+    \State \If{$I.size == 1$}                                   \Comment{Return
       \State \Return $I.sum + sum$\;
+        \State \Return $I.sum + sum$\;
     \EndIf
-
     \If{lazy(I), $i \in I.left, i \notin I.right$}     \Comment{Lazy on
-                                                                    left child}
+    \State \If{lazy(I), $i \in I.left, i \neg \in I.right$}     \Comment{Lazy on
       \State $lazy(I) \gets False$
       \State \Call{sum}{$I.left$, $i$, $j$, $sum + I.sum$}
-    \EndIf
+        \State sum($I.left$, $i$, $j$, $sum + I.sum$)
     \If{lazy(I), $i \in I.right, i \notin I.left$} \Comment{Lazy on
-                                                                    right child}
+    \State \If{lazy(I), $i \in I.right, i \neg \in I.left$} \Comment{Lazy on
       \State $lazy(I) \gets False$
       \State \Call{sum}{$I.right$, $i$, $j$, $sum + I.sum$}
+        \State sum($I.right$, $i$, $j$, $sum + I.sum$)
     \EndIf
-
     \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on
-                                                                        both}
+    \State \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on
       \State $lazy(I) \gets False$
       \State \Call{sum}{$I.right$, $i$, $j$, $sum + I.sum$} +
                 \Call{sum}{$I.left$, $i$, $j$, $sum + I.sum$}
-    \EndIf
+                sum($I.left$, $i$, $j$, $sum + I.sum$)
     \If{!lazy(I), $i \in I.left$}                        \Comment{Not lazy
-                                                                    on left child}
+    \State \If{!lazy(I), $i \in I.left$}                        \Comment{Not lazy
       \State \Call{sum}{$I.left$, $i$, $sum$}
-    \EndIf
+        \State sum($I.left$, $i$, $sum$)
     \If{!lazy(I), $i \in I.right$}                       \Comment{Not lazy
-                                                                    on right child}
+    \State \If{!lazy(I), $i \in I.right$}                       \Comment{Not lazy
       \State \Call{sum}{$I.right$, $i$, $sum$}
+        \State sum($I.right$, $i$, $sum$)
     \EndIf
-
     \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy
-                                                                        on both}
+    \State \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy
       \State \Call{sum}{$I.right$, $i$, $sum$}
+        \State sum($I.right$, $i$, $sum$)
     \EndIf
     \EndFunction
 \end{algorithmic}
 
 \begin{algorithmic}[1]
-  \Function{update}{$I$, $i$, $j$, $k$}:
     \If{$I.size = 1$}                                   \Comment{Return
-                                                                    found value}
+    \State \If{$I.size == 1$}                                   \Comment{Return
         \State \Return $I.val \gets I.val + update$\;
-    \EndIf
+        \State \Return $I.val += update$\;
     \If{lazy(I), $i \in I.left, i \notin I.right$}     \Comment{Lazy on
-                                                                    left child}
+    \State \If{lazy(I), $i \in I.left, i \neg \in I.right$}     \Comment{Lazy on
         \State $lazy(I.left) \gets True$
         \State $I.left.val \gets k$
-    \EndIf
+        \State I.left.val = k\;
     \If{lazy(I), $i \in I.right, i \notin I.left$} \Comment{Lazy on right
-                                                                            child}
+    \State \If{lazy(I), $i \in I.right, i \neg \in I.left$} \Comment{Lazy on right
         \State $lazy(I.right) \gets True$
         \State $I.right.val \gets k$
-    \EndIf
+        \State I.right.val = k\;
     \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on both}
         \State $lazy(I) \gets True$
         \State $I.val \gets k$
-    \EndIf
+        \State I.val = k\;
     \If{!lazy(I), $i \in I.left$}                        \Comment{Not lazy
-                                                                    on left child}
+    \State \If{!lazy(I), $i \in I.left$}                        \Comment{Not lazy
         \State \Call{update}{$I.left$, $i$, $update$}
-    \EndIf
+        \State update($I.left$, $i$, $update$)
     \If{!lazy(I), $i \in I.right$}                       \Comment{Not lazy
-                                                                on right child}
+    \State \If{!lazy(I), $i \in I.right$}                       \Comment{Not lazy
         \State \Call{update}{$I.right$, $i$, $update$}
+        \State update($I.right$, $i$, $update$)
     \EndIf
 
     \State \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy
-                                                                        on both}
         \State \Call{update}{$I.right$, $i$, $update$}
+        \State update($I.right$, $i$, $update$)
     \EndIf
     \EndFunction
 \end{algorithmic}
@@ -426,12 +427,12 @@ For example, if S = abracadabra, then $lceS(1, 2) = 0$, $lceS(0, 3) = 1$, and
 $lceS(0, 7) = 4$.
 Given S in advance for preprocessing, build a data structure for S based
 on the Karp-Rabin fingerprinting, in $O(n \ln(n)$) time, so that it supports subsequent
-online queries of the following two types:
 \begin{itemize}
+    \begin{itemize}
     \item $lceS(i, j)$: it computes the longest common extension at positions i
-    and j in O(log n) time.
     \item $equals (i, j, c)$: it checks if $S[i ... i + ` - 1] = S[j ... j + ` - 1]$ in constant time.
 \end{itemize}
+    \end{itemize}
 Analyze the cost and the error probability.
 The space occupied by the data structure can be $O(n \log(n))$ but it is possible
 to use $O(n)$ space.
@@ -513,19 +514,18 @@ We define \textsc{lce} as an auxiliary function
 
 A random search tree for a set S can be defined as follows: if $S$ is empty, then
 the null tree is a random search tree; otherwise, choose uniformly at random a key
-$k \in S$: the random search tree is obtained by picking
 $k$ as root, and the random search trees on $L = \{x \in S : x < k\}$ and $R = \{x \in S :
 x > k\}$ become, respectively, the left and right subtree of the root $k$.
 Consider the randomized QuickSort discussed in class and analyzed with indicator
 variables \href{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_13/randqs.pdf}{CLRS 7.3},
 and observe that the random selection of the pivots follows the above process,
-thus producing a random search tree of n nodes. Using a variation of the analysis
 with indicator variables, prove that:
 \begin{enumerate}
   \item the expected depth of a node (i.e.\ the random variable representing the distance of the node from the root) is nearly $2 \ln n$;
   \item the expected size of its subtree is nearly $2 \ln n$ too, observing that it is a simple variation of the previous analysis;
   \item the probability that the expected depth of a node exceeds $2\ln n$ is small for any given constant $c > 1$.
 \end{enumerate}
+\href{https://en.wikipedia.org/wiki/Chernoff_bound}{Chernoff’s bounds}.]
 
 \subsection{Recursive balanced proof}
 
@@ -615,7 +615,6 @@ then
 \begin{equation*}
     \prob[X \geq c \ln(n)] < e^{-c \ln(\frac{c}{e})\ln(n)}
 \end{equation*}
-
 \subsection{Proof with indicator variable}
 
 \textbf{Prove that the expected depth of a node is nearly $2 \ln n$.}
@@ -640,7 +639,7 @@ then
 
   Once a pivot $k$ is chosen from $S$, $S$ is partitioned in two subsets $L$ and
   $R$. The elements in the set $L$ will not be compared with the elements in $R$
-  at any subsequent time. The event $E_1=$``$z_j$ is an ancestor of $z_i$ in the
+  at any subsequent time. The event $E_1=$ $z_j$ is an ancestor of $z_i$ in the
   random search tree" occurs if $z_j$ and $z_i$ belongs to the same partition
   \emph{and} $z_j$ was chosen as pivot before $z_i$. The probability that $E_1$
   occurs, since it is the intersection of two events, can be upper bounded by:
@@ -650,7 +649,7 @@ then
   contains both $z_j$ and $z_i$ must contain \emph{at least} the $|j-i|+1$
   numbers between $z_j$ and $z_i$.
 
-  Taking expectations of both sides of \eqref{equation:node-depth}, and then
+  Taking expectations of both sides of~\eqref{equation:node-depth}, and then
   using linearity of expectation, we have:
   \begin{align*}
     E[X] & = \sum_{\substack{j=1\\ j\ne i}}^n E[X_{ij}] \\
@@ -671,10 +670,11 @@ observing that it is a simple variation of the previous analysis.}
 
 \begin{proof}
   The size of the subtree of a randomly chosen pivot of $z_j\in S$ is given by
-  the number of it's descendants. Since \eqref{equation:node-depth} is the
+  the number of it's descendants. Since~\eqref{equation:node-depth} is the
   number of ancestors of a node $z_i$, we can find the number of descendants of
   $z_j$ by changing the summation from $j=1,\dotsc,n$ to $i=1,\dotsc,n$.
 \end{proof}
+
 
 \newpage
 \section{Hashing sets}
@@ -693,16 +693,15 @@ function h, and the bit vector BR defined analogously as above.
 Using $h, B_S, B_R$, how can you establish if $k$ was in $S \cap R$ (union), $S \cup R$
 (intersection), or $S \\ R$ (difference)? What is the probability of error?
 
-\subsection{$k \in S$}
 \label{k_in_s}
-
+$\frac{1}{m}$ with $(1 - \frac{1}{m}): \prob(h(k) != c, \forall k \in S) = 1 - \frac{1}{m^{|S|}}$.
 Let $k \in [0, m - 1]: B_s[k] = 1 \implies h(k) \in S$, but not conclusive, as
 $\exists h \in H_{a,b}, l \in U: h(l) = k$.
 Out of the $|H_{a, b}| = (p)(p - 1)$ functions $\in H_{a, b}$ the probability
-    \begin{equation}
+Given the set of $k$ for which $h(k) = i$ the \emph{bad answers} are then
     \prob(h_{a_{i},b_{i}}(l) = h_{a_{0},b_{0}}(k))
+    1 - \prob(\textrm{good answer}) = 1 - {(1 - \frac{1}{m})}^{|S|}
     \end{equation}
-
 \subsection{$|S|$}
 \label{size_of_S}
 
@@ -722,6 +721,7 @@ there are on every $B_S$ entry to 1.
     If both $\in [m]$, then $k \in S \cap R$.
     \item \textbf{Difference} Trivially proven by complement on union.
 \end{itemize}
+
 
 
 \newpage
@@ -756,10 +756,10 @@ Now, the same goes for $x_{1}, x_{2}$:
 By the \href{http://en.wikipedia.org/wiki/Chinese_remainder_theorem}{Chinese reminder theorem}
 the above system has only one solution, therefore $\prob((a x_{1} + b) = d) = \frac{1}{p}$ and
 $e$ become independent of $d$.
-Having
 \begin{equation}
-    \prob(h(x_{1} = c_{1}), h(x_{2} = c_{2})) =
+    \begin{equation}
     \prob(h(x_{1} = c_{1})) * \prob(h(x_{2} = c_{2})) =\frac{1}{p} * \frac{1}{p} = \frac{1}{p^{2}}
 \end{equation}
 Which, since $m + 1 \leq p \leq 2m$, proves the assumption.
+
 \end{document}
