@@ -526,7 +526,7 @@ then
   Once a pivot $k$ is chosen from $S$, $S$ is partitioned in two subsets $L$ and
   $R$. The elements in the set $L$ will not be compared with the elements in $R$
   at any subsequent time. The event $E_1=$ $z_j$ is an ancestor of $z_i$ in the
-  random search tree" occurs if $z_j$ and $z_i$ belongs to the same partition
+  random search tree occurs if $z_j$ and $z_i$ belongs to the same partition
   \emph{and} $z_j$ was chosen as pivot before $z_i$. The probability that $E_1$
   occurs, since it is the intersection of two events, can be upper bounded by:
   $$\text{Pr}\{ z_j \text{ was chosen as pivot before } z_i
@@ -670,31 +670,37 @@ function h, and the bit vector BR defined analogously as above.
 Using $h, B_S, B_R$, how can you establish if $k$ was in $S \cap R$ (union), $S \cup R$
 (intersection), or $S \\ R$ (difference)? What is the probability of error?
 
-\label{k_in_s}\subsection{$k \in S$}
+\subsection{$k \in S$}
 Trivially for $B_s[h(k)] = 0$ we can answer \textsc{false} with $\prob(error) = 0$.
 Let us analyse the opposite case, $B_s[h(k)] = 1$.
 Let $i \in [0,m]$ be some index s.t. $B_s[i] = 1$, and let $cl_{S}(i)$ be the list of
 $k \in S: h(k) = 1$ for some set $S \in \displaystyle {\mathcal {P}}(S)$.
 We can then denote the sets $cl_{U} := {k_{U} : k_{U} \in U, h(k) = i},
 cl_{S} := {k_{S} : k_{S} \in S, h(k) = i}$; it is trivial to show that
-\begin{itemize}
+    \begin{itemize}
     \label{6_cl_inclusion} \item $cl_{S} \subseteq cl_{U}$ as $S \in U$.
     \label{6_cl_length} \item $| cl_{S}(k) | \leq | cl_{U}(k) | \forall k \in U$ as $S \in U$.
-\end{itemize}
-Let us not try and estimate $|cl_{S}(k)|$: given $h$ is universal, we have an expected value of collisions of $\expect[X_{k}] \approx \frac{1}{m} \forall k \in S$, that is
+    \end{itemize}
+Let us not try and estimate $|cl_{S}(k)|$: given $h$ is universal, we have an
+expected value of collisions of $\expect[X_{k}] \approx \frac{1}{m} \forall k \in S$,
+that is
 \begin{align*}
     \prob(h(k^{0}) = c) = \frac{1}{m}                               \\
     \prob(h(k^{1}) = c) = \frac{1}{m^{2}}                           \\
     \prob(h(k^{i - 1}) = c \and h(k^{i} = c) = \frac{1}{m^{i}}      \\
     \prob(h(k) = c, \forall k \in S) = \frac{1}{m^{|S|}}
 \end{align*}
-We can similarly compute the probability of not collision by simply replacing $\frac{1}{m}$ with $(1 - \frac{1}{m}): \prob(h(k) != c, \forall k \in S) = 1 - \frac{1}{m^{|S|}}$.
+We can similarly compute the probability of not collision by simply replacing
+$\frac{1}{m}$ with $(1 - \frac{1}{m}): \prob(h(k) != c, \forall k \in S) = 1 - \frac{1}{m^{|S|}}$.
 
-Given our estimate of the collision list, we can now compute an estimate of the error probability: by \ref{6_cl_inclusion}, we give an erroneous answer whenever $k \in cl_{U}(k), k \notin cl_{S}(k)$, that is we have a margin of error of $cl_{U}(k) \setminus cl_{S}(k)$ whose size is $|cl_{U}(k)| - |cl_{S}(k)|$.
+Given our estimate of the collision list, we can now compute an estimate of the
+error probability: by~\ref{6_cl_inclusion}, we give an erroneous answer whenever
+$k \in cl_{U}(k), k \notin cl_{S}(k)$, that is we have a margin of error of
+$cl_{U}(k) \setminus cl_{S}(k)$ whose size is $|cl_{U}(k)| - |cl_{S}(k)|$.
 Given the set of $k$ for which $h(k) = i$ the \emph{bad answers} are then
-\begin{equation}
-    1 - \prob(\textrm{good answer}) = 1 - (1 - \frac{1}{m})^{|S|}
-\end{equation}
+    \begin{equation}
+    1 - \prob(\textrm{good answer}) = 1 - {(1 - \frac{1}{m})}^{|S|}
+    \end{equation}
 
 
 \newpage
@@ -729,9 +735,66 @@ Now, the same goes for $x_{1}, x_{2}$:
 By the \href{http://en.wikipedia.org/wiki/Chinese_remainder_theorem}{Chinese reminder theorem}
 the above system has only one solution, therefore $\prob((a x_{1} + b) = d) = \frac{1}{p}$ and
 $e$ become independent of $d$.
+Having
     \begin{equation}
-    \prob(h(x_{1} = c_{1})) * \prob(h(x_{2} = c_{2})) =\frac{1}{p} * \frac{1}{p} = \frac{1}{p^{2}}
+    \prob(h(x_{1} = c_{1}), h(x_{2} = c_{2})) =
+    \prob(h(x_{1} = c_{1})) * \prob(h(x_{2} = c_{2})) = \frac{1}{p} * \frac{1}{p} = \frac{1}{p^{2}}
     \end{equation}
 Which, since $m + 1 \leq p \leq 2m$, proves the assumption under the said bound.
+
+
+\newpage
+\section{Deterministic data streaming}
+
+Consider a stream of $n$ items, where items can appear more than once in the stream.
+The problem is to find the most frequently appearing item in the stream (where ties
+broken arbitrarily if more than one item satisfies the latter).
+Suppose that only $k$ items can be stored, one item per memory cell, where the
+available storage is $k + O(1)$ memory cells.
+Show that the problem cannot be solved deterministically under the following rules:
+the algorithm can access only $O(\log^{c}(n))$ bits for each of the $k$ items that
+it can store, and can read the next item of the stream; you, the adversarty, have
+access to all the stream, and the content of the $k$ items stored by the algorithm,
+and can decide what is the next item that the algorithm reads (please note that you
+cannot change the past, namely, the items already read by the algorithm).
+\\Hint: it is an adversarial argument based on the k items chosen by the
+hypothetical determinist streaming algorithm, and the fact that there can be a
+tie on $> k$ items till the last minute.
+
+\subsection{Solution 1: Max replacement}
+Let us first analyse the problem without the first constraint.
+Let $S$ be the given stream, $i \in [0, n - 1]$ be an iteration in the stream read, $C_{k + O(1)}$ the map
+$object \in S \to c \in [0, n - 1]$, $k$ the size of $C_{k + O(1)}$.
+We'll denote $C_{k + O(1)}$ with $C$ from now on.
+We'll also denote $j^{i}$ as the $i^{th}$ most frequent element.
+\\Suppose that at $i$, $C = \{j_{0} \to c, j_{1} \to c, \dots , j_{k - 1} \to c\}$:
+as by hypothesis, let us be in control of the stream and read $j_{o}: j_{o} \notin C$.
+We can now pick one of two choices: either insert $j_{o} \to 1$ in $C$ by swapping
+it with some $j_{k} \in C$, or ignore it.
+In the former case, we might end up replacing the most frequent object, making our
+final solution wrong (note that a $j_{k'} \to c$ exist in $C$ s.t.\ its value
+at the end of the read might be greater than $C(j_{k}) - c$).
+Given that we are in control of the stream, we can always pick the first and second
+most frequent objects and make them appear in such a way that we replace the most
+frequent item with the second most, namely $j^{1} and j^{2}$.
+We first feed the stream the objects in sequence s.t.\ we have a
+    \begin{equation}
+    j_{0}, j_{0}, \dots, j_{0}, j_{1}, j_{1}, \dots, j_{1}, \dots j_{k - 1}, j_{k - 1}, \dots, j_{k - 1}
+    \end{equation}
+where each substream $j_{i}$ has length $l = \min(\textrm{frequence of every item})$,
+and one of $j_{i}$ is the most frequent item.
+We then proceed to feed $j_{o} \notin C$ until one of them reaches the same counter
+of any of the $j_{i}$: the algorithm will be forced to replace one of the $j_{i} \in C$,
+without knowing which of them is $j^{1}$.
+By postponing this to the $m^{th}$ iteration where $m = n - (C(j^{1}) - C(j^{2}))$
+we are able to programmatically make the algorithm effectively return, in the best
+case scenario, the $j^{2}$ object, making the algorithm non-deterministic.
+Let us now show how the problem changes with the other constriction: suppose
+that each element $j_{i} \in S$ has $m$ bits length: now if $\log^{c}(n) < m$
+we might not able to tell two $j_{i}, j_{k}$ apart, making the algorithm useless
+also for $k = n$.
+Instead, if we are able to tell them apart for a $\log^{c}(n)$, we fall back in
+the previous case.
+Finally, if $\log^{c}(n) > m$, we overflow.
 
 \end{document}
