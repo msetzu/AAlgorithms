@@ -238,10 +238,10 @@ Follows the pseudo-code for the edited version and \emph{snake\_check} function:
 
 \begin{algorithmic}[1]
   \Function{merge\_with\_paletta}{$left$, $right$, $k$}:
-    \State ...\;                        \Comment{merge instructions}
+    \State \dots \;                        \Comment{merge instructions}
     \State \If{$right > left$}
       \State paletta\_count = paletta\_count + 1\;
-      \State ...\;
+      \State \dots \;
       \EndIf
     \EndFunction
 \end{algorithmic}
@@ -286,15 +286,15 @@ in $O(\log(n))$ time. Note that $query(i) = sum(i, i)$ but it helps to reason.
 Let $T$ be a segmented binary tree over a continuous interval $I: [0, N - 1]$
 s.t.\ its leafs are the points in I, and the parent of two nodes comprises of their interval:
 
-\begin{equation*}
-  n' \cup n'' = n, n' \cap n'' = \emptyset   \textrm{ s.t. n is the father of n', n''}
-\end{equation*}
+    \begin{equation*}
+    n' \cup n'' = n, n' \cap n'' = \emptyset   \textrm{ s.t. n is the father of n', n''}
+    \end{equation*}
 
 $T$ will keep track of the prefix sums for every interval.
 We define a function
-\begin{equation}
+    \begin{equation}
     s': [0, n - 1] \to \mathbb{N}
-\end{equation}
+    \end{equation}
 that given a node in $T$ returns the value associated with $I$, namely the
 cumulative sum of that interval.
 
@@ -305,16 +305,16 @@ requested operation.
 
 We'll instead either compute over $T$ or update $T$ as necessary.
 Let us define a function to do so:
-\begin{equation}
-    l: \mathbb{N} \to (\mathbb{N} \cup \{\epsilon\}, \mathbb{N})
-\end{equation}
+    \begin{equation}
+    l: \mathbb{N} \to (\mathbb{N} \cup {\epsilon}, \mathbb{N})
+    \end{equation}
 to keep track of our lazy sums:
-\begin{equation*}
+    \begin{equation*}
     s(n) = \begin{cases}
             \epsilon, \_            &   \textrm{if no lazy prefix sum is in that interval} \\
             k, m                    &   \textrm{if a lazy sum of k is to be propagated to m}\\
             \end{cases}
-\end{equation*}
+        \end{equation*}
 The \emph{query} function is then trivial:
 
 \begin{algorithmic}[1]
@@ -449,11 +449,12 @@ $lceS(0, 7) = 4$.
 Given S in advance for preprocessing, build a data structure for S based
 on the Karp-Rabin fingerprinting, in $O(n \ln(n)$) time, so that it supports subsequent
 online queries of the following two types:
-\begin{itemize}
+    \begin{itemize}
     \item $lceS(i, j)$: it computes the longest common extension at positions i
     and j in O(log n) time.
-    \item $equals (i, j, c)$: it checks if $S[i ... i + ` - 1] = S[j ... j + ` - 1]$ in constant time.
-\end{itemize}
+    \item $equals (i, j, c)$: it checks if $S[i ... i + ` - 1] = S[j ... j + ` - 1]$
+    in constant time.
+    \end{itemize}
 Analyze the cost and the error probability.
 The space occupied by the data structure can be $O(n \log(n))$ but it is possible
 to use $O(n)$ space.
@@ -663,24 +664,31 @@ Let $i \in [0,m]$ be some index s.t. $B_s[i] = 1$, and let $cl_{S}(i)$ be the li
 $k \in S: h(k) = 1$ for some set $S \in \displaystyle {\mathcal {P}}(S)$.
 We can then denote the sets $cl_{U} := {k_{U} : k_{U} \in U, h(k) = i},
 cl_{S} := {k_{S} : k_{S} \in S, h(k) = i}$; it is trivial to show that
-\begin{itemize}
+    \begin{itemize}
     \label{6_cl_inclusion} \item $cl_{S} \subseteq cl_{U}$ as $S \in U$.
     \label{6_cl_length} \item $| cl_{S}(k) | \leq | cl_{U}(k) | \forall k \in U$ as $S \in U$.
-\end{itemize}
-Let us not try and estimate $|cl_{S}(k)|$: given $h$ is universal, we have an expected value of collisions of $\expect[X_{k}] \approx \frac{1}{m} \forall k \in S$, that is
+    \end{itemize}
+Let us not try and estimate $|cl_{S}(k)|$: given $h$ is universal, we have an
+expected value of collisions of $\expect[X_{k}] \approx \frac{1}{m} \forall k \in S$,
+that is
 \begin{align*}
     \prob(h(k^{0}) = c) = \frac{1}{m}                               \\
     \prob(h(k^{1}) = c) = \frac{1}{m^{2}}                           \\
     \prob(h(k^{i - 1}) = c \and h(k^{i} = c) = \frac{1}{m^{i}}      \\
     \prob(h(k) = c, \forall k \in S) = \frac{1}{m^{|S|}}
 \end{align*}
-We can similarly compute the probability of not collision by simply replacing $\frac{1}{m}$ with $(1 - \frac{1}{m}): \prob(h(k) != c, \forall k \in S) = 1 - \frac{1}{m^{|S|}}$.
+We can similarly compute the probability of not collision by simply replacing
+$\frac{1}{m}$ with $(1 - \frac{1}{m}): \prob(h(k) != c, \forall k \in S) = 1 - \frac{1}{m^{|S|}}$.
 
-Given our estimate of the collision list, we can now compute an estimate of the error probability: by \ref{6_cl_inclusion}, we give an erroneous answer whenever $k \in cl_{U}(k), k \notin cl_{S}(k)$, that is we have a margin of error of $cl_{U}(k) \setminus cl_{S}(k)$ whose size is $|cl_{U}(k)| - |cl_{S}(k)|$.
+Given our estimate of the collision list, we can now compute an estimate of the
+error probability: by~\ref{6_cl_inclusion}, we give an erroneous answer whenever
+$k \in cl_{U}(k), k \notin cl_{S}(k)$, that is we have a margin of error of
+$cl_{U}(k) \setminus cl_{S}(k)$ whose size is $|cl_{U}(k)| - |cl_{S}(k)|$.
 Given the set of $k$ for which $h(k) = i$ the \emph{bad answers} are then
-\begin{equation}
-    1 - \prob(\textrm{good answer}) = 1 - (1 - \frac{1}{m})^{|S|}
-\end{equation}
+    \begin{equation}
+    1 - \prob(\textrm{good answer}) = 1 - {(1 - \frac{1}{m})}^{|S|}
+    \end{equation}
+
 
 \newpage
 \section{Family of uniform hash functions}
@@ -715,9 +723,10 @@ By the \href{http://en.wikipedia.org/wiki/Chinese_remainder_theorem}{Chinese rem
 the above system has only one solution, therefore $\prob((a x_{1} + b) = d) = \frac{1}{p}$ and
 $e$ become independent of $d$.
 Having
-\begin{equation}
+    \begin{equation}
     \prob(h(x_{1} = c_{1}), h(x_{2} = c_{2})) =
-    \prob(h(x_{1} = c_{1})) * \prob(h(x_{2} = c_{2})) =\frac{1}{p} * \frac{1}{p} = \frac{1}{p^{2}}
-\end{equation}
-Which, since $m + 1 \leq p \leq 2m$, proves the assumption.
+    \prob(h(x_{1} = c_{1})) * \prob(h(x_{2} = c_{2})) = \frac{1}{p} * \frac{1}{p} = \frac{1}{p^{2}}
+    \end{equation}
+Which, since $m + 1 \leq p \leq 2m$, proves the assumption under the said bound.
+
 \end{document}
