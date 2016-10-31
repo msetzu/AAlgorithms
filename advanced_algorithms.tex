@@ -669,36 +669,31 @@ function h, and the bit vector BR defined analogously as above.
 Using $h, B_S, B_R$, how can you establish if $k$ was in $S \cap R$ (union), $S \cup R$
 (intersection), or $S \\ R$ (difference)? What is the probability of error?
 
-\label{k_in_s}
-$\frac{1}{m}$ with $(1 - \frac{1}{m}): \prob(h(k) != c, \forall k \in S) = 1 - \frac{1}{m^{|S|}}$.
-Let $k \in [0, m - 1]: B_s[k] = 1 \implies h(k) \in S$, but not conclusive, as
-$\exists h \in H_{a,b}, l \in U: h(l) = k$.
-Out of the $|H_{a, b}| = (p)(p - 1)$ functions $\in H_{a, b}$ the probability
-Given the set of $k$ for which $h(k) = i$ the \emph{bad answers} are then
-    \begin{equation}
-    \prob(h_{a_{i},b_{i}}(l) = h_{a_{0},b_{0}}(k))
-    1 - \prob(\textrm{good answer}) = 1 - {(1 - \frac{1}{m})}^{|S|}
-    \end{equation}
-\subsection{$|S|$}
-\label{size_of_S}
-
-Since $h$ is bijective, and we know $h$, we can identify a lower bound, but are
-not able to estimate correctly the exact number.
-Trivially, we count the insertions in $B_S$ with a $\phi(B_S)$, and we'll have
-$|S| \geq \phi(B_S)$.
-Since we have no access to the collision list, we dont know how many collisions
-there are on every $B_S$ entry to 1.
-
-\subsection{Set operations}
-
+\label{k_in_s}\subsection{$k \in S$}
+Trivially for $B_s[h(k)] = 0$ we can answer \textsc{false} with $\prob(error) = 0$.
+Let us analyse the opposite case, $B_s[h(k)] = 1$.
+Let $i \in [0,m]$ be some index s.t. $B_s[i] = 1$, and let $cl_{S}(i)$ be the list of
+$k \in S: h(k) = 1$ for some set $S \in \displaystyle {\mathcal {P}}(S)$.
+We can then denote the sets $cl_{U} := {k_{U} : k_{U} \in U, h(k) = i},
+cl_{S} := {k_{S} : k_{S} \in S, h(k) = i}$; it is trivial to show that
 \begin{itemize}
-    \item \textbf{Union} Trivially proven by~\ref{k_in_s} applied to $R, S$.
-    If any of them $\in [m]$, then $k \in S \cup R$.
-    \item \textbf{Intersection} Trivially proven by~\ref{k_in_s} applied to $R, S$.
-    If both $\in [m]$, then $k \in S \cap R$.
-    \item \textbf{Difference} Trivially proven by complement on union.
+    \label{6_cl_inclusion} \item $cl_{S} \subseteq cl_{U}$ as $S \in U$.
+    \label{6_cl_length} \item $| cl_{S}(k) | \leq | cl_{U}(k) | \forall k \in U$ as $S \in U$.
 \end{itemize}
+Let us not try and estimate $|cl_{S}(k)|$: given $h$ is universal, we have an expected value of collisions of $\expect[X_{k}] \approx \frac{1}{m} \forall k \in S$, that is
+\begin{align*}
+    \prob(h(k^{0}) = c) = \frac{1}{m}                               \\
+    \prob(h(k^{1}) = c) = \frac{1}{m^{2}}                           \\
+    \prob(h(k^{i - 1}) = c \and h(k^{i} = c) = \frac{1}{m^{i}}      \\
+    \prob(h(k) = c, \forall k \in S) = \frac{1}{m^{|S|}}
+\end{align*}
+We can similarly compute the probability of not collision by simply replacing $\frac{1}{m}$ with $(1 - \frac{1}{m}): \prob(h(k) != c, \forall k \in S) = 1 - \frac{1}{m^{|S|}}$.
 
+Given our estimate of the collision list, we can now compute an estimate of the error probability: by \ref{6_cl_inclusion}, we give an erroneous answer whenever $k \in cl_{U}(k), k \notin cl_{S}(k)$, that is we have a margin of error of $cl_{U}(k) \setminus cl_{S}(k)$ whose size is $|cl_{U}(k)| - |cl_{S}(k)|$.
+Given the set of $k$ for which $h(k) = i$ the \emph{bad answers} are then
+\begin{equation}
+    1 - \prob(\textrm{good answer}) = 1 - (1 - \frac{1}{m})^{|S|}
+\end{equation}
 
 
 \newpage
