@@ -701,6 +701,32 @@ Given the set of $k$ for which $h(k) = i$ the \emph{bad answers} are then
     \begin{equation}
     1 - \prob(\textrm{good answer}) = 1 - {(1 - \frac{1}{m})}^{|S|}
     \end{equation}
+We now provide a lower and upper bound for the said value.
+The lower bound is given by the \emph{perfect hash} with no collisions: given
+$e = $ number of $1$ in $B_s$, $e$ is the lowerbound.
+Provided that  $m \geq c |S|$ for some $c > 1, |S| \leq \frac{m}{c}$:
+    \begin{equation}
+    \prob(\textrm{collision over i}) = \alpha_{S} = \frac{\frac{m}{c}}{m} = \frac{1}{c}
+    \end{equation}
+Therefore
+    \begin{equation}
+    e \leq 1 - \frac{1}{m^{|S|}} \leq \frac{1}{c}
+    \end{equation}
+
+\subsection{Expected number of 1 in $B_{s}$}
+We define a random variable
+    \begin{equation}
+    X_{1} = \begin{cases}
+            1   & \textrm{if h(k) = 1}
+            0   & \textrm{otherwise}
+            \end{cases}
+    \end{equation}
+and the expected value:
+    \begin{equation}
+        \expect[X_{1}] = \Sigma^{|S|}(X_{1}) =
+        \Sigma^{|S|}(\prob(h(k) = i)) =
+        \frac{\frac{1}{m}}{\alpha} = \frac{1}{|S|}
+    \end{equation}
 
 \newpage
 \section{Family of uniform hash functions}
