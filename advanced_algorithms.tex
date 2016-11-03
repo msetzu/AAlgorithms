@@ -702,7 +702,6 @@ Given the set of $k$ for which $h(k) = i$ the \emph{bad answers} are then
     1 - \prob(\textrm{good answer}) = 1 - {(1 - \frac{1}{m})}^{|S|}
     \end{equation}
 
-
 \newpage
 \section{Family of uniform hash functions}
 
@@ -719,29 +718,40 @@ where $p$ is a sufficently large prime number ($m + 1 \leq p \leq 2m$).
 
 \subsection{Equal probability}
 
-By linear algebra, \label{modulo_cycle}$a + (kp) \mod p = c \forall k \in \mathbb{N}$.
+By linear algebra,~\label{modulo_cycle}$a + (kp) \mod p = c \forall k \in \mathbb{N}$.
 If we were to cap $a + pk \mod p = c \forall k \in K, K_{N} = {k_{i}: k_{i} < N}$
 \begin{equation}
-\prob(h(x_{i}) = c_{i})) = \frac{1}{m^{2}} = \prob(h(x_{1}) = c_{1}), h(x_{2}) = c_{2}))
+\prob(h(x_{i}) = c_{i})) = \frac{1}{m^{2}} = \prob(h(x_{1}) = c_{1}), h(x_{2}) = c_{2}
 \end{equation}
 Given $x_{i}, d$, we define as $m_{i} = (a x_{i} + b)$; since $(a x_{i} + b)$
 is a \emph{linear transformation} $m_{i}$ is unique.
-It follows trivially that there are $\frac{p}{m}$ values for which $m_{i} \mod p = d)$ since $p > m$ and by \ref{modulo_cycle}.
+It follows trivially that there are~\label{p_over_m}$\frac{p}{m}$ values for which $m_{i} \mod p = d$
+since $p > m$ and by~\ref{modulo_cycle}.
 The same goes for $x_{1}, x_{2}$:
     \begin{gather}
     (a x_{1} + b) \mod p = d                                                           \\
     (a x_{2} + b) \mod p = e
     \end{gather}
-By the \href{http://en.wikipedia.org/wiki/Chinese_remainder_theorem}{Chinese reminder theorem}
-the above system has only one solution for the variable $(a, b)$ over the $(p)(p - 1)$ possible pairs, therefore $(a x_{1} + b) \mod p = d$ and $(a x_{2} + b) \mod p = e$ for $\approx \frac{p}{m}$ cases each.
+By the \href{http://en.wikipedia.org/wiki/Chinese_remainder_theorem}{Chinese
+reminder theorem} the above system has only one solution for the variable $(a, b)$
+over the $(p)(p - 1)$ possible pairs, therefore $(a x_{1} + b) \mod p = d$ and
+$(a x_{2} + b) \mod p = e$
+for $\approx \frac{p}{m}$ cases each.
 Since $d, e$ are independent
     \begin{equation}
-    ((a x_{2} + b) \mod p = d) \wedge ((a x_{2} + b) \mod p = e) \textrm{ for } \frac{p}{m}, \frac{p}{m} = \frac{p^{2}}{m^{2}}
+    ((a x_{2} + b) \mod p = d) \wedge ((a x_{2} + b) \mod p = e) \textrm{ for }
+    \frac{p}{m}, \frac{p}{m} = \frac{p^{2}}{m^{2}}
     \end{equation}
 Over all the possible choices of $(a, b)$:
     \begin{equation}
     (\prob((a x_{2} + b) \mod p = d) \and  (\prob((a x_{2} + b) \mod p = e) = \frac{\frac{p^{2}}{m^{2}}}{(p)(p - 1)}
     \end{equation}
+
+We now prove $\prob(h(x_{1} = c_{1})) = \frac{1}{m}$.
+Of all the possible $m$ buckets, one and only one is the one we look for:
+$\prob(l \mod m) = c_{1} = \frac{1}{m}$
+As we've seen by~\ref{p_over_m} at most $\frac{p}{m}$ such $l$ exist for $(a x + b) \mod p$,
+therefore $\prob(h(x_i) = c_{i}) = \frac{\frac{p}{m}}{m} \approx \frac{1}{m}$
 Which computes $\approx \frac{1}{m^{2}}$ and proves the assumption under the said approximation.
 
 
