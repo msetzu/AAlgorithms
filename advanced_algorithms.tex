@@ -25,231 +25,6 @@
 \tableofcontents
 \clearpage
 
-\section{Hogwarts}
-
-The Hogwarts School\footnote{\url{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_16/hogwarts.pdf}}
-is modeled as a graph $G=(V, E)$ where $V$ is the set of castle's rooms and $E \subseteq V \times V$
-is the set of the stairs.
-Each stair is labelled with the time of appearance and disappearance, and can be
-walked in both directions, therefore the graph is undirected.
-The goal is to find, if possible, the minimum amount of time required to go from
-the first to the last room.
-
-\subsection{Solution 1: Preprocessing-then-Dijkstra}
-
-Dijkstra is able to find the shortest path in a graph with non-negative weights
-on its edges.
-Our main idea is to create a Dijkstra compatible graph through a \textsc{normalize}
-function, then apply Dijkstra to it in order to find the shortest path.
-The core of the preprocessing is the \textsc{normalize} function which computes traversal
-times between nodes at a given time \emph{time}:
-
-\begin{algorithmic}[1]
-  \Function{normalize}{$from$, $to$, $time$}:
-    \State $t \gets \infty$
-    \If{$start[v'] \leq t < end[v']$}  \Comment{No waiting time}
-      \State $t \gets t + 1$
-    \ElsIf{$t < start[v']$}            \Comment{Waiting time}
-      \State $t \gets start[v'] + 1$
-    \Else
-      \State $t \gets \infty$          \Comment{Available time already expired}
-    \EndIf
-      \State \Return{$t$}
-    \EndFunction
-\end{algorithmic}
-
-The normalize function is then applied to a node traversal:
-
-\subsubsection{Pseudo-code}
-
-\begin{algorithmic}[1]
-  \State create vertex set $Q$ of unvisited nodes\;
-  \State create vertexes set $E'$ of edges weight\;
-  \State $time \gets 0$                   \Comment{Initial time for traversal}
-  \State $edges \gets$ \Call{stairs\_of}{0}\;      \Comment{Get incoming/outgoing edges
-   of the source node}
-  \Function{process}{$node$, $time$}
-    \If{$edge \in visited\_edges$}
-      \State \Return{}
-    \EndIf
-
-    \State $traversal\_time \gets \infty$
-    \ForAll{$neighbor \in neighbors\_of\_node$}
-      \State $traversal\_time \gets$ \Call{traversal\_time}{$node$, $neighbor$, $time$}
-      \State $E'[0][node] \gets traversal\_time$   \Comment{$E'[i][j]$ holds the
-                                                        weight/traversal}
-      \State \Comment{time for the stair between $i$ and $j$}
-
-      \ForAll{$new\_neighbor \in neighbors\_of\_neighbor$}
-        \State \Call{normalize}{$neighbor$, $new\_neighbor$, $traversal\_time$}
-      \EndFor
-    \EndFor
-    \If{\Call{dijkstra}{$V, E'$} = $\infty$}
-    	\State \Return{-1}
-    \Else
-      \State \Return{$t$}
-    \EndIf
-  \EndFunction
-\end{algorithmic}
-
-\begin{framed}
-  \noindent
-  \textbf{Computational cost}: $\Theta(n^{2})$ if the vertex set in \textsc{dijkstra} is implemented
-  as an array. $O(|E|+|V|\log |V|)$ with Fibonacci heap.
-\end{framed}
-
-\subsection{Solution 2: HogwartsDijkstra}
-
-\begin{algorithmic}[1]
-  \Function{HogwartsDijkstra}{$G$}:
-  \State create vertex set $Q$ of unvisited nodes
-  \ForAll{vertex $v \in V$}      \Comment{initialization}
-      \State $time[v] \gets \infty$  \Comment{unknown time from source to v}
-      \State add $v$ to $Q$          \Comment{all nodes initially in Q}
-  \EndFor
-  \State $time[0] \gets 0$ \Comment{time from source to source}
-  \While{$Q\ne \emptyset$}
-      \State $u \gets x \in Q$ with $\min \{time[x]\}$
-      \State remove $u$ from $Q$
-      \ForAll{neighbor $v$ of $u$}:
-          \If{$time[u] \leq appear[v]$}
-              \State $alt \gets appear[v] + 1$ \Comment{wait the appearance of
-                                                                    the stair}
-          \ElsIf{$time[u] < disappear[v]$}
-              \State $alt \gets time[u] + 1$       \Comment{use the stair}
-          \Else
-              \State $alt \gets \infty$            \Comment{the stair has
-                                                        already disappeared}
-          \EndIf
-          \If{$alt < time[v]$}
-              \State $time[v] \gets alt$           \Comment{a quicker path to
-                                                            $v$ has been found}
-          \EndIf
-      \EndFor
-  \EndWhile
-  \State \Return{$time[|N|-1]$}
-  \EndFunction
-\end{algorithmic}
-
-\begin{framed}
-  \noindent
-  \textbf{Computational cost}. See the previous section.
-\end{framed}
-
-\subsection{Solution 3: BFS-like traversal}
-
-\begin{algorithmic}[1]
-  \Function{reach}{$N$, $M$, $A[]$, $B[]$, $appear[]$, $disappear[]$}
-      \For{$i=0$ to $M-1$}
-          \State $edges\_[A[i]].push\_back(make\_pair(i, B[i]))$
-          \State $edges\_[B[i]].push\_back(make\_pair(i, A[i]))$
-      \EndFor
-      \For{$i=0$ to $N-1$}
-          \State $done\_[i] \gets false$
-          \State $distance\_[i] \gets \infty$
-      \EndFor
-      \State $reached\_[0].push\_back(0)$
-    \State $distance\_[0] \gets 0$
-    \For{$t=0$ to $MAX\_TIME$}
-      \ForAll{$v \in reached\_[t]$}
-          \If{not $done\_[v]$}
-          \ForAll{$edge \in edges\_[v]$}
-            \State $staircase \gets edge.first$
-            \State $neighbor \gets edge.second$
-            \State $time \gets \max(distance_[v], appear[staircase])+1$
-            \If{not $done\_[neighbor]$ \\ \hfill and $distance\_[v] < disappear[staircase]$ \\ \hfill and  $time < distance\_[neighbor]$}
-              \State $distance\_[neighbor] \gets time$
-              \State $reached\_[time].push\_back(neighbor)$
-            \EndIf
-          \EndFor
-        \State $done\_[v] \gets true$
-          \EndIf
-      \EndFor
-    \EndFor
-    \State \Return{$(distance\_[N-1] = \infty) ? -1 : distance\_[N-1]$}
-  \EndFunction
-\end{algorithmic}
-
-\begin{framed}
-  \noindent
-  \textbf{Computational cost}: $O(m + MAX\_TIME)$.
-\end{framed}
-
-
-\section{Paletta}
-
-Paletta ordering\footnote{\url{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_16/paletta.pdf}}
-is a peculiar ordering technique: given a 3-tuple of elements, paletta takes the
-central element as pivot and swaps the two elements right before and next to it.
-To make an example:
-$$(3, 2, 1) \xrightarrow{paletta} (1, 2, 3)$$
-We now want to develop an algorithm to order any array through paletta ordering
-with the minimal number of swaps.
-You should see as not every array can be ordered (e.g. [1, 3, 2]).
-
-\subsection{Solution 1: Split and count-inversions}
-
-We should note that the following properties hold:
-\begin{enumerate}
-    \item Every element can be a pivot, but the first and the last one, as they
-    have respectively no elements before and after them.
-    \item Every element can be swapped as many times as necessary, but only with
-    elements of the same 2-remainder (numbers in even positions can only be
-    swapped with numbers in even positions, the same holds for odd indexes).
-    More formally, if $n$ is the size of the array $A$ we want to sort,
-    $i,j \in [1, n - 2]$, $A[i]$ can be swapped with $A[j]$ if and only if $i \equiv j \pmod{2}$.
-    \item The least number of swaps does not backtrack any element.
-    Formally, let \emph{k} be the minimal number of swaps applied to an array,
-    backtracks included. By hypothesis, \emph{k} is minimal, but at least \emph{m},
-    $m > 0$ backtrack swaps have been operated, therefore we found a
-    $k' = k - m: k' < k$, a new minimal number of swaps: contradiction.
-\end{enumerate}
-
-Given item 2, we can split our array in two, even and odd numbers, and order
-them counting the swaps.
-In our example we'll use \emph{mergesort}, as it runs in $O(n\log n)$, does
-backtrack elements, and is very well-known.
-Clearly, given an array, a swap happens when an element is pushed back, pulling
-the one between its new position and the old one ahead: we can map this behaviour
-in the merge routine of mergesort: the array merged is able to push back elements
-from its right pointer to the new array, moving them back of $(m - i) + (j - m)$ positions,
-where \emph{m} is the dimension of the current two sub-arrays to merge.
-Provided that our edited version of mergesort ran successfully on both the
-even-index and odd-index, we now need to verify if by merging them we obtain an
-ordered array.
-Intuitively, the merged array will start with the first element of the even-index
-arrays, followed by the first of the odd-index array, followed by the second of
-the even-index array, and so on.
-To check for these elements is pretty trivial and can be done in linear time.
-Follows the pseudo-code for the edited version and \textsc{snake\_check} function:
-
-\begin{algorithmic}[1]
-  \Function{merge\_with\_paletta}{$left$, $right$, $k$}:
-    \State \dots                        \Comment{merge instructions}
-    \If{$right > left$}
-      \State $paletta\_count \gets paletta\_count + 1$
-      \State \dots
-      \EndIf
-    \EndFunction
-\end{algorithmic}
-
-\begin{algorithmic}[1]
-  \Function{snake\_check}{}
-    \State $even, odd \gets 0$
-    \For{;$even, odd < N;even = even + 1, odd = odd + 1$}
-      \If{$a[even] > a[odd]$}
-        \State \Return{$-1$}\;
-      \EndIf
-    \EndFor
-    \State \Return{$paletta\_count$}\;
-    \EndFunction
-\end{algorithmic}
-
-\begin{framed}
-  \noindent
-  \textbf{Computational cost}: $\Theta(n\log n)$.
-\end{framed}
-
 
 \newpage
 \section{Range updates}
@@ -268,7 +43,7 @@ Design a data structure that uses $O(n)$ space and implements each operation abo
 in $O(\log(n))$ time. Note that $query(i) = sum(i, i)$ but it helps to reason.
 [Hint to further save space: use an implicit tree such as the Fenwick tree (see wikipedia).]
 
-\subsection{Solution 1: Fenwick lazy a-b sums}
+\subsection{Solution 1: Segment tree lazy a-b sums}
 Let $T$ be a segmented binary tree over a continuous interval $I: [0, N - 1]$
 s.t.\ its leafs are the points in I, and the parent of two nodes comprises of their interval:
 $$  n' \cup n'' = n, n' \cap n'' = \emptyset   \textrm{ s.t. } n \text{ is the parent of } n', n''$$
@@ -882,5 +657,232 @@ a map in a Scala-like syntax.
     \State \Return{$C$}\;
     \EndFunction
 \end{algorithmic}
+
+\newpage
+\newpage
+\section{Hogwarts}
+
+The Hogwarts School\footnote{\url{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_16/hogwarts.pdf}}
+is modeled as a graph $G=(V, E)$ where $V$ is the set of castle's rooms and $E \subseteq V \times V$
+is the set of the stairs.
+Each stair is labelled with the time of appearance and disappearance, and can be
+walked in both directions, therefore the graph is undirected.
+The goal is to find, if possible, the minimum amount of time required to go from
+the first to the last room.
+
+\subsection{Solution 1: Preprocessing-then-Dijkstra}
+
+Dijkstra is able to find the shortest path in a graph with non-negative weights
+on its edges.
+Our main idea is to create a Dijkstra compatible graph through a \textsc{normalize}
+function, then apply Dijkstra to it in order to find the shortest path.
+The core of the preprocessing is the \textsc{normalize} function which computes traversal
+times between nodes at a given time \emph{time}:
+
+\begin{algorithmic}[1]
+  \Function{normalize}{$from$, $to$, $time$}:
+    \State $t \gets \infty$
+    \If{$start[v'] \leq t < end[v']$}  \Comment{No waiting time}
+      \State $t \gets t + 1$
+    \ElsIf{$t < start[v']$}            \Comment{Waiting time}
+      \State $t \gets start[v'] + 1$
+    \Else
+      \State $t \gets \infty$          \Comment{Available time already expired}
+    \EndIf
+      \State \Return{$t$}
+    \EndFunction
+\end{algorithmic}
+
+The normalize function is then applied to a node traversal:
+
+\subsubsection{Pseudo-code}
+
+\begin{algorithmic}[1]
+  \State create vertex set $Q$ of unvisited nodes\;
+  \State create vertexes set $E'$ of edges weight\;
+  \State $time \gets 0$                   \Comment{Initial time for traversal}
+  \State $edges \gets$ \Call{stairs\_of}{0}\;      \Comment{Get incoming/outgoing edges
+   of the source node}
+  \Function{process}{$node$, $time$}
+    \If{$edge \in visited\_edges$}
+      \State \Return{}
+    \EndIf
+
+    \State $traversal\_time \gets \infty$
+    \ForAll{$neighbor \in neighbors\_of\_node$}
+      \State $traversal\_time \gets$ \Call{traversal\_time}{$node$, $neighbor$, $time$}
+      \State $E'[0][node] \gets traversal\_time$   \Comment{$E'[i][j]$ holds the
+                                                        weight/traversal}
+      \State \Comment{time for the stair between $i$ and $j$}
+
+      \ForAll{$new\_neighbor \in neighbors\_of\_neighbor$}
+        \State \Call{normalize}{$neighbor$, $new\_neighbor$, $traversal\_time$}
+      \EndFor
+    \EndFor
+    \If{\Call{dijkstra}{$V, E'$} = $\infty$}
+    	\State \Return{-1}
+    \Else
+      \State \Return{$t$}
+    \EndIf
+  \EndFunction
+\end{algorithmic}
+
+\begin{framed}
+  \noindent
+  \textbf{Computational cost}: $\Theta(n^{2})$ if the vertex set in \textsc{dijkstra} is implemented
+  as an array. $O(|E|+|V|\log |V|)$ with Fibonacci heap.
+\end{framed}
+
+\subsection{Solution 2: HogwartsDijkstra}
+
+\begin{algorithmic}[1]
+  \Function{HogwartsDijkstra}{$G$}:
+  \State create vertex set $Q$ of unvisited nodes
+  \ForAll{vertex $v \in V$}      \Comment{initialization}
+      \State $time[v] \gets \infty$  \Comment{unknown time from source to v}
+      \State add $v$ to $Q$          \Comment{all nodes initially in Q}
+  \EndFor
+  \State $time[0] \gets 0$ \Comment{time from source to source}
+  \While{$Q\ne \emptyset$}
+      \State $u \gets x \in Q$ with $\min \{time[x]\}$
+      \State remove $u$ from $Q$
+      \ForAll{neighbor $v$ of $u$}:
+          \If{$time[u] \leq appear[v]$}
+              \State $alt \gets appear[v] + 1$ \Comment{wait the appearance of
+                                                                    the stair}
+          \ElsIf{$time[u] < disappear[v]$}
+              \State $alt \gets time[u] + 1$       \Comment{use the stair}
+          \Else
+              \State $alt \gets \infty$            \Comment{the stair has
+                                                        already disappeared}
+          \EndIf
+          \If{$alt < time[v]$}
+              \State $time[v] \gets alt$           \Comment{a quicker path to
+                                                            $v$ has been found}
+          \EndIf
+      \EndFor
+  \EndWhile
+  \State \Return{$time[|N|-1]$}
+  \EndFunction
+\end{algorithmic}
+
+\begin{framed}
+  \noindent
+  \textbf{Computational cost}. See the previous section.
+\end{framed}
+
+\subsection{Solution 3: BFS-like traversal}
+
+\begin{algorithmic}[1]
+  \Function{reach}{$N$, $M$, $A[]$, $B[]$, $appear[]$, $disappear[]$}
+      \For{$i=0$ to $M-1$}
+          \State $edges\_[A[i]].push\_back(make\_pair(i, B[i]))$
+          \State $edges\_[B[i]].push\_back(make\_pair(i, A[i]))$
+      \EndFor
+      \For{$i=0$ to $N-1$}
+          \State $done\_[i] \gets false$
+          \State $distance\_[i] \gets \infty$
+      \EndFor
+      \State $reached\_[0].push\_back(0)$
+    \State $distance\_[0] \gets 0$
+    \For{$t=0$ to $MAX\_TIME$}
+      \ForAll{$v \in reached\_[t]$}
+          \If{not $done\_[v]$}
+          \ForAll{$edge \in edges\_[v]$}
+            \State $staircase \gets edge.first$
+            \State $neighbor \gets edge.second$
+            \State $time \gets \max(distance_[v], appear[staircase])+1$
+            \If{not $done\_[neighbor]$ \\ \hfill and $distance\_[v] < disappear[staircase]$ \\ \hfill and  $time < distance\_[neighbor]$}
+              \State $distance\_[neighbor] \gets time$
+              \State $reached\_[time].push\_back(neighbor)$
+            \EndIf
+          \EndFor
+        \State $done\_[v] \gets true$
+          \EndIf
+      \EndFor
+    \EndFor
+    \State \Return{$(distance\_[N-1] = \infty) ? -1 : distance\_[N-1]$}
+  \EndFunction
+\end{algorithmic}
+
+\begin{framed}
+  \noindent
+  \textbf{Computational cost}: $O(m + MAX\_TIME)$.
+\end{framed}
+
+
+\section{Paletta}
+
+Paletta ordering\footnote{\url{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_16/paletta.pdf}}
+is a peculiar ordering technique: given a 3-tuple of elements, paletta takes the
+central element as pivot and swaps the two elements right before and next to it.
+To make an example:
+$$(3, 2, 1) \xrightarrow{paletta} (1, 2, 3)$$
+We now want to develop an algorithm to order any array through paletta ordering
+with the minimal number of swaps.
+You should see as not every array can be ordered (e.g. [1, 3, 2]).
+
+\subsection{Solution 1: Split and count-inversions}
+
+We should note that the following properties hold:
+\begin{enumerate}
+    \item Every element can be a pivot, but the first and the last one, as they
+    have respectively no elements before and after them.
+    \item Every element can be swapped as many times as necessary, but only with
+    elements of the same 2-remainder (numbers in even positions can only be
+    swapped with numbers in even positions, the same holds for odd indexes).
+    More formally, if $n$ is the size of the array $A$ we want to sort,
+    $i,j \in [1, n - 2]$, $A[i]$ can be swapped with $A[j]$ if and only if $i \equiv j \pmod{2}$.
+    \item The least number of swaps does not backtrack any element.
+    Formally, let \emph{k} be the minimal number of swaps applied to an array,
+    backtracks included. By hypothesis, \emph{k} is minimal, but at least \emph{m},
+    $m > 0$ backtrack swaps have been operated, therefore we found a
+    $k' = k - m: k' < k$, a new minimal number of swaps: contradiction.
+\end{enumerate}
+
+Given item 2, we can split our array in two, even and odd numbers, and order
+them counting the swaps.
+In our example we'll use \emph{mergesort}, as it runs in $O(n\log n)$, does
+backtrack elements, and is very well-known.
+Clearly, given an array, a swap happens when an element is pushed back, pulling
+the one between its new position and the old one ahead: we can map this behaviour
+in the merge routine of mergesort: the array merged is able to push back elements
+from its right pointer to the new array, moving them back of $(m - i) + (j - m)$ positions,
+where \emph{m} is the dimension of the current two sub-arrays to merge.
+Provided that our edited version of mergesort ran successfully on both the
+even-index and odd-index, we now need to verify if by merging them we obtain an
+ordered array.
+Intuitively, the merged array will start with the first element of the even-index
+arrays, followed by the first of the odd-index array, followed by the second of
+the even-index array, and so on.
+To check for these elements is pretty trivial and can be done in linear time.
+Follows the pseudo-code for the edited version and \textsc{snake\_check} function:
+
+\begin{algorithmic}[1]
+  \Function{merge\_with\_paletta}{$left$, $right$, $k$}:
+    \State \dots                        \Comment{merge instructions}
+    \If{$right > left$}
+      \State $paletta\_count \gets paletta\_count + 1$
+      \State \dots
+      \EndIf
+    \EndFunction
+\end{algorithmic}
+
+\begin{algorithmic}[1]
+  \Function{snake\_check}{}
+    \State $even, odd \gets 0$
+    \For{;$even, odd < N;even = even + 1, odd = odd + 1$}
+      \If{$a[even] > a[odd]$}
+        \State \Return{$-1$}\;
+      \EndIf
+    \EndFor
+    \State \Return{$paletta\_count$}\;
+    \EndFunction
+\end{algorithmic}
+
+\begin{framed}
+  \noindent
+  \textbf{Computational cost}: $\Theta(n\log n)$.
+\end{framed}
 
 \end{document}
