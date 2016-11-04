@@ -1,5 +1,7 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
+\usepackage{mathtools}             % For symbols like tilde
+\usepackage[T1]{fontenc}           % For symbols like tilde
 \usepackage{hyperref}              % For \url{...}
 \usepackage{amssymb}               % Math symbols
 \usepackage{amsmath}               % Various commands like \text{...}
@@ -489,19 +491,22 @@ Therefore
     \end{equation}
 
 \subsection{Expected number of 1 in $B_{s}$}
-We define a random variable
-    \begin{equation}
-    X_{1} = \begin{cases}
-            1   & \textrm{if h(k) = 1}
-            0   & \textrm{otherwise}
+We define a random variable $X_{k}$:
+    \begin{equation*}
+    X_{k} = \begin{cases}
+            1   & if B_{s}[k] = 1  \\
+            0   & otherwise
             \end{cases}
-    \end{equation}
-and the expected value:
+    \end{equation*}
+and one over the ones in $B_{s}$, $X$:
     \begin{equation}
-        \expect[X_{1}] = \Sigma^{|S|}(X_{1}) =
-        \Sigma^{|S|}(\prob(h(k) = i)) =
-        \frac{\frac{1}{m}}{\alpha} = \frac{1}{|S|}
-    \end{equation}
+        X = \Sigma_{k = 0}^{m - 1}(X_k)
+    \end{equation}.
+We compute the relative expected value $\expect{X}$:
+    \begin{gather*}
+    \expect{X} = X = \Sigma_{k = 0}^{m - 1}(\prob(B_{s}[k] = 1)) = \\
+    = \Sigma_{k = 0}^{m - 1}(\frac{\alpha}{m}) \leq \frac{m}{c}
+    \end{gather*}
 
 \newpage
 \section{Family of uniform hash functions}
@@ -565,7 +570,7 @@ broken arbitrarily if more than one item satisfies the latter).
 Suppose that only $k$ items can be stored, one item per memory cell, where the
 available storage is $k + O(1)$ memory cells.
 Show that the problem cannot be solved deterministically under the following rules:
-the algorithm can allocate only $O(\polylog(n))$ bits for each of the $k$ items that
+the algorithm can allocate only $O(poly\log(n))$ bits for each of the $k$ items that
 it can store (i.e. $O(\log^{c}(n))$ for any fixed costant $c$ > 0), and can read
 the next item of the stream; you, the adversarty, have access to all the stream,
 and the content of the $k$ items stored by the algorithm, and can decide what is
@@ -657,6 +662,7 @@ a map in a Scala-like syntax.
     \State \Return{$C$}\;
     \EndFunction
 \end{algorithmic}
+
 
 \newpage
 \newpage
