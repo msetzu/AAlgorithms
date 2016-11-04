@@ -1,0 +1,72 @@
+\section{Family of uniform hash functions}
+
+The notion of pairwise independence says that, for any $x_1 \neq x_2, c_1, c_2
+\in \mathbb{Z}_p$, we have that
+\begin{equation}
+  \label{equation:pairwise-independence}
+  \prob(h(x_1)= c_1, h(x_2) = c_2) = \prob(h(x_1) = c_1) \times \prob(h(x_2) = c_2)
+\end{equation}
+In other words, the joint probability is the product of the two individual probabilities.
+Show that the family of hash functions $\mathcal{H} = \{h_{a,b}(x) = ((ax + b) \bmod p) \bmod m :
+a \in \mathbb{Z}^*_p,
+b \in \mathbb{Z}_p \}$ is \emph{pairwise independent}
+where $p$ is a sufficently large prime number ($m + 1 \leq p \leq 2m$).
+
+\subsection{First proof}
+
+By linear algebra,~\label{modulo_cycle}$a + (kp) \bmod p = c \forall k \in \mathbb{N}$.
+If we were to cap $a + pk \bmod p = c \forall k \in K, K_{N} = {k_{i}: k_{i} < N}$
+\begin{equation*}
+  \prob(h(x_{i}) = c_{i})) = \frac{1}{m^{2}} = \prob(h(x_{1}) = c_{1}), h(x_{2}) = c_{2}
+\end{equation*}
+Given $x_{i}, d$, we define as $m_{i} = (a x_{i} + b)$; since $(a x_{i} + b)$
+is a \emph{linear transformation} $m_{i}$ is unique.
+It follows trivially that there are~\label{p_over_m}$\frac{p}{m}$ values for which $m_{i} \bmod p = d$
+since $p > m$ and by~\ref{modulo_cycle}.
+The same goes for $x_{1}, x_{2}$:
+\begin{gather*}
+  (a x_{1} + b) \bmod p = d \\
+  (a x_{2} + b) \bmod p = e
+\end{gather*}
+By the \href{http://en.wikipedia.org/wiki/Chinese_remainder_theorem}{Chinese
+reminder theorem} the above system has only one solution for the variable $(a, b)$
+over the $(p)(p - 1)$ possible pairs, therefore $(a x_{1} + b) \bmod p = d$ and
+$(a x_{2} + b) \bmod p = e$
+for $\approx \frac{p}{m}$ cases each.
+Since $d, e$ are independent
+\begin{equation*}
+  ((a x_{2} + b) \bmod p = d) \wedge ((a x_{2} + b) \bmod p = e) \textrm{ for }
+  \frac{p}{m}, \frac{p}{m} = \frac{p^{2}}{m^{2}}
+\end{equation*}
+Over all the possible choices of $(a, b)$:
+\begin{equation*}
+  \prob((a x_{2} + b) \bmod p = d \wedge  ((a x_{2} + b) \bmod p = e) = \frac{\frac{p^{2}}{m^{2}}}{(p)(p - 1)}
+\end{equation*}
+
+We now prove $\prob(h(x_{1}) = c_{1}) = \frac{1}{m}$.
+Of all the possible $m$ buckets, one and only one is the one we look for:
+$\prob(l \mod m) = c_{1} = \frac{1}{m}$
+As we've seen by~\ref{p_over_m} at most $\frac{p}{m}$ such $l$ exist for $(a x + b) \mod p$,
+therefore $\prob(h(x_i) = c_{i}) = \frac{\frac{p}{m}}{m} \approx \frac{1}{m}$
+Which computes $\approx \frac{1}{m^{2}}$ and proves the assumption under the said approximation.
+
+\subsection{Second proof}
+
+\begin{proof}
+The right-hand side of \eqref{equation:pairwise-independence} is equal to $\frac{1}{m^2}$ by definition of universal hash function. We have to show that the left-hand side is also equal to  $\frac{1}{m^2}$.
+
+Given a hash function $h_{a,b} \in \mathcal{H}$, and two distinct inputs $x_1, x_2 \in \mathbb{N}$, let:
+\begin{align*}
+  r = (a x_1 + b) \bmod p\\
+  s = (a x_2 + b) \bmod p
+\end{align*}
+Notice that $r \ne s$ because $r - s \equiv a(x_1-x_2) \pmod p $,  both $a$ and $x_1-x_2$ are nonzero modulo a prime number and so their product is nonzero.
+
+Since there are a total of $p(p-1)$ pairs of $(r, s)$ such that $r \ne s$ ($p^2$ choices subtracted the number of pairs where $r=s$), there is a one-to-one correspondence between pairs $(a, b)\in \mathbb{Z}_p^*\times\mathbb{Z}_p$ and pairs $(r, s)$. Therefore:
+$$\prob_{h_{a,b}\in\mathcal{H}}(h(x_1)= c_1, h(x_2) = c_2) = \prob_{r\ne s\in\mathbb{Z}_p^2}(r \bmod m = c_1, s \bmod m = c_2)$$
+
+There are at most $\lfloor p / m \rfloor $ values of $r$ that satisfy $r \bmod m=c_1$, and the same goes for $c_2$ and $s$. Hence, there are about $\lfloor p / m \rfloor^2$ choices for the pair $(r, s) \in \mathbb{Z}_p^2$ that satisfy $r \bmod m = c_1 \wedge s \bmod m = c_2$. Dividing the favorable cases with the all possible cases:
+$$\frac{\lfloor p / m \rfloor^2}{p(p-1)}\le\prob(r \bmod m = c_1, s \bmod m = c_2)\le \frac{(\lfloor p / m \rfloor + 1)^2}{p(p-1)}$$
+Thus, $\prob(h(x_1)= c_1, h(x_2) = c_2)\approx \frac{1}{m^2}$.
+
+\end{proof}
