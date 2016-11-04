@@ -11,8 +11,11 @@
 \usepackage{framed}                % To frame the computational cost
 \usepackage{qtree}                 % Draw simple binary trees
 \usepackage{amsthm}                % \proof environment
-\newcommand*{\expect}[1]{\mathsf{E}\left[{#1}\right]}  % Define statistical expected value
-\newcommand*{\prob}{\mathsf{P}}    % Define statistical probability
+\newcommand*{\expect}[1]{\mathsf{E}\left[{#1}\right]}   % Define statistical expected value
+\newcommand*{\prob}{\mathsf{P}}                         % Define statistical probability
+
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}%            % Define abs-like syntax
+\DeclarePairedDelimiter\norm{\lVert}{\rVert}%
 
 \title{Advanced Algorithms Problems and Solutions}
 \author{Mattia Setzu \and Giorgio Vinciguerra}
@@ -686,14 +689,41 @@ We trivially have some changes over $X_{ji}$ and $\tilde{F}[i]$:
     \end{gather*}
 \label{X_ji}\paragraph{$X_{ji}$} can vary as complementary increments $(+v_i, +v_j, +v_k, -v_k, -v_j, -v_i)$
 can make it $\leq 0$ without necessarily being updates on $i$.
+In order to have a minimum error estimate we'll pick the \emph{median} value of $X_{ji}$.
 \label{f_tilde}~\paragraph{$\tilde{F}[i] = F[i] + X_{ji}$} by the above assertion the counter $\tilde{F}[i]$ could have no garbage, or negative
 garbage according to the other increments.
 Therefore by choosing the minimum $\tilde{F}[i]$ over the $\log(\frac{1}{\delta})$ we
 could actually pick the most perturbed result (think of a collision with the
 biggest negative increment over one row).
-The last step is the probability proof: $\prob{\tilde{F}[i] > F[i] + \epsilon ||F||}$.
-Since by~\ref{X_ji} $X_{ji}$ can be both null or negative our assumption is wrong:
 
+\label{probability}The last step is the probability proof: $\prob{\tilde{F}[i] > F[i] + \epsilon \norm{F}}$.
+Since by~\ref{X_ji} $X_{ji}$ can be either positive or negative we pick the \emph{median}
+value $med$ over the minimum $m$ and maximum $M$.
+We are then able to split our error analysis in two of equivalent size $\frac{r}{2}$:
+\begin{gather*}
+\prob(\tilde{F}[i] \in F[i] + \epsilon \norm{F}) = \\
+\prob(\tilde{F}[i] \geq F[i] - \abs{\epsilon} \norm{F} \wedge \tilde{F}[i] \leq F[i] + \abs{\epsilon} \norm{F}) = \\
+\prob(\tilde{F}[i] \geq F[i] - \abs{\epsilon} \norm{F}) \prob(\tilde{F}[i] \leq F[i] + \abs{\epsilon} \norm{F})
+\end{gather*}
+Let us define $p_0 = \prob(\tilde{F}[i] \geq F[i] - \abs{\epsilon} \norm{F})$ and
+$p_1 = \prob(\tilde{F}[i] \leq F[i] + \abs{\epsilon} \norm{F})$.
+We can report the analysis seen in class adjusted for the number of rows $\frac{r}{2}$
+
+\begin{align*}
+p_0 = \prod^{\frac{r}{2}}(\prob(|Xji| \geq - \abs{\epsilon} \norm{F})) = \\
+    = - \frac{1}{2^{\frac{r}{2}}} = - \delta^{\frac{1}{2}}
+\end{align*}
+
+Now for $p_1$:
+
+\begin{align*}
+    p_1 = \prob(\tilde{F}[i] \leq F[i] + \abs{\epsilon} \norm{F}) = \\
+    1 - \prob(\tilde{F}[i] \geq F[i] + \abs{\epsilon} \norm{F}) =
+    = 1 - \frac{1}{2^{\frac{r}{2}}} = 1 - \delta^{\frac{1}{2}}
+\end{align*}
+
+Giving us a combined probability of $p = p_0 p_1 =
+(- \delta^{\frac{1}{2}}) (1 - \delta^{\frac{1}{2}}) = -\sqrt{\delta} + \delta$.
 
 \newpage
 \section{Count-min sketch: range queries}
@@ -702,7 +732,7 @@ Show and analyze the application of count-min sketch to range queries $(i, j)$ f
 computing $\Sigma_{jk=i}^{k} F[k]$.\\
 Hint: reduce the latter query to the estimate of just $t \leq 2 \log(n)$ counters
 $c_1, c_2, \dots, c_t$.
-Note that the probability at most $\delta$ of error (i.e. that $tl = 1 c l > jk = i F[k] + 2 \log(n) ||F||)$,
+Note that the probability at most $\delta$ of error (i.e.\ that $tl = 1 c l > jk = i F[k] + 2 \log(n) \norm{F})$,
 it does not suffices to say that it is at most $\delta$ the probability of error
 of each counter $c_l$: while each counter is still the actual wanted value plus
 the residual as before, it is better to consider the sum $V$ of these $t$ wanted
