@@ -1,0 +1,140 @@
+\section{Range updates}
+
+Consider an array \emph{C} of n integers, initially all equal to zero.
+We want to support the following operations:
+\begin{itemize}
+    \item \textbf{update(i, j, c):} where $0 \leq i \leq j \leq n - 1$ and $c$ is
+    an integer: it changes $C$ such that $C[k] = C[k] + c$ for every $i \leq k \leq j$.
+    \item \textbf{query(i)} where $0 \leq i \leq n - 1$: it returns the value of $C[i]$.
+    \item \textbf{sum(i,j)} where $0 \leq i \leq j \leq n - 1$: it returns
+                    $\Sigma_{k = 1}^{j}(C[k])$.
+\end{itemize}
+
+Design a data structure that uses $O(n)$ space and implements each operation above
+in $O(\log(n))$ time. Note that $query(i) = sum(i, i)$ but it helps to reason.
+[Hint to further save space: use an implicit tree such as the Fenwick tree (see wikipedia).]
+
+\subsection{Solution 1: Segment tree lazy a-b sums}
+Let $T$ be a segmented binary tree over a continuous interval $I: [0, N - 1]$
+s.t.\ its leafs are the points in I, and the parent of two nodes comprises of their interval:
+$$  n' \cup n'' = n, n' \cap n'' = \emptyset   \textrm{ s.t. } n \text{ is the parent of } n', n''$$
+
+$T$ will keep track of the prefix sums for every interval.
+We define a function
+\begin{equation}
+    s': [0, n - 1] \to \mathbb{N}
+\end{equation}
+that given a node in $T$ returns the value associated with $I$, namely the
+cumulative sum of that interval.
+
+In order to reduce the computational cost, we introduce a lazy algorithm
+that doesn't propagate sums over $T$ as they are streamed in the input,
+which means $s'(i)$ might not be accurate at a given time $t$ for any of the
+requested operation.
+
+We'll instead either compute over $T$ or update $T$ as necessary.
+Let us define a function to do so:
+\begin{equation}
+    l: \mathbb{N} \to (\mathbb{N} \cup \{\epsilon\}, \mathbb{N})
+\end{equation}
+to keep track of our lazy sums:
+\begin{equation}
+    s(n) = \begin{cases}
+            \epsilon, \_            &   \textrm{if no lazy prefix sum is in that interval} \\
+            k, m                    &   \textrm{if a lazy sum of k is to be propagated to m}\\
+            \end{cases}
+\end{equation}
+The \textsc{query} function is then trivial:
+
+\begin{algorithmic}[1]
+    \Function{query}{$I$, $i$, $sum$}:
+    \If{$I.size = 1$}                       \Comment{Return found value}
+      \State \Return $I.sum$
+    \EndIf
+    \If{lazy(I), $i \in I.left, i \notin I.right$}     \Comment{Lazy on left child}
+      \State $lazy(I) \gets False$
+      \State \Call{query}{$I.left$, $i$, $sum + I.sum$}
+    \EndIf
+    \If{lazy(I), $i \in I.right, i \notin I.left$} \Comment{Lazy on right child}
+      \State $lazy(I) \gets False$
+      \State \Call{query}{$I.right$, $i$, $sum + I.sum$}
+    \EndIf
+    \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on both}
+      \State $lazy(I) \gets False$
+      \State \Call{query}{$I.right$, $i$, $j$, $sum + I.sum$} +
+            \Call{query}{$I.left$, $i$, $j$, $sum + I.sum$}
+    \EndIf
+    \If{!lazy(I), $i \in I.left$}             \Comment{Not lazy on left child}
+      \State \Call{query}{$I.left$, $i$, $sum$}
+    \EndIf
+    \If{!lazy(I), $i \in I.right$}        \Comment{Not lazy on right child}
+      \State \Call{query}{$I.right$, $i$, $sum$}
+    \EndIf
+    \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy both}
+      \State \Call{sum}{$I.right$, $i$, $sum$}
+    \EndIf
+    \EndFunction
+\end{algorithmic}
+
+\begin{algorithmic}[1]
+    \Function{sum}{$I$, $i$, $j$, $sum$}:
+    \If{$I.size = 1$}                                   \Comment{Return}
+      \State \Return{$I.sum + sum$}\;
+    \EndIf
+    \If{lazy(I), $i \in I.left, i \notin I.right$}     \Comment{Lazy on left}
+      \State $lazy(I) \gets False$
+      \State \Call{sum}{$I.left$, $i$, $j$, $sum + I.sum$}
+    \EndIf
+    \If{lazy(I), $i \in I.right, i \notin I.left$} \Comment{Lazy on right}
+      \State $lazy(I) \gets False$
+      \State \Call{sum}{$I.right$, $i$, $j$, $sum + I.sum$}
+    \EndIf
+    \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on both}
+      \State $lazy(I) \gets False$
+      \State \Call{sum}{$I.right$, $i$, $j$, $sum + I.sum$} +
+                \Call{sum}{$I.left$, $i$, $j$, $sum + I.sum$}
+    \EndIf
+    \If{!lazy(I), $i \in I.left$}                        \Comment{Not lazy on both}
+      \State \Call{sum}{$I.left$, $i$, $sum$}
+    \EndIf
+    \If{!lazy(I), $i \in I.right$}                       \Comment{Not lazy on both}
+      \State \Call{sum}{$I.right$, $i$, $sum$}
+    \EndIf
+    \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy on both}
+      \State \Call{sum}{$I.right$, $i$, $sum$}
+    \EndIf
+    \EndFunction
+\end{algorithmic}
+
+\begin{algorithmic}[1]
+    \Function{update}{$I$, $i$, $j$, $k$}:
+    \If{$I.size = 1$}                                   \Comment{Return}
+        \State \Return $I.val \gets I.val + update$\;
+        \State \Return $I.val += update$\;
+    \EndIf
+    \If{lazy(I), $i \in I.left, i \notin I.right$}     \Comment{Lazy on left}
+        \State $lazy(I.left) \gets True$
+        \State $I.left.val \gets k$
+    \EndIf
+    \If{lazy(I), $i \in I.right, i \notin I.left$} \Comment{Lazy on right}
+        \State $lazy(I.right) \gets True$
+        \State $I.right.val \gets k$
+    \EndIf
+    \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on both}
+        \State $lazy(I) \gets True$
+        \State $I.val \gets k$
+    \EndIf
+    \If{!lazy(I), $i \in I.left$}                        \Comment{Not lazy}
+        \State \Call{update}{$I.left$, $i$, $update$}
+        \State update($I.left$, $i$, $update$)
+    \EndIf
+    \If{!lazy(I), $i \in I.right$}                       \Comment{Not lazy}
+        \State \Call{update}{$I.right$, $i$, $update$}
+        \State update($I.right$, $i$, $update$)
+    \EndIf
+    \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy}
+        \State \Call{update}{$I.right$, $i$, $update$}
+        \State update($I.right$, $i$, $update$)
+    \EndIf
+    \EndFunction
+\end{algorithmic}

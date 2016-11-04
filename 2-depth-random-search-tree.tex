@@ -1,0 +1,165 @@
+\section{Depth of a node in a random search tree}
+
+A random search tree for a set S can be defined as follows: if $S$ is empty, then
+the null tree is a random search tree; otherwise, choose uniformly at random a key
+$k$ as root, and the random search trees on $L = \{x \in S : x < k\}$ and $R = \{x \in S :
+x > k\}$ become, respectively, the left and right subtree of the root $k$.
+Consider the randomized QuickSort discussed in class and analyzed with indicator
+variables \href{http://didawiki.cli.di.unipi.it/lib/exe/fetch.php/magistraleinformatica/alg2/algo2_13/randqs.pdf}{CLRS 7.3},
+and observe that the random selection of the pivots follows the above process,
+with indicator variables, prove that:
+\begin{enumerate}
+  \item the expected depth of a node (i.e.\ the random variable representing the distance of the node from the root) is nearly $2 \ln n$;
+  \item the expected size of its subtree is nearly $2 \ln n$ too, observing that it is a simple variation of the previous analysis;
+  \item the probability that the expected depth of a node exceeds $2\ln n$ is small for any given constant $c > 1$.
+\end{enumerate}
+\href{https://en.wikipedia.org/wiki/Chernoff_bound}{Chernoff’s bounds}.
+
+\subsection{Recursive balanced proof}
+
+Let $n$ be the number of nodes in the input list $l$, $h = \log_2(n)$ the height
+of a balanced tree over $l$, $T(p)$ the tree built over the permutation $p$ of pivots,
+$d(m)$ be the positional distance of a value $m$ of a partition from the median
+value of the said partition.
+Then the following holds:
+
+    \begin{itemize}
+    \item $height(T) = h \iff |T.left| = |T.right| \pm 1$ Trivially, let $r$ be
+    the root  of a 3-nodes partition: then, if the partition is unbalanced, the
+    lesser one will comprise of 0 nodes, while the greater one of 2, which implies
+    that $height(T.right) == 2$.
+    \label{k_distance} \item P = pivot,
+    $d(m) = \pm k \implies height(T.left) = height(T.right) \pm k$.
+    Recursively from the previous statement, a partition unbalanced of one element
+    generates subtrees whose levels differ on a factor of $1$.
+    By iterating recursively, their subtrees, if unbalanced by $1$, will yield
+    one more level difference.
+    Over $k$ unbalanced pivots on a single subtree, at most $k$ levels will be
+    added to $h$.
+    \item By the previous statement, it follows that $\nexists T, T': height(T) >= height(T')$,
+    T balanced, T' unbalanced.
+    As stated, let $T', T$ be the unbalanced/balanced tree respectively; let us
+    cheat with $T$ and switch the root pivot with the first element in its subtree.
+    Now, let us prove by contradiction that $T$ can't stay balanced and that its
+    height will increase.
+    By shifting the tree to the left we have deprived $T.right$ of either 0 levels
+    (in case $T.right$ is able to switch every pivot in its tree with its right
+    subtree root, ending with the rightmost leaf in its subtree) or 1, in case no
+    rightmost leaf is present.
+    Therefore $height(T) <= height(T')$.
+    \item The completely unbalanced tree is the tree with the most levels.
+    By taking partitions of size 0 we costantly force, at each level, one subtree
+    to disappear.
+    Therefore, its level(s) has to be necessarly transferred to its brother.
+    We then have exactly one node per level, therefore $n$ levels.
+    \end{itemize}
+
+\subparagraph{Behaviour on random permutations}
+Now let us analyse how the tree depth varies according to random pivot selection.
+We start by applying the~\ref{k_distance}k-distance to a tree $T$ with $n = 3$
+nodes.
+Trivially, $height(T)$ with balanced tree is equal to two.
+Now, let us pick either the lowest or the greatest pivot possible: the tree
+is unbalanced towards either the left or the right, but $height(T) = 2$ in
+both cases.
+As the reader can see from~\ref{k_distance}, the distance works in absolute
+value; it is then clear how, at every permutation for a pivot $p$, out of the
+$n$, there are $2$ that generate a tree of the same height:
+$p = d(P) + k, p = d(P) - k$.
+Given that at every iteration a node $x$ in a completely unbalanced tree $T$'
+has a probability of $\frac{1}{n - i}$, we can define the probability of $x$
+being a pivot at level $l$ as:
+    \begin{equation}
+    P(x_{k}) = \frac{1}{n - l}
+    \end{equation}
+Now, in order for $x$ not to be chosen as pivot in the previous $l - 1$
+levels we have:
+    \begin{equation}
+    P(x_{k}) = \Sigma_{k = 1}^{l - 1} (\frac{1}{n - l + 1})
+    \end{equation}
+Given the height of $T$, the (harmonic) partial series converges to
+$\ln{(n)} + 1$.
+Let us now add a root $r$ s.t. $T'.right = T, T'.left = T$.
+We now have to consider the mirror case $\ln{(n')} + \ln{(n')}$,
+given by the previous $n' = n/2$ in the logarithm, since the number of nodes
+doubled, the $+1$ removed for both, since now neither of $T'.left, T.right$
+is the root, and a $+1$ added since a new level has been added.
+
+\subsection{Upper bound}
+
+By hypothesis,
+    \begin{equation}
+    E[d(x) > 2 c \ln(n)] <<< 1
+    \end{equation}
+By definition the ancestor of a node $i$ are indipendent random variables,
+and we can apply the \href{https://en.wikipedia.org/wiki/Chernoff_bound}{Chernoff
+bounds} over the set ${x: d(x) >= 2 \ln(n)}$ of random variables determining
+the expected distance of nodes.
+\begin{equation*}
+    \prob[X \geq c \expect[X]] < e^{-c \ln(\frac{c}{e})\expect[X]}
+\end{equation*}
+Let us consider $X = 1 \forall i == \ln(n)$, the expected depth of $\ln(n)$,
+then
+\begin{equation*}
+    \prob[X \geq c \ln(n)] < e^{-c \ln(\frac{c}{e})\ln(n)}
+\end{equation*}
+
+\subsection{Proof with indicator variable}
+
+\textbf{Prove that the expected depth of a node is nearly $2 \ln n$.}
+
+\begin{proof}
+  Let $z_m$ the $m$th smallest element in $S$ and $$X_{ij}=
+  \left\{
+    \begin{array}{ll}
+      1 & \mbox{if $z_j$ is an ancestor of $z_i$ in the random search tree} \\
+      0 & \mbox{otherwise}
+    \end{array}
+  \right.$$
+  The depth of the node $i$ in the tree is given by the number of its ancestors:
+  \begin{equation}
+    X=\sum_{\substack{j=1 \\ j\ne i}}^n X_{ij}
+    \label{equation:node-depth}
+  \end{equation}
+
+  Note that the depth of a node is also equal to the number of comparison it's
+  involved in (in other words, the number of times it became the left or the
+  right child of a randomly chosen pivot).
+
+  Once a pivot $k$ is chosen from $S$, $S$ is partitioned in two subsets $L$ and
+  $R$. The elements in the set $L$ will not be compared with the elements in $R$
+  at any subsequent time. The event $E_1=$ $z_j$ is an ancestor of $z_i$ in the
+  random search tree occurs if $z_j$ and $z_i$ belongs to the same partition
+  \emph{and} $z_j$ was chosen as pivot before $z_i$. The probability that $E_1$
+  occurs, since it is the intersection of two events, can be upper bounded by:
+  $$\text{Pr}\{ z_j \text{ was chosen as pivot before } z_i
+  \}=\frac{1}{\text{size of the partition}}\leq\frac{1}{|j-i|+1}$$ because
+  pivots are chosen randomly and independently, and because the partition that
+  contains both $z_j$ and $z_i$ must contain \emph{at least} the $|j-i|+1$
+  numbers between $z_j$ and $z_i$.
+
+  Taking expectations of both sides of~\eqref{equation:node-depth}, and then
+  using linearity of expectation, we have:
+  \begin{align*}
+    E[X] & = \sum_{\substack{j=1\\ j\ne i}}^n E[X_{ij}] \\
+    & = \sum_{\substack{j=1\\ j\ne i}}^n \text{Pr}\{ z_j \text{ is an ancestor
+      of } z_i \text{ in the random search tree} \} \\
+    & \le \sum_{\substack{j=1\\ j\ne i}}^n \frac{1}{|j-i|} \\
+    & = \sum_{j=1}^{i-1} \frac{1}{i-j} + \sum_{j=i+1}^{n} \frac{1}{j-i}
+  \end{align*}
+  With the change of variables $l=i-j$ and $m=j-i$:
+  \begin{equation*}
+    = \sum_{l=1}^{i-1} \frac{1}{l} + \sum_{m=1}^{n} \frac{1}{m} \approx 2\ln n
+  \end{equation*}
+
+\end{proof}
+
+\textbf{Prove that the expected size of its subtree is nearly $2 \ln n$ too,
+observing that it is a simple variation of the previous analysis.}
+
+\begin{proof}
+  The size of the subtree of a randomly chosen pivot of $z_j\in S$ is given by
+  the number of it's descendants. Since~\eqref{equation:node-depth} is the
+  number of ancestors of a node $z_i$, we can find the number of descendants of
+  $z_j$ by changing the summation from $j=1,\dotsc,n$ to $i=1,\dotsc,n$.
+\end{proof}

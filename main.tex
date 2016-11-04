@@ -1,0 +1,46 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools}             % For symbols like tilde
+\usepackage[T1]{fontenc}           % For symbols like tilde
+\usepackage{hyperref}              % For \url{...}
+\usepackage{amssymb}               % Math symbols
+\usepackage{amsmath}               % Various commands like \text{...}
+\usepackage{mathtools}             % Maths
+\usepackage[noend]{algpseudocode}  % Pseudocode printer
+\usepackage{listings}              % Source code printer
+\usepackage{framed}                % To frame the computational cost
+\usepackage{qtree}                 % Draw simple binary trees
+\usepackage{amsthm}                % \proof environment
+\usepackage{titlesec}              % Customize sections
+
+\newcommand*{\expect}[1]{\mathsf{E}\left[{#1}\right]} % Define statistical expected value
+\newcommand*{\prob}{\mathsf{P}}                       % Define statistical probability
+\newcommand{\sectionbreak}{\clearpage}                % Clear page before each section
+
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}           % Define abs-like syntax
+\DeclarePairedDelimiter\norm{\lVert}{\rVert}
+
+\lstset{numbers=left} % Print line numbers in \begin{lstlisting}...
+
+\title{Advanced Algorithms Problems and Solutions}
+\author{Mattia Setzu \and Giorgio Vinciguerra}
+\date{October 2016}
+
+\begin{document}
+
+  \maketitle
+  \tableofcontents
+
+  \include{1-range-updates}
+  \include{2-depth-random-search-tree}
+  \include{3-karp-rabin-strings}
+  \include{4-hashing-sets}
+  \include{5-uniform-hash-functions}
+  \include{6-deterministic-data-streaming}
+  \include{7-most-frequent-item-stream}
+  \include{8-count-min-sketch-extension}
+  \include{9-count-min-sketch-range-queries}
+  \include{appendix}
+
+\end{document}

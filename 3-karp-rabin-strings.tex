@@ -1,0 +1,89 @@
+\section{Karp-Rabin fingerprinting on strings}
+
+Given a string $S: |S| = n$, and two positions $0 \leq i < j \leq (n - 1)$,
+the longest common extension $lceS(i, j)$ is the length of the maximal run of matching
+characters from those positions, namely: if $S[i] 6= S[j]$ then $lceS(i, j) = 0$;
+otherwise, $lceS(i, j) = \max{l \geq 1 : S[i ... i + l - 1] = S[j ... j + i - 1]}$.
+For example, if S = abracadabra, then $lceS(1, 2) = 0$, $lceS(0, 3) = 1$, and
+$lceS(0, 7) = 4$.
+Given S in advance for preprocessing, build a data structure for S based
+on the Karp-Rabin fingerprinting, in $O(n \ln(n)$) time, so that it supports subsequent
+    \begin{itemize}
+    \item $lceS(i, j)$: it computes the longest common extension at positions i
+    \item $equals (i, j, c)$: it checks if $S[i ... i + ` - 1] = S[j ... j + ` - 1]$ in constant time.
+    \end{itemize}
+Analyze the cost and the error probability.
+The space occupied by the data structure can be $O(n \log(n))$ but it is possible
+to use $O(n)$ space.
+[Note: in this exercise, a onetime preprocessing is performed, and then many online
+queries are to be answered on the fly.]
+
+\subsection{Solution 1: Cumulative shift}
+\subsubsection{Construction}
+
+In order to save computational cycles on checks over ranges we use a similar structure
+to the one in the range updates: we compute the hashing on the first character in $O(1)$
+time, then roll the hash through the $n - 1$ remaining characters through $n O(1)$
+operations.
+We call $H$ this array; we also denote $h_k$ as the function $c a^{i}$ computating
+the Rabin-Karph hash of a string $s$.
+The reader shall now see that $\exists h^{-1}(s)$: that is, $h$ is invertible in $O(1)$.
+The entries $h[i] = \sum_{i \in [0, n - 1]}(h(i))$ have cumulative hash and the following
+properties hold:
+    \begin{itemize}
+    \item $h[s[i]] = (h[i] - h[i - 1]) / a^{-1}, a^{-1} = a^{1}$
+    \item $h[i..j] - h[k..l] = (h[l] - h[k - 1]) / a^{-1} -
+            (h[j] - h[i - 1]) / a^{-1}, a^{-1} = \textrm{modular inverse}$
+    \end{itemize}
+
+\subsubsection{equals(i, j, l)}
+
+\textsc{equals} works on cumulative hashes, subtracting them and scaling them
+accordingly, as our $rabin$ function multiplies by an $a^{i}$ costant.
+
+\begin{algorithmic}[1]
+  \Function{equals}{$i$, $j$, $length$}:
+    \State $h_i = h[i + length] - h[i - 1]$\;
+    \State $h_j = h[j + length] - h[j - 1]$\;
+
+    \State $h^{i} = h_i / inv(a, i, l)$\;
+    \State $h^{j} = h_j / inv(a, j, l)$\;
+
+    \Return{$h^{i} - h^{j} == 0$}\;
+    \EndFunction
+
+    \Function{inv}{$h$, $k$, $l$}:
+    \Return $h^{k - l}$
+    \EndFunction
+\end{algorithmic}
+
+\subsubsection{lce(i, j)}
+
+\textsc{lce} works on cumulative hashes, checks the equality on the middle element
+of the strings and runs recursively on the half with different hashing.
+We define \textsc{lce} as an auxiliary function
+
+\begin{algorithmic}[1]
+  \Function{lce}{$i$, $j$, $l$}:
+    \State eq = \Call{equals}{$i$, $j$}\;
+
+    \If{eq}
+        \Return{$l$}
+    \ElsIf{$\neg$ \Call{equals}{$(j - i) / 2$, $(n - j) / 2$, $l$}}
+        \Return{\Call{equals}{$(j - i) / 2$, $(n - j) / 2$}}                            % First half
+        \Else $(j - i) / 2 + $ \Return{\Call{equals}{$(j - i) / 2$, $(n - j) / 2$}}     % Second half
+    \EndIf
+
+    \State $h_i = h[i + length] - h[i - 1]$\;
+    \State $h_j = h[j + length] - h[j - 1]$\;
+
+    \State $h^{i} = h_i / inv(a, i, l)$\;
+    \State $h^{j} = h_j / inv(a, j, l)$\;
+
+    \Return{$h^{i} - h^{j} == 0$}\;
+    \EndFunction
+
+    \Function{inv}{$h$, $k$, $l$}:
+    \Return $h^{k - l}$
+    \EndFunction
+\end{algorithmic}

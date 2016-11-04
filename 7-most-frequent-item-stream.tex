@@ -1,0 +1,80 @@
+\section{Special case of most frequent item in the stream}
+
+Suppose to have a stream of $n$ items, so that one of them occurs $> \frac{n}{2}$
+times in the stream.
+Also, the main memory is limited to keeping just two items and their counters, plus
+the knowledge of the value of $n$ beforehand.
+Show how to find deterministically the most frequent item in this scenario.
+\\ Hint: since the problem cannot be solved deterministically if the most
+frequent item occurs $\leq \frac{n}{2}$ times, the fact that the frequency is
+$> \frac{n}{2}$ should be exploited.
+
+\subsection{Solution 1: Up \& Down counter}
+We'll use the notation of the previous section.
+Before illustrating our solution we prove that the following hold:
+    \begin{itemize}
+    \label{frequence_dominance}\item \textbf{Given the $j^{1}$ element, $C(j^{1}) > C(j^{i}) \forall i \in S$.}
+    \item Following the previous, $C(j^{i}) < C(j^{i}),  i > 1$ element.
+    \item \textbf{There are at most $\frac{n}{2} - 1$ elements in S:} given that $j^{1}$
+    appears at least $\frac{n}{2} + 1$ times, in the best case scenario every
+    other $\frac{n}{2} - 1$ element is different, giving $\frac{n}{2} - 1$
+    different elements.
+    \label{sub-stream_dominance}~\item \textbf{$j^{1}$ has sub-stream dominance:}
+    $\exists S' \subseteq S: j^{1} \textrm{ is the most frequent item} \in S'$:
+    trivially, since it is the most frequent element, $S'$ is always a sub-stream
+    dominant sub-stream.
+    \end{itemize}
+
+\paragraph{Recursive sub-streams} It is trivial to show that if we were to have
+$\frac{n}{2}$ counters, $\Sigma^{\frac{n}{2}}_{i = 0, i \neq 1}(C(j^{i}) < C(j^{1})$
+by~\ref{frequence_dominance}.
+Though trivial, by combining it with~\ref{sub-stream_dominance} we can assert that
+given $S' = S[0, \frac{n}{2}], S'' = S[\frac{n}{2}, n], k = \textrm{ number of elements } \in S$
+    \begin{itemize}
+    \item \textbf{$j^{1}$} is the sub-stream dominant element in either $S', S''$:
+    by contradiction, let us assume that is false. Then
+    $\exists j_{o} \neq j^{1}: C(j_{o})$ in $S' > C(j^{1}$, $\exists j_{o}: C(j_{o})$ in $S'' > C(j^{1}$;
+    given that $S'S'' = S$, that would make $C(j_{o}) = C(j^{1})$: contradiction.
+    \item More generally, given two sub-streams $S', S''$, the sub-stream
+    dominant element of $S'S''$ is one of the sub-stream dominants in
+    $S'$ or $S''$ and its frequencies are defined by
+        \begin{equation}
+        e - k - 1\textrm{ in } S', \frac{n}{2} + 1 - (e - k - 1) \textrm{ in } S''
+        \end{equation}
+    where $e$ is an arbitrary number of appearances of $j^{2}: e < \frac{n}{2} + 1$
+    The reader will see as the $+1$ in the right side guarantees the
+    sub-stream dominant to be maximum.
+    The sides can be swapped without hurting generality.
+    \end{itemize}
+
+In order to better illustrate, we provide an algorithm that exploits the
+sub-stream dominance.
+Our idea is to \emph{go up} with our counter when we are fed an object we've
+already met, and to \emph{go down} when we are fed an object different from
+us.
+Once we reach the bottom (0), we know by~\ref{sub-stream_dominance} that
+we either reached zero for an object $\neq j^{1}$, and we can ignore it,
+or we reached zero for $j^{1}$, that being the most frequent element will
+have sub-stream dominance in the remaining sequence, which means it will
+\emph{go upper} than any other element in that sub-stream.
+Given that any other element has lower frequency, the most frequent of
+them, $j^{2}$ will \emph{go down} $e < \frac{n}{2} + 1$ times.
+Note that $C$ holds only one element, for simplicity we'll denote its entries as
+a map in a Scala-like syntax.
+
+\begin{algorithmic}[1]
+  \Function{up\_and\_down}{$S$, $C$}:
+    \State $k \gets S.next()$\;
+    \If{$\exists C(k)$}
+        \State $C \gets \{k => C(k) + 1\}$\;    \Comment{Increment current dominant
+                                                element.}
+    \ElsIf{$C(k) == 0$}
+        \State $C \gets \{k => 1\}$\;           \Comment{k is no more dominant,
+                                                swap it with new element and initialize.}
+    \Else
+        \State $C \gets \{k => C(k) - 1\}$      \Comment{k is still dominant, but
+                                                the stream.}
+    \EndIf
+    \State \Return{$C$}\;
+    \EndFunction
+\end{algorithmic}

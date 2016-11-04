@@ -1,0 +1,54 @@
+\section{Count-min sketch: extension to negative counters}
+
+Check the analysis seen in class, and discuss how to allow F [i] to change by arbirary
+values read in the stream.
+Namely, the stream is a sequence of pairs of elements, where the first element indicates the
+item $i$ whose counter is to be changed, and the second element is the amount $v$ of that
+change ($v$ can vary in each pair).
+In this way, the operation on the counter becomes $F[i] = F[i] + v$, where the increment
+and decrement can be now seen as $(i, 1)$ and $(i, -1)$.
+
+\subsection{Proof}
+
+We trivially have some changes over $X_{ji}$ and $\tilde{F}[i]$:
+    \begin{gather*}
+        X_{ji} = \Sigma^{n}(I_k F[k]) \\
+        \tilde{F}[i] = F[i] + X_{ji}
+    \end{gather*}
+\label{X_ji}\paragraph{$X_{ji}$} can vary as complementary increments $(+v_i, +v_j, +v_k, -v_k, -v_j, -v_i)$
+can make it $\leq 0$ without necessarily being updates on $i$.
+In order to have a minimum error estimate we'll pick the \emph{median} value of $X_{ji}$.
+\label{f_tilde}~\paragraph{$\tilde{F}[i] = F[i] + X_{ji}$} by the above assertion the counter $\tilde{F}[i]$ could have no garbage, or negative
+garbage according to the other increments.
+Therefore by choosing the minimum $\tilde{F}[i]$ over the $\log(\frac{1}{\delta})$ we
+could actually pick the most perturbed result (think of a collision with the
+biggest negative increment over one row).
+
+\label{probability}The last step is the probability proof: $\prob{\tilde{F}[i] > F[i] + \epsilon \norm{F}}$.
+Since by~\ref{X_ji} $X_{ji}$ can be either positive or negative we pick the \emph{median}
+value $med$ over the minimum $m$ and maximum $M$.
+We are then able to split our error analysis in two of equivalent size $\frac{r}{2}$:
+\begin{gather*}
+\prob(\tilde{F}[i] \in F[i] + \epsilon \norm{F}) = \\
+\prob(\tilde{F}[i] \geq F[i] - \abs{\epsilon} \norm{F} \wedge \tilde{F}[i] \leq F[i] + \abs{\epsilon} \norm{F}) = \\
+\prob(\tilde{F}[i] \geq F[i] - \abs{\epsilon} \norm{F}) \prob(\tilde{F}[i] \leq F[i] + \abs{\epsilon} \norm{F})
+\end{gather*}
+Let us define $p_0 = \prob(\tilde{F}[i] \geq F[i] - \abs{\epsilon} \norm{F})$ and
+$p_1 = \prob(\tilde{F}[i] \leq F[i] + \abs{\epsilon} \norm{F})$.
+We can report the analysis seen in class adjusted for the number of rows $\frac{r}{2}$
+
+\begin{align*}
+p_0 = \prod^{\frac{r}{2}}(\prob(|Xji| \geq - \abs{\epsilon} \norm{F})) = \\
+    = - \frac{1}{2^{\frac{r}{2}}} = - \delta^{\frac{1}{2}}
+\end{align*}
+
+Now for $p_1$:
+
+\begin{align*}
+    p_1 = \prob(\tilde{F}[i] \leq F[i] + \abs{\epsilon} \norm{F}) = \\
+    1 - \prob(\tilde{F}[i] \geq F[i] + \abs{\epsilon} \norm{F}) =
+    = 1 - \frac{1}{2^{\frac{r}{2}}} = 1 - \delta^{\frac{1}{2}}
+\end{align*}
+
+Giving us a combined probability of $p = p_0 p_1 =
+(- \delta^{\frac{1}{2}}) (1 - \delta^{\frac{1}{2}}) = -\sqrt{\delta} + \delta$.
