@@ -1,6 +1,6 @@
 \section{Count-min sketch: extension to negative counters}
 
-Check the analysis seen in class, and discuss how to allow F [i] to change by arbirary
+Check the analysis seen in class, and discuss how to allow $F[i]$ to change by arbitrary
 values read in the stream.
 Namely, the stream is a sequence of pairs of elements, where the first element indicates the
 item $i$ whose counter is to be changed, and the second element is the amount $v$ of that
@@ -8,7 +8,31 @@ change ($v$ can vary in each pair).
 In this way, the operation on the counter becomes $F[i] = F[i] + v$, where the increment
 and decrement can be now seen as $(i, 1)$ and $(i, -1)$.
 
-\subsection{Proof}
+
+\subsection{First solution}
+
+Let $F$ be the implicit vector of size $n$ that receives updates $(i, v)$ such that $F[i]=F[i]+v$ (initially, $F[i]=0 \; \forall i \in [1, n]$).
+The Count-Min (CM) sketch data structure, with parameters $\varepsilon$ and $\delta$, consists of:
+\begin{itemize}
+  \item a table $T$ of size $r\times c$, where $r=\log\frac{1}{\delta}$ and $c=\frac{e}{\varepsilon}$, that we use to approximate queries on $F$.
+  \item $r$ hash functions $h_1, \dots, h_r$ chosen uniformly at random from a pairwise-independent family. 
+\end{itemize}
+When an update $(i, v)$ arrives, the table is updated as follows: 
+$$ T[i, h_j(i)] = T[i, h_j(i)] + v \qquad \forall j = 1, \dots, r $$ 
+A point query returns an approximation $\tilde{F}[i]$ of $F[i]$. If we assume that $F[i] \geq 0$, then:
+$$\tilde{F}[i]=\min_{j\in[1,r]} T[j, h_j(i)]$$ with the guarantees:
+\begin{enumerate}
+  \item $\tilde{F}[i]\geq F[i]$ 
+  \item $\prob(\tilde{F}[i]>F[i]+\varepsilon\norm{F})\le\delta$.
+\end{enumerate}
+
+The problem statement asks to remove the assumption $F[i]\geq 0$. In this case the point query becomes: 
+$$\tilde{F}[i]=\median_{j\in[1,r]} T[j, h_j(i)]$$
+with the guarantee that $\prob(F[i]-3\varepsilon\norm{F} \leq \tilde{F}[i] \leq F[i]+3\varepsilon\norm{F}) < 1-\delta^{1/4}$.
+
+% TODO: Proof
+
+\subsection{Second solution}
 
 We trivially have some changes over $X_{ji}$ and $\tilde{F}[i]$:
     \begin{gather*}
