@@ -89,19 +89,19 @@ is the root, and a $+1$ added since a new level has been added.
 
 By hypothesis,
     \begin{equation}
-    E[d(x) > 2 c \ln(n)] <<< 1
+    \E{d(x) > 2 c \ln(n)} <<< 1
     \end{equation}
 By definition the ancestor of a node $i$ are indipendent random variables,
 and we can apply the \href{https://en.wikipedia.org/wiki/Chernoff_bound}{Chernoff
 bounds} over the set ${x: d(x) >= 2 \ln(n)}$ of random variables determining
 the expected distance of nodes.
 \begin{equation*}
-    \prob[X \geq c \expect[X]] < e^{-c \ln(\frac{c}{e})\expect[X]}
+    \prob{X \geq c \E{X}} < e^{-c \ln(\frac{c}{e})\E{X}}
 \end{equation*}
 Let us consider $X = 1 \forall i == \ln(n)$, the expected depth of $\ln(n)$,
 then
 \begin{equation*}
-    \prob[X \geq c \ln(n)] < e^{-c \ln(\frac{c}{e})\ln(n)}
+    \prob{X \geq c \ln(n)} < e^{-c \ln(\frac{c}{e})\ln(n)}
 \end{equation*}
 
 \subsection{Proof with indicator variable}
@@ -141,7 +141,7 @@ then
   Taking expectations of both sides of~\eqref{equation:node-depth}, and then
   using linearity of expectation, we have:
   \begin{align*}
-    E[X] & = \sum_{\substack{j=1\\ j\ne i}}^n E[X_{ij}] \\
+    \E{X} & = \sum_{\substack{j=1\\ j\ne i}}^n \E{X_{ij}} \\
     & = \sum_{\substack{j=1\\ j\ne i}}^n \text{Pr}\{ z_j \text{ is an ancestor
       of } z_i \text{ in the random search tree} \} \\
     & \le \sum_{\substack{j=1\\ j\ne i}}^n \frac{1}{|j-i|} \\

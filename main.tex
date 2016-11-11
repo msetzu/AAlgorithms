@@ -14,13 +14,15 @@
 \usepackage{amsthm}                % \proof environment
 \usepackage{titlesec}              % Customize sections
 
-\newcommand*{\expect}[1]{\mathsf{E}\left[{#1}\right]} % Define statistical expected value
-\newcommand*{\prob}{\mathsf{P}}                       % Define statistical probability
-\newcommand{\sectionbreak}{\clearpage}                % Clear page before each section
-
-\DeclarePairedDelimiter\abs{\lvert}{\rvert}           % Define abs-like syntax
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}  % Define abs-like syntax
 \DeclarePairedDelimiter\norm{\lVert}{\rVert}
-\DeclareMathOperator*{\median}{median}                % Median operator
+\DeclareMathOperator*{\median}{median}       % Median operator with subscript support
+\DeclareMathOperator*{\mprob}{\mathbb{P}}    % Probability with subscript support
+
+\newcommand*{\E}[1]{\mathbb{E}\left[{#1}\right]}      % Define expected value
+\newcommand*{\prob}[1]{\mprob\left[{#1}\right]}       % Define probability
+\newcommand*{\probs}[2]{\mprob_{#1}\left[{#2}\right]} % Define probability with subscript
+\newcommand{\sectionbreak}{\clearpage}                % Clear page before each section
 
 \lstset{numbers=left} % Print line numbers in \begin{lstlisting}...
 
