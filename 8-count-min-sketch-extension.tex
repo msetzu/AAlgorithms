@@ -15,22 +15,42 @@ Let $F$ be the implicit vector of size $n$ that receives updates $(i, v)$ such t
 The Count-Min (CM) sketch data structure, with parameters $\varepsilon$ and $\delta$, consists of:
 \begin{itemize}
   \item a table $T$ of size $r\times c$, where $r=\log\frac{1}{\delta}$ and $c=\frac{e}{\varepsilon}$, that we use to approximate queries on $F$.
-  \item $r$ hash functions $h_1, \dots, h_r$ chosen uniformly at random from a pairwise-independent family. 
+  \item $r$ hash functions $h_1, \dots, h_r$, chosen uniformly at random from a pairwise-independent family, that maps from $\{1,\dots,n\}$ to $\{1,\dots,c\}$.
 \end{itemize}
+The parameters specify that the error in answering a query is in within a factor of $\varepsilon$ with probability $1-\delta$.
 When an update $(i, v)$ arrives, the table is updated as follows: 
 $$ T[i, h_j(i)] = T[i, h_j(i)] + v \qquad \forall j = 1, \dots, r $$ 
 A point query returns an approximation $\tilde{F}[i]$ of $F[i]$. If we assume that $F[i] \geq 0$, then:
 $$\tilde{F}[i]=\min_{j\in[1,r]} T[j, h_j(i)]$$ with the guarantees:
 \begin{enumerate}
   \item $\tilde{F}[i]\geq F[i]$ 
-  \item $\prob(\tilde{F}[i]>F[i]+\varepsilon\norm{F})\le\delta$.
+  \item $\prob{\tilde{F}[i]>F[i]+\varepsilon\norm{F}}\le\delta$.
 \end{enumerate}
 
 The problem statement asks to remove the assumption $F[i]\geq 0$. In this case the point query becomes: 
 $$\tilde{F}[i]=\median_{j\in[1,r]} T[j, h_j(i)]$$
-with the guarantee that $\prob(F[i]-3\varepsilon\norm{F} \leq \tilde{F}[i] \leq F[i]+3\varepsilon\norm{F}) < 1-\delta^{1/4}$.
+with the guarantee that $\prob{F[i]-3\varepsilon\norm{F} \leq \tilde{F}[i] \leq F[i]+3\varepsilon\norm{F}} < 1-\delta^{1/4}$.
 
-% TODO: Proof
+\begin{proof}
+  Let $I_{i,j,k}$ the indicator variable that is $1$ if $i \ne k \wedge h_j(i)=h_j(k)$ and $0$ otherwise. Observe that, by pairwise independence of the hash functions,
+  $$\E{I_{i,j,k}} = \prob{h_j(i)=h_j(k)} \leq \frac{1}{c} = \frac{\varepsilon}{e} $$
+  and, given $X_{i,j}=\sum_{k=1}^n I_{i,j,k}F[k]$
+  \begin{equation}
+    \label{cm-sketch-1}
+  	\E{|X_{i,j}|} = \E{\sum_{k=1}^n I_{i,j,k}|F[k]|} \leq \sum_{k=1}^n |F[k]|\E{I_{i,j,k}} \leq \frac{\varepsilon}{e}\norm{F}
+  \end{equation}
+  The probability that any count is off by more than $3\varepsilon\norm{F}$ is:
+  \begin{align*}
+    &  \prob{|T[i, h_j(i)]-F[i]| \geq 3\varepsilon\norm{F}} &  \\
+    &= \prob{|F[i]+X_{i,j}-F[i]| \geq 3\varepsilon\norm{F}} & \text{by construction of $T$} \\
+    &= \prob{|X_{i,j}| \geq 3\varepsilon\norm{F}} & \\
+    &\leq \frac{\E{|X_{i,j}|}}{3\varepsilon\norm{F}} & \text{by the Markov inequality} \\
+    &\leq \frac{\varepsilon\norm{F}}{e} \frac{1}{3\varepsilon\norm{F}} & \text{by \eqref{cm-sketch-1}} \\
+    &= \frac{1}{3e} < \frac{1}{8} &
+  \end{align*}
+  Applying Chernoff bounds...
+  % TODO: finish
+\end{proof}
 
 \subsection{Second solution}
 
@@ -53,24 +73,24 @@ Since by~\ref{X_ji} $X_{ji}$ can be either positive or negative we pick the \emp
 value $med$ over the minimum $m$ and maximum $M$.
 We are then able to split our error analysis in two of equivalent size $\frac{r}{2}$:
 \begin{gather*}
-\prob(\tilde{F}[i] \in F[i] + \epsilon \norm{F}) = \\
-\prob(\tilde{F}[i] \geq F[i] - \abs{\epsilon} \norm{F} \wedge \tilde{F}[i] \leq F[i] + \abs{\epsilon} \norm{F}) = \\
-\prob(\tilde{F}[i] \geq F[i] - \abs{\epsilon} \norm{F}) \prob(\tilde{F}[i] \leq F[i] + \abs{\epsilon} \norm{F})
+\prob{\tilde{F}[i] \in F[i] + \epsilon \norm{F}} = \\
+\prob{\tilde{F}[i] \geq F[i] - \abs{\epsilon} \norm{F} \wedge \tilde{F}[i] \leq F[i] + \abs{\epsilon} \norm{F}} = \\
+\prob{\tilde{F}[i] \geq F[i] - \abs{\epsilon} \norm{F}) \prob(\tilde{F}[i] \leq F[i] + \abs{\epsilon} \norm{F}}
 \end{gather*}
-Let us define $p_0 = \prob(\tilde{F}[i] \geq F[i] - \abs{\epsilon} \norm{F})$ and
-$p_1 = \prob(\tilde{F}[i] \leq F[i] + \abs{\epsilon} \norm{F})$.
+Let us define $p_0 = \prob{\tilde{F}[i] \geq F[i] - \abs{\epsilon} \norm{F}}$ and
+$p_1 = \prob{\tilde{F}[i] \leq F[i] + \abs{\epsilon} \norm{F}}$.
 We can report the analysis seen in class adjusted for the number of rows $\frac{r}{2}$
 
 \begin{align*}
-p_0 = \prod^{\frac{r}{2}}(\prob(|Xji| \geq - \abs{\epsilon} \norm{F})) = \\
+p_0 = \prod^{\frac{r}{2}}\prob{|Xji| \geq - \abs{\epsilon} \norm{F}} = \\
     = - \frac{1}{2^{\frac{r}{2}}} = - \delta^{\frac{1}{2}}
 \end{align*}
 
 Now for $p_1$:
 
 \begin{align*}
-    p_1 = \prob(\tilde{F}[i] \leq F[i] + \abs{\epsilon} \norm{F}) = \\
-    1 - \prob(\tilde{F}[i] \geq F[i] + \abs{\epsilon} \norm{F}) =
+    p_1 = \prob{\tilde{F}[i] \leq F[i] + \abs{\epsilon} \norm{F}} = \\
+    1 - \prob{\tilde{F}[i] \geq F[i] + \abs{\epsilon} \norm{F}} =
     = 1 - \frac{1}{2^{\frac{r}{2}}} = 1 - \delta^{\frac{1}{2}}
 \end{align*}
 
