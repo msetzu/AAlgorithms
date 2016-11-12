@@ -1,12 +1,31 @@
 \section{Count-min sketch: range queries}
 
-Show and analyze the application of count-min sketch to range queries $(i, j)$ for
-computing $\Sigma_{jk=i}^{k} F[k]$.\\
-Hint: reduce the latter query to the estimate of just $t \leq 2 \log(n)$ counters
-$c_1, c_2, \dots, c_t$.
-Note that the probability at most $\delta$ of error (i.e.\ that $tl = 1 c l > jk = i F[k] + 2 \log(n) \norm{F})$,
-it does not suffices to say that it is at most $\delta$ the probability of error
-of each counter $c_l$: while each counter is still the actual wanted value plus
-the residual as before, it is better to consider the sum $V$ of these $t$ wanted
-values and the sum X of these residuals, and apply Markov’s inequality to $V$ and
-$X$ rather than on the individual counters.
+Show and analyze the application of count-min sketch to range queries $(i,j)$ for computing  $\sum^j_{k=i} F[k]$. Hint: reduce the latter query to the estimate of just $t \leq 2\ log\ n$ counters $c_1,c_2,...,c_t$. Note that in order to obtain a probability at most $\delta$ of error (i.e. that $\sum^t_{l=1}c_l > \sum^j_{k=i}F[k] + 2\epsilon\ log\ n ||F||$), it does not suffices to say that it is at most $\delta$ the probability of error of each counter $c_l$: while each counter is still the actual wanted value plus the residual as before, it is better to consider the sum $V$ of these $t$ wanted values and the sum $X$ of these residuals, and apply Markov’s inequality to $V$ and $X$ rather than on the individual counters.
+
+\vspace{1cm}
+\noindent
+\textbf{Solution.} A range $[a,b]$ is a dyadic range if it's length is a power of two ($l=2^y$), and begins at a multiple of its own length: $[j2^y+1, (j+1)2^y]$. For example, $[13,16]$ can be written as $[3\cdot 2^2+1,(3+1)\cdot 2^2]$. Any arbitrary range of size $s$ can be partitioned into $O(\log s)$ dyadic ranges, for example \cite{Cormode11}:
+$$[18,38]=[18,18]\cup[19,20]\cup[21,24]\cup[25,32]\cup[33,36]\cup[37,38]$$
+
+Let $n$ be the size of the implicit vector $F$ whose entries we want to approximate. The idea is to maintain a collection $C$ of $\log_2 n$ CM sketches, one for each set of dyadic ranges of length $2^y$ $\forall y\in [0, \log_2 n-1]$. The operations on $C$ becomes:
+\begin{itemize}
+  \item \textbf{Update} ($F[i] = F[i] + v$). Every sketch in $C$ is updated, since each point $1 \leq i \leq n$ is member of $\log_2 n$ dyadic ranges.
+  \item \textbf{Range queries} ($\sum_{i=l}^rF[i]$). The range $[l,r]$ is partitioned into at most $2\log_2 n$ dyadic ranges. For each partition, a point query is made to the corresponding sketch in $C$; the (estimated) result of the range query is the sum of the point queries. See Figure \ref{figure:dyadic-ranges}.
+\end{itemize}
+
+The time to compute the estimate or to make an update is $O(\log n\log\frac{1}{\delta})$. The space used is $O(\frac{1}{\varepsilon}\log n\log\frac{1}{\delta})$, because each sketch requires $O(\frac{e}{\varepsilon}\ln\frac{1}{\delta})$ space \cite{Cormode05}.
+
+Let $F[l..r]=\sum_{i=l}^rF[i]$ be the answer to the range query and $\tilde{F}[l..r]$ the estimate. The guarantees are:
+\begin{itemize}
+  \item $\tilde{F}[l..r] \geq F[l..r]$
+  \item $\prob{\tilde{F}[l..r] > F[l..r]+2\varepsilon\log n\norm{F}} \leq \delta$
+\end{itemize}
+
+% TODO: proof
+
+\begin{figure}[hbt]
+  \centering
+  \includegraphics[width=0.5\linewidth]{images/dyadic-ranges}
+  \caption{A hierarchy of dyadic ranges. The leaves are the ranges of length $2^0$, while the root corresponds to the single range of length $2^3$. Each level of the tree can be seen as a CM sketch table. To estimate $\sum_{k=2}^8F[k]$, the range $[2,8]$ is decomposed into dyadic ranges $[2,2], [3,4], [5,8]$. Each node contains the sum of the values stored in its children. Red nodes are queried and their sum is returned. Adapted from \cite{Cormode11}.}
+    \label{figure:dyadic-ranges}
+\end{figure}
