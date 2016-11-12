@@ -13,6 +13,9 @@
 \usepackage{qtree}                 % Draw simple binary trees
 \usepackage{amsthm}                % \proof environment
 \usepackage{titlesec}              % Customize sections
+\usepackage{biblatex}              % Bibliography
+
+\addbibresource{bibliography.bib}
 
 \DeclarePairedDelimiter\abs{\lvert}{\rvert}  % Define abs-like syntax
 \DeclarePairedDelimiter\norm{\lVert}{\rVert}
@@ -45,5 +48,7 @@
   \include{8-count-min-sketch-extension}
   \include{9-count-min-sketch-range-queries}
   \include{appendix}
+  
+  \printbibliography
 
 \end{document}
