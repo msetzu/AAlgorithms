@@ -21,11 +21,36 @@ Let $F[l..r]=\sum_{i=l}^rF[i]$ be the answer to the range query and $\tilde{F}[l
   \item $\prob{\tilde{F}[l..r] > F[l..r]+2\varepsilon\log n\norm{F}} \leq \delta$
 \end{itemize}
 
-% TODO: proof
+\begin{proof}
+  Let $I_{i,j,k}$ the indicator variable that is $1$ if $i \ne k \wedge h_j(i)=h_j(k)$ and $0$ otherwise. From the analysis of CM sketch, we know that
+  $\E{I_{i,j,k}} \leq \frac{\varepsilon}{e} $
+  and
+  $$\E{X_{i,j}} = \E{\sum_{k=1}^n I_{i,j,k}F[k]} \leq \frac{\varepsilon}{e}\norm{F}$$
+  A range query $\tilde{F}[l..r]$ is assembled by  $t \leq 2\log n$ point queries on dyadic intervals $[l_1,r_1], [l_2,r_2], \dots, [l_t,r_t]$. 
+  The expectation of the additive error $X^j$ for any estimator (i.e. the $j$-th row of any of the $t$ CM sketches queried) is
+  \begin{equation}
+    \E{X^j} = \E{\sum_{s=1}^tX_{i,j}}=\sum_{s=1}^t\E{X_{i,j}} \leq (2\log n) \frac{\varepsilon}{e}\norm{F}
+    \label{range-query-error-expect}
+  \end{equation}
+  Also observe that the $j$-th estimation of $F[l..r]$ is
+  \begin{equation}
+    \tilde{F}^j[l..r]= \sum_{s=1}^t \tilde{F}^j[l_s..r_s] = \sum_{s=1}^t (F[l_s..r_s] + X_{i,j}) = F[l..r]+X^j
+    \label{range-query-f}
+  \end{equation}
+  Now, for the $j$-th estimation we can compute
+  \begin{align*}
+    &\phantom{={}} \prob{\tilde{F}^j[l..r] > F[l..r]+2\varepsilon\log n\norm{F}} & \\
+    &= \prob{X^j > 2\varepsilon\log n\norm{F}} & \text{because of \eqref{range-query-f}} \\
+    &\leq \frac{\E{X^j}}{2\varepsilon\log n\norm{F}} & \text{by the Markov inequality} \\
+    &\leq  \frac{2\varepsilon\log n\norm{F}}{e} \frac{1}{2\varepsilon\log n\norm{F}} & \text{because of \eqref{range-query-error-expect}} \\
+    &= e^{-1} &
+  \end{align*}
+  Since we have $\ln\frac{1}{\delta}$ independent hash functions $\prod_{j=1}^{\ln(1/\delta)}e^{-1}=e^{-\ln(1/\delta)}=\delta$
+\end{proof}
 
-\begin{figure}[hbt]
+\begin{figure}[h]
   \centering
-  \includegraphics[width=0.5\linewidth]{images/dyadic-ranges}
+  \includegraphics[width=0.55\linewidth]{images/dyadic-ranges}
   \caption{A hierarchy of dyadic ranges. The leaves are the ranges of length $2^0$, while the root corresponds to the single range of length $2^3$. Each level of the tree can be seen as a CM sketch table. To estimate $\sum_{k=2}^8F[k]$, the range $[2,8]$ is decomposed into dyadic ranges $[2,2], [3,4], [5,8]$. Each node contains the sum of the values stored in its children. Red nodes are queried and their sum is returned. Adapted from \cite{Cormode11}.}
     \label{figure:dyadic-ranges}
 \end{figure}
