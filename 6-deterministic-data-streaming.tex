@@ -1,17 +1,18 @@
 \section{Deterministic data streaming}
 
-Consider a stream of $n$ items, where items can appear more than once in the stream.
-The problem is to find the most frequently appearing item in the stream (where ties
-broken arbitrarily if more than one item satisfies the latter).
-Suppose that only $k$ items can be stored, one item per memory cell, where the
-available storage is $k + O(1)$ memory cells.
-Show that the problem cannot be solved deterministically under the following rules:
-the algorithm can allocate only $O(poly\log(n))$ bits for each of the $k$ items that
-it can store (i.e. $O(\log^{c}(n))$ for any fixed costant $c$ > 0), and can read
-the next item of the stream; you, the adversarty, have access to all the stream,
-and the content of the $k$ items stored by the algorithm, and can decide what is
-the next item that the algorithm reads (please note that you cannot change
-past, namely, the items already read by the algorithm).
-\\Hint: it is an adversarial argument based on the k items chosen by the
-hypothetical determinist streaming algorithm, and the fact that there can be a
-tie on $> k$ items till the last minute.
+Consider a stream of n items, where items can appear more than once. The problem is to find the most frequently appearing item in the stream (where ties are broken arbitrarily if more than one item satisfies the latter). For any fixed integer $k \geq 1$, suppose that only $k$ items and counters can be stored, one item per memory cell, where each counter can use only $O(polylog(n))$ bits (i.e. $O(log^c n)$ for any fixed constant $c > 0$): in other words, only $b = O(k\cdot polylog(n))$ bits of space are available. (Note that, even though we call them counters, they can actually contain any kind of information as long as it does not exceed that amount of bits.)Show that the problem cannot be solved deterministically under the following rules: the algorithm can only use $b$ bits, and read the next item of the stream, one item at a time. You, the adversary, have access to all the stream, and the content of the $b$ bits stored by the algorithm: you cannot change those $b$ bits and the past, namely, the items already read by the algorithm, but you can change the future, namely, the next item to be read. Since the algorithm must be correct for any input, you can use any amount of streams to be fed to the algorithm and as many distinct items as you want. [Hint: it is an adversarial argument based on the fact that, for many streams, there can be a tie on the items.]
+
+\vspace{1cm}
+\noindent
+\textbf{Solution.} We, the adversaries, can decide the alphabet $\Sigma$ and the content of the stream $s\in \Sigma^*$. The \emph{idea} is to create a stream generator that forces any deterministic algorithm to reach a state $q$ with at least two different streams. In fact, the number of states (i.e. configurations of memory) of this class of algorithms is bounded by $b$ and, by the pigeonhole principle, there exist at least two streams that cause the algorithm to transition the same state.
+
+Suppose that $q$ is reached by the three streams:  
+\begin{enumerate}
+  \item $\alpha 0011$, where $\alpha\in\Sigma^*$ contains the same number of $0$s and $1$s
+  \item $\beta aabb$, where $\beta\in\Sigma^*$ contains the same number of $a$s and $b$s
+  \item $\gamma 00bb $, where $\gamma\in\Sigma^*$ contains the same number of $0$s and $b$s
+\end{enumerate}
+When we will emit 0 as next character of the stream and query the algorithm for the most frequent item, we will receive an answer $\mathcal{A}$. The algorithm is deterministic, therefore in $q$ the answer will be the same for each stream. But $\mathcal{A}$ will be wrong for at least one of the three streams. For example, if $\mathcal{A}=0$, then the answer is wrong for the second stream.
+
+% TODO: details of the stream generator
+
