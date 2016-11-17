@@ -1,0 +1,86 @@
+\section{Count-min sketch: extension to negative counters}
+
+Consider the two-level perfect hash tables presented in [CLRS] and discussed in class.
+As already discussed, for a given set of $n$ keys from the universe $U$, a random
+universal hash function $h : U \to [m]$ is employed where $m = n$, thus creating
+$n$ buckets of size $n_j \geq 0$, where $\Sigma_{j=0}^{n-1}(n_j) = n$.
+Each bucket $j$ uses a random universal hash function $h_j: U \to [m]$ with
+$m = n_j^2$.
+Key $x$ is thus stored in position $h_j(x)$ of the table for bucket $j$, where
+$j = h(x)$.
+This problem asks to replace each such table by a bitvector of length $n_j^2$,
+initialized to all $0$s, where key $x$ is discarded and, in its place, a bit $1$
+is set in position $h_j(x)$ (a similar thing was proposed in Problem 4 and thus
+we can have a one-side error).
+Design a space-efficient implementation of this variation of perfect hash, using
+a couple of tips.
+First, it can be convenient to represent the value of the table size in unary
+(i.e., x zeroes followed by one for size $x$, so $000001$ represents $x = 5$ and
+$1$ represents $x = 0$).
+Second, it can be useful to employ a rank-select data structure that, given any
+bit vector B of b bits, uses additional $o(b)$ bits to support in $O(1)$ time the
+following operations on B:
+\begin{itemize}
+\item $rank_1(i)$: return the number of $1$s appearing in the first $i$ bits of $B$.
+\item $select_1(i)$: return the position $i$ of the $j^{th} 1$, if any, appearing
+in $B$ (i.e. $B[i] = 1$ and $rank_1(i) = j$).
+\end{itemize}
+
+Operations $rank_0(i)$ and $select_0(j)$ can be defined in the same way as above.
+Also, note that $o(b)$ stands for any asymptotic cost that is smaller than
+\\ $O(b), b \to \infty$.
+
+\subsection{Wide bitvector}
+
+The two-level hashing layers are comprised of:
+\begin{enumerate}
+\item An hash function and $n$ pointers, each addressing one bitvector $B_j$.
+\item $n$ hash functions $h_j$ hashing to their relative buckets $B_j$.
+\end{enumerate}
+
+Given that by removing one hash function we would not be able to retrieve any element in its bucket, we try and optimize the pointers on the first level.
+
+\subsubsection{First level pointers}
+We merge the bitvectors $B_j$ subsequently one after the other in a flat array $B$: note that the space is not reduced nor increased, as no further bits are used to separate two adjacent buckets.
+
+\begin{equation*}
+B = 0 0 1 0 1 1 0 1 \dots 0 1
+\end{equation*}
+
+We then store their respective dimensions in unary form in an auxiliary bitvector $L$ following the same principle.
+
+\begin{equation*}
+L = 0 0 1 | 0 1 | 1 | 0 1 | \dots 0 1 |
+\end{equation*}
+
+
+It is trivial to see as given a substring $S'$ in $L$ the length it encodes ends at the very next $1$.
+We can exploit this property to compute the size of any interval of buckets $B_a$ and $B_b, b \geq a$ in $O(1)$:
+\begin{itemize}
+\item Pick the $b^{th} 1 = \alpha $ with $select_1(b)$ in $O(1)$: this will give us the end of the precedent bucket.
+\item Pick the sum of the sizes of the preceding buckets by computing the number of $0$s with $rank_0(\alpha)$: this will give us starting position of the desired bucket.
+\end{itemize}
+
+Given a bitvector $B$ we employ a map structure to answer the $\mathcal{Q}(i)$ in $O(1)$:
+\begin{itemize}
+\item Hash on the first level in $O(1)$.
+\item Given $j = h(k)$, apply the above algorithm in $O(1)$ to select the corresponding bucket starting at index $B[k]$ and ending at $B[k + \delta], \delta \geq 0$.
+\item Apply $h_j(k)$ to $B[k, k + \delta]$ and return $B[k + j]$.
+\end{itemize}
+
+
+\subsubsection{Hash functions optimization}
+We now try and improve the space for the hash functions parameters $a_j, b_j, p_j$.
+First, we select the lowest $p_j$ possible, that is the first $p_j > n_j^2$: by \href{https://en.wikipedia.org/wiki/Bertrand\%27s_postulate}{Bertrand postulate} such a prime $p_j$ exists for $n_j \leq p_j \leq 2n_j - 2$.
+We therefore need a space of at most $2n_j^2$ bits for each parameter in an unary encoding.
+Since we have $a \in \mathbb{Z}_{p_j}^*, b \in \mathbb{Z}_{p_j}$, we have a space of $3 \cdot 2n_j^2$ for a triple $(a_j, b_j, p_j)$ of any given hash function.
+Let us now compute the expected space for the $m$ hash functions:
+\begin{equation*}
+\E{3 \sum_{j=0}^{m-1}2n_j^2} =
+6 \cdot \E{\sum_{j=0}^{m-1}n_j^2}
+\end{equation*}
+where $\E{n_j^2} \leq 2n$ as shown in the perfect hashing analysis.
+Therefore
+\begin{equation*}
+6 \cdot \E{\sum_{j=0}^{m-1} n_j^2} \leq 6 \cdot 2n = 12n
+\end{equation*}
