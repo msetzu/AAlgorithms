@@ -54,26 +54,35 @@ L = 0 0 1 | 0 1 | 1 | 0 1 | \dots 0 1 |
 \end{equation*}
 
 
-It is trivial to see as given a substring $S'$ in $L$ the length it encodes ends at the very next $1$.
-We can exploit this property to compute the size of any interval of buckets $B_a$ and $B_b, b \geq a$ in $O(1)$:
+It is trivial to see as given a substring $S'$ in $L$ the length it encodes ends
+at the very next $1$.
+We can exploit this property to compute the size of any interval of buckets $B_a$
+and $B_b, b \geq a$ in $O(1)$:
 \begin{itemize}
-\item Pick the $b^{th} 1 = \alpha $ with $select_1(b)$ in $O(1)$: this will give us the end of the precedent bucket.
-\item Pick the sum of the sizes of the preceding buckets by computing the number of $0$s with $rank_0(\alpha)$: this will give us starting position of the desired bucket.
+\item Pick the $b^{th} 1 = \alpha $ with $select_1(b)$ in $O(1)$: this will give
+us the end of the precedent bucket.
+\item Pick the sum of the sizes of the preceding buckets by computing the number
+of $0$s with $rank_0(\alpha)$: this will give us starting position of the desired bucket.
 \end{itemize}
 
 Given a bitvector $B$ we employ a map structure to answer the $\mathcal{Q}(i)$ in $O(1)$:
 \begin{itemize}
 \item Hash on the first level in $O(1)$.
-\item Given $j = h(k)$, apply the above algorithm in $O(1)$ to select the corresponding bucket starting at index $B[k]$ and ending at $B[k + \delta], \delta \geq 0$.
+\item Given $j = h(k)$, apply the above algorithm in $O(1)$ to select the corresponding
+bucket starting at index $B[k]$ and ending at $B[k + \delta], \delta \geq 0$.
 \item Apply $h_j(k)$ to $B[k, k + \delta]$ and return $B[k + j]$.
 \end{itemize}
 
 
 \subsubsection{Hash functions optimization}
 We now try and improve the space for the hash functions parameters $a_j, b_j, p_j$.
-First, we select the lowest $p_j$ possible, that is the first $p_j > n_j^2$: by \href{https://en.wikipedia.org/wiki/Bertrand\%27s_postulate}{Bertrand postulate} such a prime $p_j$ exists for $n_j \leq p_j \leq 2n_j - 2$.
-We therefore need a space of at most $2n_j^2$ bits for each parameter in an unary encoding.
-Since we have $a \in \mathbb{Z}_{p_j}^*, b \in \mathbb{Z}_{p_j}$, we have a space of $3 \cdot 2n_j^2$ for a triple $(a_j, b_j, p_j)$ of any given hash function.
+First, we select the lowest $p_j$ possible, that is the first $p_j > n_j^2$: by
+\href{https://en.wikipedia.org/wiki/Bertrand\%27s_postulate}{Bertrand postulate}
+such a prime $p_j$ exists for $n_j^2 \leq p_j \leq 2n_j^2 - 2$.
+We therefore need a space of at most $2n_j^2$ bits for each parameter in an unary
+encoding.
+Since we have $a \in \mathbb{Z}_{p_j}^*, b \in \mathbb{Z}_{p_j}$, we have a space
+of $3 \cdot 2n_j^2$ for a triple $(a_j, b_j, p_j)$ of any given hash function.
 Let us now compute the expected space for the $m$ hash functions:
 \begin{equation*}
 \E{3 \sum_{j=0}^{m-1}2n_j^2} =
