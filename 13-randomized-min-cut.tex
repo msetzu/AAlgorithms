@@ -1,0 +1,75 @@
+\section{Randomized min-cut algorithm}
+
+Consider the randomized min-cut algorithm discussed in class.
+We have seen that its probability of success is at least $\frac{1}{{{n} \choose {1}}}$,
+where $n$ is the number of its vertices.
+
+\begin{itemize}
+\item Describe how to implement the algorithm when the graph is represented by adjacency
+lists, and analyze its running time.
+In particular, a contraction step can be done in $O(n)$ time.
+\item A weighted graph has a weight $w(e)$ on each edge $e$, which is a positive
+real number.
+The min-cut in this case is meant to be min-weighted cut, where the sum of the weights
+in the cut edges is minimum.
+Describe how to extend the algorithm to weighted graphs, and show that the probability
+of success is still $geq \frac{1}{{{n} \choose {2}}}$ [hint: define the weighted degree
+of a node].
+\item Show that running the algorithm multiple times independently at random, and
+taking the minimum among the min-cuts thus produced, the probability of success
+can be made at least $1 - \frac{1}{nc}$ for a constant $c > 0$
+(hence, with high probability).
+\end{itemize}
+
+\subsection{4-ways pointers}
+
+We build an adjacency list s.t.\ every item in the list has four pointers and an
+auxiliary counter for the repetitions in its list:
+\begin{itemize}
+\item forward: a pointer to the next element in its list
+\item backwards: a pointer to the previous element in its list
+\item up: a pointer to a contracted element in another list
+\item down: a pointer to a contracted element in another list
+\end{itemize}
+
+We operate the contraction of two nodes in the following way:
+\begin{itemize}
+\item Pick two nodes $a, b$.
+Given that at least an edge exists between them we can find both of them in their
+respective list.
+\item Find the two elements in each other's lists: $a$ in $b.list$ and $b$ in $a.list$:
+as we have at most $n - 1$ nodes per list, the search is linear.
+\item Set the \emph{up} pointer of $a$ to $b.list[a]$ and viceversa: given that
+both maintain pointers to their respective lists through the \emph{forward} and
+\emph{backward} pointers, both lists can be traversed as before and a new edge
+is created.
+Note that the \emph{up} and \emph{down} pointers avoid collisions: if we then try
+to merge $a-b$ to a node $c$ we'll have only the \emph{up} and \emph{down} pointers
+to link $a$ and $b$ and $c$ will be linked arbitrarly to any of them.
+Worst-case scenario we need to find an empty slot over all nodes, that is check
+for a free pointer slot over $2 \cdot (n - 1)$ slots in $O(n)$ time.
+\end{itemize}
+
+\subsection{Weighted graph extension}
+
+We now extend the above to weighted multi-graph.
+First we'll define the \emph{min-weighted cut}, the weighted cut where
+$\min_{|c| > 0} C = \min_{C} \sum{w(c)}$, that is the sum of the
+weights determines the weight of the overall cut.
+We can then define the weighted degree $dg_{w}(v)$ of a node $v$ as the
+sum of the weights of its incoming/outgoing edges: $\sum{w(e_{v, v'})}$.
+We then reconduct this problem to the non-weighted case: given an edge $v$ with weight $w_v = dg_{w}(v)$ and split it in $w_v$ edges of weight $1$.
+We then have an equality between the sum of the weights for $v$ is equal to the number of edges (cuts) for $v$ as in the unweighted case.
+We then apply the error analysis seen in class to obtain $\frac{1}{{{n} \choose {2}}}$.
+
+\subsection{Error probability}
+
+By the analysis seen in class we have an error probability of
+\begin{equation*}
+1 - \Pr({\text{success}}) = 1 - \frac{1}{{{n} \choose {1}}}
+\end{equation*}
+if we then run the algorithm some $d \cdot \frac{1}{{{n} \choose {2}}}$ times, the probability of success becomes
+\begin{equation*}
+1 - \left(1 - \frac{1}{{{n} \choose {2}}} \right)^{c \cdot \frac{1}{{{n} \choose {2}}}} \geq 1 - e^{d}
+\end{equation*}
+by $d = c \ln(c)$ we have an error probability of $\leq \frac{1}{n^c}$.
