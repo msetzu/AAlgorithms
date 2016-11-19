@@ -21,34 +21,16 @@ can be made at least $1 - \frac{1}{nc}$ for a constant $c > 0$
 (hence, with high probability).
 \end{itemize}
 
-\subsection{4-ways pointers}
+\subsection{Contraction algorithm}
 
-We build an adjacency list s.t.\ every item in the list has four pointers and an
-auxiliary counter for the repetitions in its list:
-\begin{itemize}
-\item forward: a pointer to the next element in its list
-\item backwards: a pointer to the previous element in its list
-\item up: a pointer to a contracted element in another list
-\item down: a pointer to a contracted element in another list
-\end{itemize}
+We assume that the adjacency lists $Adj[x]$ are sorted $\forall x \in V$. We also note that the multigraph is undirected, therefore $v\in Adj[u]$ if and only if $u\in Adj[v]$. We maintain an attribute $pe$ in each edge to store the number of parallel edges.
 
-We operate the contraction of two nodes in the following way:
+To contract an edge $(u, v)$, we have to merge the two adjacency lists $Adj[u]$ and $Adj[v]$ into a single \emph{sorted} adjacency list $Adj[uv]$ --- like the merge procedure in merge sort --- ensuring that:
 \begin{itemize}
-\item Pick two nodes $a, b$.
-Given that at least an edge exists between them we can find both of them in their
-respective list.
-\item Find the two elements in each other's lists: $a$ in $b.list$ and $b$ in $a.list$:
-as we have at most $n - 1$ nodes per list, the search is linear.
-\item Set the \emph{up} pointer of $a$ to $b.list[a]$ and viceversa: given that
-both maintain pointers to their respective lists through the \emph{forward} and
-\emph{backward} pointers, both lists can be traversed as before and a new edge
-is created.
-Note that the \emph{up} and \emph{down} pointers avoid collisions: if we then try
-to merge $a-b$ to a node $c$ we'll have only the \emph{up} and \emph{down} pointers
-to link $a$ and $b$ and $c$ will be linked arbitrarly to any of them.
-Worst-case scenario we need to find an empty slot over all nodes, that is check
-for a free pointer slot over $2 \cdot (n - 1)$ slots in $O(n)$ time.
+  \item if the current node in $Adj[u]$ is $v$, skip the node, since it will not appear in $Adj[uv]$ (do the same with $Adj[v]$ and $u$);
+  \item if the current nodes are equal to $x$, add $x$ to $Adj[uv]$ and set $(uv, x).pe = (u,x).pe + (v,x).pe$.
 \end{itemize}
+Finally, we replace $Adj[u]$ and $Adj[v]$ with the newly created $Adj[uv]$.
 
 \subsection{Weighted graph extension}
 
