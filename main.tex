@@ -1,9 +1,10 @@
-\documentclass{article}
+\documentclass[a4paper]{article}
 
 \usepackage[utf8]{inputenc}
-\usepackage{mathtools}             % For symbols like tilde
+\usepackage[top=3cm,bottom=3cm,left=2.5cm,right=2.5cm]{geometry}
 \usepackage[T1]{fontenc}           % For symbols like tilde
 \usepackage{hyperref}              % For \url{...}
+\usepackage{amsthm}                % \proof environment
 \usepackage{amssymb}               % Math symbols
 \usepackage{amsmath}               % Various commands like \text{...}
 \usepackage{mathtools}             % Maths
@@ -11,10 +12,8 @@
 \usepackage{listings}              % Source code printer
 \usepackage{framed}                % To frame the computational cost
 \usepackage{qtree}                 % Draw simple binary trees
-\usepackage{amsthm}                % \proof environment
 \usepackage{titlesec}              % Customize sections
 \usepackage{biblatex}              % Bibliography
-
 \addbibresource{bibliography.bib}
 
 \DeclarePairedDelimiter\abs{\lvert}{\rvert}  % Define abs-like syntax
@@ -48,8 +47,10 @@
   \include{8-count-min-sketch-extension}
   \include{9-count-min-sketch-range-queries}
   \include{10-space-efficient-perfect-hash}
+  \include{11-bloom-vs-perfect-hash}
+  \include{12-minhash-sketches}
   \include{13-randomized-min-cut}
-  %\include{appendix}
+  \include{appendix}
 
   \printbibliography
 
