@@ -1,95 +1,50 @@
-\section{Count-min sketch: extension to negative counters}
+\section{Space-efficient perfect hash}
 
-Consider the two-level perfect hash tables presented in [CLRS] and discussed in class.
-As already discussed, for a given set of $n$ keys from the universe $U$, a random
-universal hash function $h : U \to [m]$ is employed where $m = n$, thus creating
-$n$ buckets of size $n_j \geq 0$, where $\Sigma_{j=0}^{n-1}(n_j) = n$.
-Each bucket $j$ uses a random universal hash function $h_j: U \to [m]$ with
-$m = n_j^2$.
-Key $x$ is thus stored in position $h_j(x)$ of the table for bucket $j$, where
-$j = h(x)$.
-This problem asks to replace each such table by a bitvector of length $n_j^2$,
-initialized to all $0$s, where key $x$ is discarded and, in its place, a bit $1$
-is set in position $h_j(x)$ (a similar thing was proposed in Problem 4 and thus
-we can have a one-side error).
-Design a space-efficient implementation of this variation of perfect hash, using
-a couple of tips.
-First, it can be convenient to represent the value of the table size in unary
-(i.e., x zeroes followed by one for size $x$, so $000001$ represents $x = 5$ and
-$1$ represents $x = 0$).
-Second, it can be useful to employ a rank-select data structure that, given any
-bit vector B of b bits, uses additional $o(b)$ bits to support in $O(1)$ time the
-following operations on B:
+Consider the two-level perfect hash tables presented in [CLRS] and discussed in class. As already discussed, for a given set of $n$ keys from the universe $U$, a random universal hash function $h : U \to [m]$ is employed where $m = n$, thus creating $n$ buckets of size $n_j \geq 0$, where $\sum^{n-1}_{j=0} n_j = n$. Each bucket $j$ uses a random universal hash function $h_j: U \to [m_j]$ with $m_j = n_j^2$. Key $x$ is thus stored in position $h_j(x)$ of the table for bucket $j$, where $j = h(x)$.
+
+This problem asks to replace each such table by a bitvector of length $n_j^2$, initialized to all 0s, where key $x$ is discarded and, in its place, a bit 1 is set in position $h_j(x)$ (a similar thing was proposed in Problem 4 and thus we can have a one-side error). Design a space-efficient implementation of this variation of perfect hash, using a couple of tips. First, it can be convenient to represent the value of the table size in unary (i.e., $x$ zeroes followed by one for size $x$, so 000001 represents $x = 5$ and 1 represents $x = 0$). Second, it can be useful to employ a rank-select data structure that, given any bit vector $B$ of $b$ bits, uses additional $o(b)$ bits to support in $O(1)$ time the following operations on $B$:
 \begin{itemize}
-\item $rank_1(i)$: return the number of $1$s appearing in the first $i$ bits of $B$.
-\item $select_1(i)$: return the position $i$ of the $j^{th} 1$, if any, appearing
-in $B$ (i.e. $B[i] = 1$ and $rank_1(i) = j$).
+  \item $rank_1(i)$: return the number of 1s appearing in the first $i$ bits of $B$.
+  \item $select_1(j)$: return the position $i$ of the $j$th 1, if any, appearing in $B$ (i.e. $B[i] = 1$ and $rank_1(i) = j$).
 \end{itemize}
+Operations $rank_0(i)$ and $select_0(j)$ can be defined in the same way as above. Also, note that $o(b)$ stands for any asymptotic cost that is smaller than $\Theta(b)$ for $b \to \infty$.
 
-Operations $rank_0(i)$ and $select_0(j)$ can be defined in the same way as above.
-Also, note that $o(b)$ stands for any asymptotic cost that is smaller than
-\\ $O(b), b \to \infty$.
-
-\subsection{Wide bitvector}
-
-The two-level hashing layers are comprised of:
+\vspace{1cm}
+\paragraph{Solution.} The two-level hashing layers are comprised of:
 \begin{enumerate}
-\item An hash function and $n$ pointers, each addressing one bitvector $B_j$.
-\item $n$ hash functions $h_j$ hashing to their relative buckets $B_j$.
+  \item A hash function $h$ and $n$ pointers, each addressing one bitvector $B_j$ of size $n_j^2$.
+  \item $n$ hash functions $h_j$ hashing to their relative bitvector $B_j$ of size $n_j^2$.
 \end{enumerate}
+Instead of storing a vector of pointers to the secondary hash tables, we merge the bitvectors $B_j$, one after the other, in a flat array $B=B_0B_1 \cdots B_{n-1}$. Note that, except for the $n$ pointers removed at the first level, the space is neither reduced nor increased, as no further bits are used to separate two adjacent buckets. We then store the size of each $B_j$ in unary in an auxiliary bitvector $L$:
+$$L = \overbrace{00 \dots 0}^{n_0^2 \text{ times}} 1 
+      \overbrace{00 \dots 0}^{n_1^2 \text{ times}} 1 \cdots
+      \overbrace{00 \dots 0}^{n_{n-1}^2 \text{ times}} 1$$
+$L$ is associated with a rank-select data structure.
 
-Given that by removing one hash function we would not be able to retrieve any element in its bucket, we try and optimize the pointers on the first level.
+\paragraph{Queries.} The starting index of $B_j$ in $B$ is computed in $O(1)$ with the following function on $L$: $$\phi(j)=rank_0(select_1(j))$$ This operation:
+\begin{enumerate}
+  \item finds the position of the $j$th 1 with $select_1(j)$, that is, the index in $L$ that precedes the start of the unary representation of $n_j^2$;
+  \item calculates the sum of the sizes of the preceding bitvectors ($\sum_{i=0}^{j-1} n_i^2$) by computing the number of $0$s with $rank_0(select_1(j))$ (this is the starting position of the desired bitvector).
+\end{enumerate}
+We can determine (with a probability of error) whether a key $k$ belongs to the set $S \subset U$, by testing whether $B[i+h_{h(k)}(k)]$ is equal to 1, where $i=\phi(h(k))$ is the starting position of the $h(k)$th bucket, and $h_{h(k)}(k)$ is the offset for the secondary level.
 
-\subsubsection{First level pointers}
-We merge the bitvectors $B_j$ subsequently one after the other in a flat array $B$: note that the space is not reduced nor increased, as no further bits are used to separate two adjacent buckets.
-
-\begin{equation*}
-B = 0 0 1 0 1 1 0 1 \dots 0 1
-\end{equation*}
-
-We then store their respective dimensions in unary form in an auxiliary bitvector $L$ following the same principle.
-
-\begin{equation*}
-L = 0 0 1 | 0 1 | 1 | 0 1 | \dots 0 1 |
-\end{equation*}
-
-
-It is trivial to see as given a substring $S'$ in $L$ the length it encodes ends
-at the very next $1$.
-We can exploit this property to compute the size of any interval of buckets $B_a$
-and $B_b, b \geq a$ in $O(1)$:
-\begin{itemize}
-\item Pick the $b^{th} 1 = \alpha $ with $select_1(b)$ in $O(1)$: this will give
-us the end of the precedent bucket.
-\item Pick the sum of the sizes of the preceding buckets by computing the number
-of $0$s with $rank_0(\alpha)$: this will give us starting position of the desired bucket.
-\end{itemize}
-
-Given a bitvector $B$ we employ a map structure to answer the $\mathcal{Q}(i)$ in $O(1)$:
-\begin{itemize}
-\item Hash on the first level in $O(1)$.
-\item Given $j = h(k)$, apply the above algorithm in $O(1)$ to select the corresponding
-bucket starting at index $B[k]$ and ending at $B[k + \delta], \delta \geq 0$.
-\item Apply $h_j(k)$ to $B[k, k + \delta]$ and return $B[k + j]$.
-\end{itemize}
-
-
-\subsubsection{Hash functions optimization}
-We now try and improve the space for the hash functions parameters $a_j, b_j, p_j$.
-First, we select the lowest $p_j$ possible, that is the first $p_j > n_j^2$: by
+\paragraph{Hash functions space optimization.} We now try to improve the space for the hash functions parameters $a_j, b_j, p_j$.
+First, we select the lowest $p_j$ possible, that is, the first $p_j > n_j^2$: by
 \href{https://en.wikipedia.org/wiki/Bertrand\%27s_postulate}{Bertrand postulate}
 such a prime $p_j$ exists for $n_j^2 \leq p_j \leq 2n_j^2 - 2$.
 We therefore need a space of at most $2n_j^2$ bits for each parameter in an unary
 encoding.
 Since we have $a \in \mathbb{Z}_{p_j}^*, b \in \mathbb{Z}_{p_j}$, we have a space
 of $3 \cdot 2n_j^2$ for a triple $(a_j, b_j, p_j)$ of any given hash function.
-Let us now compute the expected space for the $m$ hash functions:
-\begin{equation*}
-\E{3 \sum_{j=0}^{m-1}2n_j^2} =
-6 \cdot \E{\sum_{j=0}^{m-1}n_j^2}
-\end{equation*}
-where $\E{n_j^2} \leq 2n$ as shown in the perfect hashing analysis.
-Therefore
-\begin{equation*}
-6 \cdot \E{\sum_{j=0}^{m-1} n_j^2} \leq 6 \cdot 2n = 12n
-\end{equation*}
+Let us now compute the space for the $n$ hash functions:
+$$Y=3n+3 \sum_{j=0}^{n-1}2n_j^2 = 3n+6 \sum_{j=0}^{n-1}n_j^2$$
+where $3n$ is the number of 1s that separate the unary encoding of the parameters. We have also an auxiliary space $o(Y)$ due to the rank-select data structure. 
+
+\paragraph{Space.} The space occupied by the whole data structure is:
+\begin{itemize}
+  \item $X=\sum_{j=0}^{n-1}n_j^2$ bits for $B$;
+  \item $X+n$ bits for $L$, since $X$ is the number of 0s and $n$ is the number of 1s in $L$;
+  \item $o(X+n)$ bits for the rank-select auxiliary data structure for $L$;
+  \item $Y+o(Y)$ bits for the hash functions, as shown in the previous paragraph.
+\end{itemize}
+Since $\E{\sum_{j=0}^{n-1}n_j^2} < 2n$, as shown in the perfect hashing analysis \cite[281]{Cormen09}, the total space is $O(n)$.
