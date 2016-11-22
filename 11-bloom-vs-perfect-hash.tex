@@ -1,7 +1,31 @@
-\section{Bloom filters vs. space-efficient perfect hash}
+\section{Bloom filters vs.\ space-efficient perfect hash}
 
-Recall that classic Bloom filters use roughly $1.44\log_2(1/f)$ bits per key, as seen in class (where $f=(1-p)^k$ is the failure probability minimized for $p \approx e^{-\frac{kn}{m}} = 1/2$). The problem asks to extend the implementation required in Problem 10 by employing an additional random universal hash function $s : U \to [m]$ with $m = \lceil 1/f \rceil$, called signature, so that $s(x)$ is also stored (in place of $x$, which is discarded). The resulting space-efficient perfect hash table $T$ has now a one-side error with failure probability of roughly $f$, as in Bloom filters: say why. Design a space-efficient efficient implementation of $T$, and compare the number of bits per key required by $T$ with that required by Bloom filters.
+Recall that classic Bloom filters use roughly $1.44\log_2(1/f)$ bits per key, as
+seen in class (where $f=(1-p)^k$ is the failure probability minimized for
+$p \approx e^{-\frac{kn}{m}} = 1/2$).
+The problem asks to extend the implementation required in Problem 10 by employing
+an additional random universal hash function $s : U \to [m]$ with $m = \lceil 1/f \rceil$,
+called signature, so that $s(x)$ is also stored (in place of $x$, which is discarded).
+The resulting space-efficient perfect hash table $T$ has now a one-side error with
+failure probability of roughly $f$, as in Bloom filters: say why.
+Design a space-efficient efficient implementation of $T$, and compare the number
+of bits per key required by $T$ with that required by Bloom filters.
 
-\vspace{1cm}
-\noindent
-\textbf{Solution.} 
+\subsection{Solution 1}
+
+\subsection{Error probability}
+By swapping to a signature function on a $\frac{1}{f}$ table we get back to our classic definition of hash function with a one-sided error of $\frac{1}{m}$ where $m = \frac{1}{f} \implies \Pr(error) = \frac{1}{\frac{1}{f}} = f$
+
+\subsubsection{Bits count comparison}
+
+Our solution uses roughly $17n + o(n) \approx \frac{17}{f} + o(\frac{1}{f})$ bits
+per key, while Bloom filters clock around $1.44 \log_2(\frac{1}{f})$.
+We add an hash table $T_s$ to store the signatures $s(k)$ with size
+$m \cdot \log_2(m) = \frac{1}{f} \cdot \log_2(m)$ bits.
+We try and analyse these two functions $g_{bloom}(n) < g_{perf\_hash}(x)$ and verify
+whether or not they meet:
+\begin{align*}
+\log_2(1/f) + 17 < 1.44 \log_2(1/f) \\
+f < \frac{1}{2^{\frac{17}{0.44}}} \\
+\end{align*}
+That is, bloom filters are more performing for $f$ over $2.34\cdot10^{-12}$.
