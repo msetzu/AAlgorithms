@@ -12,9 +12,10 @@ $S$ looking at h and $B_S$ and what is the probability of error?)
 Later, another database R has been found to be lost: it was using the same hash
 function h, and the bit vector BR defined analogously as above.
 Using $h, B_S, B_R$, how can you establish if $k$ was in $S \cap R$ (union), $S \cup R$
-(intersection), or $S \\ R$ (difference)? What is the probability of error?
+(intersection), or $S \setminus R$ (difference)? What is the probability of error?
 
-\subsection{$k \in S$}
+\vspace{0.5cm}
+\paragraph{Solution.}
 Trivially for $B_s[h(k)] = 0$ we can answer \textsc{false} with $\prob{error} = 0$.
 Let us analyse the opposite case, $B_s[h(k)] = 1$.
 Let $i \in [0,m]$ be some index s.t. $B_s[i] = 1$, and let $cl_{S}(i)$ be the list of
@@ -57,7 +58,7 @@ Therefore
     e \leq 1 - \frac{1}{m^{|S|}} \leq \frac{1}{c}
     \end{equation}
 
-\subsection{Expected number of 1 in $B_{s}$}
+\paragraph{Expected number of 1 in $B_{s}$.}
 We define a random variable $X_{k}$:
     \begin{equation*}
     X_{k} = \begin{cases}
@@ -68,7 +69,7 @@ We define a random variable $X_{k}$:
 and one over the ones in $B_{s}$, $X$:
     \begin{equation}
         X = \Sigma_{k = 0}^{m - 1}X_k
-    \end{equation}.
+    \end{equation}
 We compute the relative expected value $\E{X}$:
     \begin{align*}
        \E{X} & = \E{\Sigma_{k = 0}^{m - 1}X_k} \\
