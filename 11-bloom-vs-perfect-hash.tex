@@ -11,13 +11,11 @@ failure probability of roughly $f$, as in Bloom filters: say why.
 Design a space-efficient efficient implementation of $T$, and compare the number
 of bits per key required by $T$ with that required by Bloom filters.
 
-\subsection{Solution 1}
-
-\subsection{Error probability}
+\vspace{0.5cm}
+\paragraph{Solution.}
 By swapping to a signature function on a $\frac{1}{f}$ table we get back to our classic definition of hash function with a one-sided error of $\frac{1}{m}$ where $m = \frac{1}{f} \implies \Pr(error) = \frac{1}{\frac{1}{f}} = f$
 
-\subsubsection{Bits count comparison}
-
+\paragraph{Bits count comparison.}
 Our solution uses roughly $17n + o(n) \approx \frac{17}{f} + o(\frac{1}{f})$ bits
 per key, while Bloom filters clock around $1.44 \log_2(\frac{1}{f})$.
 We add an hash table $T_s$ to store the signatures $s(k)$ with size

@@ -18,9 +18,8 @@ to use $O(n)$ space.
 [Note: in this exercise, a onetime preprocessing is performed, and then many online
 queries are to be answered on the fly.]
 
-\subsection{Solution 1: Cumulative shift}
-\subsubsection{Construction}
-
+\vspace{0.5cm}
+\paragraph{Solution.}
 In order to save computational cycles on checks over ranges we use a similar structure
 to the one in the range updates: we compute the hashing on the first character in $O(1)$
 time, then roll the hash through the $n - 1$ remaining characters through $n O(1)$
@@ -35,8 +34,6 @@ properties hold:
     \item $h[i..j] - h[k..l] = (h[l] - h[k - 1]) / a^{-1} -
             (h[j] - h[i - 1]) / a^{-1}, a^{-1} = \textrm{modular inverse}$
     \end{itemize}
-
-\subsubsection{equals(i, j, l)}
 
 \textsc{equals} works on cumulative hashes, subtracting them and scaling them
 accordingly, as our $rabin$ function multiplies by an $a^{i}$ costant.
@@ -56,8 +53,6 @@ accordingly, as our $rabin$ function multiplies by an $a^{i}$ costant.
     \Return $h^{k - l}$
     \EndFunction
 \end{algorithmic}
-
-\subsubsection{lce(i, j)}
 
 \textsc{lce} works on cumulative hashes, checks the equality on the middle element
 of the strings and runs recursively on the half with different hashing.

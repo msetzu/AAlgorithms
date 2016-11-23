@@ -14,7 +14,8 @@ Design a data structure that uses $O(n)$ space and implements each operation abo
 in $O(\log(n))$ time. Note that $query(i) = sum(i, i)$ but it helps to reason.
 [Hint to further save space: use an implicit tree such as the Fenwick tree (see wikipedia).]
 
-\subsection{Solution 1: Segment tree lazy a-b sums}
+\vspace{0.5cm}
+\paragraph{Solution.}
 Let $T$ be a segmented binary tree over a continuous interval $I: [0, N - 1]$
 s.t.\ its leafs are the points in I, and the parent of two nodes comprises of their interval:
 $$  n' \cup n'' = n, n' \cap n'' = \emptyset   \textrm{ s.t. } n \text{ is the parent of } n', n''$$
