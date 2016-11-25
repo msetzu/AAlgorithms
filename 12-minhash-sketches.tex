@@ -2,9 +2,8 @@
 
 As discussed in class, for a min-wise independent family $\mathcal{H}$, we can associate a sketch $$s(X) = \langle \min h_1(X), \min h_2(X), \dots , \min h_k(X) \rangle$$ with each set $X$ in the given data collection, where $h_1, h_2, \dots , h_k$ are independently chosen at random from $\mathcal{H}$. Consider now any two sets $A$ and $B$, with their sketches $s(A)$ and $s(B)$. Can you compute a sketch for $A \cup B$ using just $s(A)$ and $s(B)$ in $O(k)$ time? Can you prove that it is equivalent to compute $s(A \cup B)$ from scratch directly from $A \cup B$?
 
-\vspace{1cm}
-\noindent
-\textbf{Solution.}  We claim that
+\vspace{0.5cm}
+\paragraph{Solution.}  We claim that
 $$\langle \min(\min h_1(A), \min h_1(B)), \dots, \min(\min h_k(A), \min h_k(B))\rangle$$
 which can be computed from $s(A)$ and $s(B)$ with $\Theta(k)$ comparisons, is equivalent to
 $$s(A \cup B) = \langle \min h_1(A \cup B), \dots , \min h_k(A \cup B) \rangle$$

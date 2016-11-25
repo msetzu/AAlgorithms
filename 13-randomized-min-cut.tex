@@ -21,8 +21,8 @@ can be made at least $1 - \frac{1}{nc}$ for a constant $c > 0$
 (hence, with high probability).
 \end{itemize}
 
-\subsection{Contraction algorithm}
-
+\vspace{0.5cm}
+\paragraph{Contraction algorithm.}
 We assume that the adjacency lists $Adj[x]$ are sorted $\forall x \in V$. We also note that the multigraph is undirected, therefore $v\in Adj[u]$ if and only if $u\in Adj[v]$. We maintain an attribute $pe$ in each edge to store the number of parallel edges.
 
 To contract an edge $(u, v)$, we have to merge the two adjacency lists $Adj[u]$ and $Adj[v]$ into a single \emph{sorted} adjacency list $Adj[uv]$ --- like the merge procedure in merge sort --- ensuring that:
@@ -32,8 +32,7 @@ To contract an edge $(u, v)$, we have to merge the two adjacency lists $Adj[u]$ 
 \end{itemize}
 Finally, we replace $Adj[u]$ and $Adj[v]$ with the newly created $Adj[uv]$.
 
-\subsection{Weighted graph extension}
-
+\paragraph{Weighted graph extension.}
 We now extend the above to weighted multi-graph.
 First we'll define the \emph{min-weighted cut}, the weighted cut where
 $\min_{|c| > 0} C = \min_{C} \sum{w(c)}$, that is the sum of the
@@ -44,8 +43,7 @@ We then reconduct this problem to the non-weighted case: given an edge $v$ with 
 We then have an equality between the sum of the weights for $v$ is equal to the number of edges (cuts) for $v$ as in the unweighted case.
 We then apply the error analysis seen in class to obtain $\frac{1}{{{n} \choose {2}}}$.
 
-\subsection{Error probability}
-
+\paragraph{Error probability.}
 By the analysis seen in class we have an error probability of
 \begin{equation*}
 1 - \Pr({\text{success}}) = 1 - \frac{1}{{{n} \choose {1}}}
