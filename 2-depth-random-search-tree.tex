@@ -11,9 +11,85 @@ with indicator variables, prove that:
 \begin{enumerate}
   \item the expected depth of a node (i.e.\ the random variable representing the distance of the node from the root) is nearly $2 \ln n$;
   \item the expected size of its subtree is nearly $2 \ln n$ too, observing that it is a simple variation of the previous analysis;
-  \item the probability that the expected depth of a node exceeds $2\ln n$ is small for any given constant $c > 1$.
+  \item the that the probability that the depth of a node exceeds $c2 \ln n$ is small for any given constant $c > 1$.
 \end{enumerate}
-\href{https://en.wikipedia.org/wiki/Chernoff_bound}{Chernoff’s bounds}.
+
+\subsection{Proof with indicator variable}
+
+\paragraph{Prove that the expected depth of a node is nearly $2 \ln n$.}
+
+\begin{proof}
+  Let $z_m$ the $m$th smallest element in $S$ and $$X_{ij}=
+  \left\{
+    \begin{array}{ll}
+      1 & \mbox{if $z_j$ is an ancestor of $z_i$ in the random search tree} \\
+      0 & \mbox{otherwise}
+    \end{array}
+  \right.$$
+  The depth of the node $i$ in the tree is given by the number of its ancestors:
+  \begin{equation}
+    X=\sum_{\substack{j=1 \\ j\ne i}}^n X_{ij}
+    \label{equation:node-depth}
+  \end{equation}
+
+  Note that the depth of a node is also equal to the number of comparison it's
+  involved in (in other words, the number of times it became the left or the
+  right child of a randomly chosen pivot).
+
+  Once a pivot $k$ is chosen from $S$, $S$ is partitioned in two subsets $L$ and
+  $R$. The elements in the set $L$ will not be compared with the elements in $R$
+  at any subsequent time. The event $E_1=$ $z_j$ is an ancestor of $z_i$ in the
+  random search tree occurs if $z_j$ and $z_i$ belongs to the same partition
+  \emph{and} $z_j$ was chosen as pivot before $z_i$. The probability that $E_1$
+  occurs, since it is the intersection of two events, can be upper bounded by:
+  $$\text{Pr}\{ z_j \text{ was chosen as pivot before } z_i
+  \}=\frac{1}{\text{size of the partition}}\leq\frac{1}{|j-i|+1}$$ because
+  pivots are chosen randomly and independently, and because the partition that
+  contains both $z_j$ and $z_i$ must contain \emph{at least} the $|j-i|+1$
+  numbers between $z_j$ and $z_i$.
+
+  Taking expectations of both sides of~\eqref{equation:node-depth}, and then
+  using linearity of expectation, we have:
+  \begin{align*}
+    \E{X} & = \sum_{\substack{j=1\\ j\ne i}}^n \E{X_{ij}} \\
+    & = \sum_{\substack{j=1\\ j\ne i}}^n \text{Pr}\{ z_j \text{ is an ancestor
+      of } z_i \text{ in the random search tree} \} \\
+    & \le \sum_{\substack{j=1\\ j\ne i}}^n \frac{1}{|j-i|} \\
+    & = \sum_{j=1}^{i-1} \frac{1}{i-j} + \sum_{j=i+1}^{n} \frac{1}{j-i}
+  \end{align*}
+  With the change of variables $l=i-j$ and $m=j-i$:
+  \begin{equation*}
+    = \sum_{l=1}^{i-1} \frac{1}{l} + \sum_{m=1}^{n} \frac{1}{m} \approx 2\ln n
+  \end{equation*}
+
+\end{proof}
+
+\paragraph{Prove that the expected size of its subtree is nearly $2 \ln n$ too,
+observing that it is a simple variation of the previous analysis.}
+
+\begin{proof}
+  The size of the subtree of a randomly chosen pivot of $z_j\in S$ is given by
+  the number of it's descendants. Since~\eqref{equation:node-depth} is the
+  number of ancestors of a node $z_i$, we can find the number of descendants of
+  $z_j$ by changing the summation from $j=1,\dotsc,n$ to $i=1,\dotsc,n$.
+\end{proof}
+
+\paragraph{Prove that the that the probability that the depth of a node exceeds $c2 \ln n$ is small for any given constant $c > 1$.}
+
+\begin{proof}
+  We apply the Theorem \ref{theorem:chernoff} below with $(1+\delta)=c$ and $\mu=2 \ln n$:
+  $$\prob{X>2c\ln n}<\left(\frac{e^{c-1}}{c^c}\right)^{2 \ln n}$$
+  Since $\lim_{n\to+\infty}a^n=0$ with $0<a<1$, and $\lim_{n\to+\infty}2\ln n= +\infty$, we have to prove that, for any $c>1$
+  $$0<\frac{e^{c-1}}{c^c}<1$$
+  The first inequality is simple to verify, for the latter observe that
+  $$\frac{e^{c-1}}{c^c}<1 \iff e^{c-1}<c^c \iff c-1 < c\ln c \iff c(1-\ln c)<1.$$
+\end{proof}
+
+\newtheorem{thm}{Theorem}
+\begin{thm}[Chernoff Bound]\label{theorem:chernoff}
+  Let $X_1, \dots, X_n$ be independent Poisson trials such that, for $1 \leq i \leq n$, $\prob{X_i=1}=p_i$, where $0 < p_i < 1$. Then, for $X=\sum_{i=1}^n X_i$, $\mu=\E{X}=\sum_{i=1}^n p_i$ and any $\delta>0$,
+	$$\prob{X>(1+\delta )\mu}<\left({\frac {e^{\delta }}{(1+\delta )^{(1+\delta )}}}\right)^\mu.$$
+\end{thm}
 
 \subsection{Recursive balanced proof}
 
@@ -102,63 +178,3 @@ then
 \begin{equation*}
     \prob{X \geq c \ln(n)} < e^{-c \ln(\frac{c}{e})\ln(n)}
 \end{equation*}
-
-\subsection{Proof with indicator variable}
-
-\textbf{Prove that the expected depth of a node is nearly $2 \ln n$.}
-
-\begin{proof}
-  Let $z_m$ the $m$th smallest element in $S$ and $$X_{ij}=
-  \left\{
-    \begin{array}{ll}
-      1 & \mbox{if $z_j$ is an ancestor of $z_i$ in the random search tree} \\
-      0 & \mbox{otherwise}
-    \end{array}
-  \right.$$
-  The depth of the node $i$ in the tree is given by the number of its ancestors:
-  \begin{equation}
-    X=\sum_{\substack{j=1 \\ j\ne i}}^n X_{ij}
-    \label{equation:node-depth}
-  \end{equation}
-
-  Note that the depth of a node is also equal to the number of comparison it's
-  involved in (in other words, the number of times it became the left or the
-  right child of a randomly chosen pivot).
-
-  Once a pivot $k$ is chosen from $S$, $S$ is partitioned in two subsets $L$ and
-  $R$. The elements in the set $L$ will not be compared with the elements in $R$
-  at any subsequent time. The event $E_1=$ $z_j$ is an ancestor of $z_i$ in the
-  random search tree occurs if $z_j$ and $z_i$ belongs to the same partition
-  \emph{and} $z_j$ was chosen as pivot before $z_i$. The probability that $E_1$
-  occurs, since it is the intersection of two events, can be upper bounded by:
-  $$\text{Pr}\{ z_j \text{ was chosen as pivot before } z_i
-  \}=\frac{1}{\text{size of the partition}}\leq\frac{1}{|j-i|+1}$$ because
-  pivots are chosen randomly and independently, and because the partition that
-  contains both $z_j$ and $z_i$ must contain \emph{at least} the $|j-i|+1$
-  numbers between $z_j$ and $z_i$.
-
-  Taking expectations of both sides of~\eqref{equation:node-depth}, and then
-  using linearity of expectation, we have:
-  \begin{align*}
-    \E{X} & = \sum_{\substack{j=1\\ j\ne i}}^n \E{X_{ij}} \\
-    & = \sum_{\substack{j=1\\ j\ne i}}^n \text{Pr}\{ z_j \text{ is an ancestor
-      of } z_i \text{ in the random search tree} \} \\
-    & \le \sum_{\substack{j=1\\ j\ne i}}^n \frac{1}{|j-i|} \\
-    & = \sum_{j=1}^{i-1} \frac{1}{i-j} + \sum_{j=i+1}^{n} \frac{1}{j-i}
-  \end{align*}
-  With the change of variables $l=i-j$ and $m=j-i$:
-  \begin{equation*}
-    = \sum_{l=1}^{i-1} \frac{1}{l} + \sum_{m=1}^{n} \frac{1}{m} \approx 2\ln n
-  \end{equation*}
-
-\end{proof}
-
-\textbf{Prove that the expected size of its subtree is nearly $2 \ln n$ too,
-observing that it is a simple variation of the previous analysis.}
-
-\begin{proof}
-  The size of the subtree of a randomly chosen pivot of $z_j\in S$ is given by
-  the number of it's descendants. Since~\eqref{equation:node-depth} is the
-  number of ancestors of a node $z_i$, we can find the number of descendants of
-  $z_j$ by changing the summation from $j=1,\dotsc,n$ to $i=1,\dotsc,n$.
-\end{proof}
