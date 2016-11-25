@@ -39,16 +39,14 @@ given $S' = S[0, \frac{n}{2}], S'' = S[\frac{n}{2}, n], k = \textrm{ number of e
     \item More generally, given two sub-streams $S', S''$, the sub-stream
     dominant element of $S'S''$ is one of the sub-stream dominants in
     $S'$ or $S''$ and its frequencies are defined by
-        \begin{equation}
-        e - k - 1\textrm{ in } S', \frac{n}{2} + 1 - (e - k - 1) \textrm{ in } S''
-        \end{equation}
+    $$e - k - 1\textrm{ in } S', \frac{n}{2} + 1 - (e - k - 1) \textrm{ in } S''$$
     where $e$ is an arbitrary number of appearances of $j^{2}: e < \frac{n}{2} + 1$
     The reader will see as the $+1$ in the right side guarantees the
     sub-stream dominant to be maximum.
     The sides can be swapped without hurting generality.
     \end{itemize}
 
-In order to better illustrate, we provide an algorithm that exploits the
+In order to better illustrate, we provide an algorithm (the Boyer–Moore majority vote algorithm) that exploits the
 sub-stream dominance.
 Our idea is to \emph{go up} with our counter when we are fed an object we've
 already met, and to \emph{go down} when we are fed an object different from
@@ -60,22 +58,20 @@ have sub-stream dominance in the remaining sequence, which means it will
 \emph{go upper} than any other element in that sub-stream.
 Given that any other element has lower frequency, the most frequent of
 them, $j^{2}$ will \emph{go down} $e < \frac{n}{2} + 1$ times.
-Note that $C$ holds only one element, for simplicity we'll denote its entries as
-a map in a Scala-like syntax.
 
 \begin{algorithmic}[1]
-  \Function{up\_and\_down}{$S$, $C$}:
-    \State $k \gets S.next()$\;
-    \If{$\exists C(k)$}
-        \State $C \gets \{k => C(k) + 1\}$\;    \Comment{Increment current dominant
-                                                element.}
-    \ElsIf{$C(k) == 0$}
-        \State $C \gets \{k => 1\}$\;           \Comment{k is no more dominant,
-                                                swap it with new element and initialize.}
-    \Else
-        \State $C \gets \{k => C(k) - 1\}$      \Comment{k is still dominant, but
-                                                the stream.}
-    \EndIf
-    \State \Return{$C$}\;
-    \EndFunction
+  \Function{majority\_vote\_algorithm}{$S$}:
+    \State $candidate \gets$ null
+    \State $counter \gets 0$
+    \ForAll{$object \in S$}
+       \If{$counter = 0$}
+         \State $candidate \gets object$ \Comment{$candidate$ is no more dominant, swap it}
+       \ElsIf{$object = candidate$}
+         \State $counter \gets counter + 1$
+       \ElsIf{$object \neq candidate$}
+         \State $counter \gets counter - 1$
+       \EndIf
+    \EndFor
+    \State \Return{$candidate$}
+  \EndFunction
 \end{algorithmic}
