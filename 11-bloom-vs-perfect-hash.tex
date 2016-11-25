@@ -13,17 +13,15 @@ of bits per key required by $T$ with that required by Bloom filters.
 
 \vspace{0.5cm}
 \paragraph{Solution.}
-By swapping to a signature function on a $\frac{1}{f}$ table we get back to our classic definition of hash function with a one-sided error of $\frac{1}{m}$ where $m = \frac{1}{f} \implies \Pr(error) = \frac{1}{\frac{1}{f}} = f$
+We extend the data structure discussed in Section \ref{section:space-efficient-perfect-hash} with an additional array $C$ that stores the $n$ signatures. Leveraging the fact that $B$ has as many 1s as the number of signatures we need to store, we fill the array $C$ with the signatures in this way: the entry $C[i]$ contains the signature $s(k)$ in binary if and only if $k$ is the key that caused a the $i$th one in $B$. We also need an additional space of $o(X)$ to perform rank-select operations  on $B$ in $O(1)$.
 
-\paragraph{Bits count comparison.}
-Our solution uses roughly $17n + o(n) \approx \frac{17}{f} + o(\frac{1}{f})$ bits
-per key, while Bloom filters clock around $1.44 \log_2(\frac{1}{f})$.
-We add an hash table $T_s$ to store the signatures $s(k)$ with size
-$m \cdot \log_2(m) = \frac{1}{f} \cdot \log_2(m)$ bits.
-We try and analyse these two functions $g_{bloom}(n) < g_{perf\_hash}(x)$ and verify
-whether or not they meet:
-\begin{align*}
-\log_2(1/f) + 17 < 1.44 \log_2(1/f) \\
-f < \frac{1}{2^{\frac{17}{0.44}}} \\
-\end{align*}
-That is, bloom filters are more performing for $f$ over $2.34\cdot10^{-12}$.
+With this new data structure, given a key $l \in U$, to check whether it belongs to $S$ we check whether $B[i]=1$ where $i=\phi(h(l))+h_{h(l)}(l)$ as before, but also:
+\begin{equation}
+  \label{equation:query-signature}
+  C[rank_1(i)-1] \stackrel{?}{=} s(l).
+\end{equation}
+In fact, $rank_1(i)-1$, executed on $B$, returns the position in $C$ where we find the signature for the key $k\in S$ that caused $B[i]=1$.
+
+We have an error whenever $l\notin S$, but \eqref{equation:query-signature} is true. Since the signature has length $1/f$, $\Pr(error) \leq \frac{1}{1/f} = f$.
+
+\paragraph{Bits per key comparison.} If we consider only the space used by $C$, $B$ and $L$, our solutions uses $n\log_2\frac{1}{f}+X+(X+n)$ bits to store $n$ keys. Since $\E{X}<2n$, on average we need approximately $\log_2\frac{1}{f}+5$ bits per key, that compared to the Bloom filters is better for $f<2^{-\frac{5}{0.44}}$.

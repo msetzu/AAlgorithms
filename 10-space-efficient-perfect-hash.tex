@@ -1,4 +1,5 @@
 \section{Space-efficient perfect hash}
+\label{section:space-efficient-perfect-hash}
 
 Consider the two-level perfect hash tables presented in [CLRS] and discussed in class. As already discussed, for a given set of $n$ keys from the universe $U$, a random universal hash function $h : U \to [m]$ is employed where $m = n$, thus creating $n$ buckets of size $n_j \geq 0$, where $\sum^{n-1}_{j=0} n_j = n$. Each bucket $j$ uses a random universal hash function $h_j: U \to [m_j]$ with $m_j = n_j^2$. Key $x$ is thus stored in position $h_j(x)$ of the table for bucket $j$, where $j = h(x)$.
 
@@ -26,7 +27,7 @@ $L$ is associated with a rank-select data structure.
   \item finds the position of the $j$th 1 with $select_1(j)$, that is, the index in $L$ that precedes the start of the unary representation of $n_j^2$;
   \item calculates the sum of the sizes of the preceding bitvectors ($\sum_{i=0}^{j-1} n_i^2$) by computing the number of $0$s with $rank_0(select_1(j))$ (this is the starting position of the desired bitvector).
 \end{enumerate}
-We can determine (with a probability of error) whether a key $k$ belongs to the set $S \subset U$, by testing whether $B[i+h_{h(k)}(k)]$ is equal to 1, where $i=\phi(h(k))$ is the starting position of the $h(k)$th bucket, and $h_{h(k)}(k)$ is the offset for the secondary level.
+We can determine (with a probability of error) whether a key $k$ belongs to the set $S \subset U$, by testing whether $B[i+h_{h(k)}(k)]$ is equal to 1, where $i=\phi(h(k))$ is the starting position of the $h(k)$th bitvector, and $h_{h(k)}(k)$ is the offset for the secondary level.
 
 \paragraph{Hash functions space optimization.} We now try to improve the space for the hash functions parameters $a_j, b_j, p_j$.
 First, we select the lowest $p_j$ possible, that is, the first $p_j > n_j^2$: by
