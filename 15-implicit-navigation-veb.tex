@@ -1,5 +1,29 @@
 \section{Implicit navigation in vEB layout}
-Consider $N = 2^h - 1$ keys where h is a power of 2, and the implicit cache-oblivious vEB layout of their corresponding complete binary tree, where the keys are suitably permuted and stored in an array of length $N$ without using pointers (as it happens in the classical implicit binary heap but the rule here is different). The root is in the first position of the array. Find a rule that, given the position of the current node, it is possible to locate in the array the positions of its left and right children. Discuss how to apply this layout to obtain (a) a static binary search tree and (b) a heap data structure, discussing the cache complexity.
+Consider $N = 2^h - 1$ keys where $h$ is a power of 2, and the implicit cache-oblivious vEB layout of their corresponding complete binary tree, where the keys are suitably permuted and stored in an array of length $N$ without using pointers (as it happens in the classical implicit binary heap but the rule here is different). The root is in the first position of the array. Find a rule that, given the position of the current node, it is possible to locate in the array the positions of its left and right children. Discuss how to apply this layout to obtain (a) a static binary search tree and (b) a heap data structure, discussing the cache complexity.
 
 \vspace{0.5cm}
-\paragraph{Solution.}
+\paragraph{Solution.} We assume that the keys are stored in a zero-indexed array $A$. Given and index $0 \leq i < A.length$ we will give a rule for computing the index of its children.
+
+\begin{center}
+  \begin{tikzpicture}[sibling distance=10pt]
+    \Tree [.0 [.1 [.3 [.4 15 18 ]  [.5 21 24 ] ] [.6 [.7 27 30 ] [.8 33 36 ] ] ] [.2 [.9 [.10 39 42 ] [.11 45 48 ] ] [.12 [.13 51 54 ] [.14 57 60 ] ] ] ]
+  \end{tikzpicture}
+\end{center}
+
+First, note a simple property: if $i \bmod 3 = 0$, then the left and the right child of $i$ are stored, respectively, in positions $i+1$ and $i+2$. Observe that the index of the keys that respect this property are those in an even level (the root has level 0).
+
+Before we give a rule for the nodes in an odd level we notice that, in even levels, there is a gap of three indexes between two adjacent \emph{neighbours} (nodes in the same level). Instead, in odd levels: two \emph{siblings} (nodes with the same parent) are stored in adjacent positions; two neighbours that aren't siblings are separated by a gap of one index.
+
+Let $k$ be the largest even power of 2 such that $2^k<i$ (for example, if $i=8$, such is power is $2$). Notice that $2^k$ is the number of nodes in the $k$-th level of the tree, and:
+\begin{itemize}
+  \item the number of neighbour of $i$ is $2^{k+1}-1$;
+  \item the index of the first node in the same level of $i$ is $2^k=\alpha$; 
+ \item the index of the first node in the same level of $i$'s children is $2^{k+2}-1=\beta$.
+\end{itemize}
+
+Now, since we know the index of the first key in the same level of $i$'s children, and this level is even, by our previous observation about gaps of three indexes, we can find the left child of $i$ with the following $$\beta+3m \quad \text{ where $m$ is the number of neighbours on the left of $i$'s left child}$$
+
+We compute $m$ as twice the difference between $i$ and the index of the first node in the same level minus the number of gaps (that have size one, by the observation on odd levels): $m=2(i-\alpha-\lfloor \frac{i-\alpha}{3} \rfloor)$.
+
+The final rule to compute the left child of $i$ when $i \bmod 3 \neq 0$ is: $$\textsc{Left}(i)=2^{k+2}-1+6\left(i-2^k- \left\lfloor \frac{i-2^k}{3} \right\rfloor\right)$$ and the right child is $$\textsc{Right}(i)=\textsc{Left}(i)+3$$
+
