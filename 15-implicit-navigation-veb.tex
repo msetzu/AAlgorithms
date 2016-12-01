@@ -17,7 +17,7 @@ Before we give a rule for the nodes in an odd level we notice that, in even leve
 Let $k$ be the largest even power of 2 such that $2^k<i$ (for example, if $i=8$, such is power is $2$). Notice that $2^k$ is the number of nodes in the $k$-th level of the tree, and:
 \begin{itemize}
   \item the number of neighbour of $i$ is $2^{k+1}-1$;
-  \item the index of the first node in the same level of $i$ is $2^k=\alpha$; 
+  \item the index of the first node in the same level of $i$ is $2^k=\alpha$;
  \item the index of the first node in the same level of $i$'s children is $2^{k+2}-1=\beta$.
 \end{itemize}
 
@@ -27,3 +27,51 @@ We compute $m$ as twice the difference between $i$ and the index of the first no
 
 The final rule to compute the left child of $i$ when $i \bmod 3 \neq 0$ is: $$\textsc{Left}(i)=2^{k+2}-1+6\left(i-2^k- \left\lfloor \frac{i-2^k}{3} \right\rfloor\right)$$ and the right child is $$\textsc{Right}(i)=\textsc{Left}(i)+3$$
 
+\vspace{0.5cm}
+\paragraph{Solution.}
+We define $q$ as the queried index, $T$ the \emph{vEB layout}, $h$ the height of $T$ s.t. $h = 2^l, l > 0$, $e_{l, i}$ as the $i^{th}$ element at level $l$ and $A$ the 1-indexed array.
+We then show how it can trivially be scaled to a 0-indexed array.
+Then the following holds:
+\begin{itemize}
+    \label{15_even_power} \item \textbf{Even powers:} Let $k$ be a level in $T$ s.t $k \mod 2 = 0$ s.t. the first element $e_{1, 2i}$ at $k$: then $e_1 = 2^{2i}$.
+    Since $h$ is a power of two we'll have the tip of the tree as 1 | 2 - 3 | 4 - 7 - 10 - 13 | $\dots |$.
+    \label{15_2-level_stripe}~\item \textbf{2-levels stripes:} Let $k$ be a level in $T$ s.t $k \mod 2 = 0$ s.t. the first element $e_1 = 2^k$ at $k: e_{1, k} = 2^k$: then $e_{1, k + 1} = 2^{k + 2}$.
+    Given that $(k, k + 1)$ are two subsequent levels, a \emph{vBE} minimal tree $T'$ exists: then $T'$ is populated sequentially with $2^k$ and $2^{k + 1}$ subsequent indexes: the first $2^k - 1$ of them allow us to get to $2^{k + 1}$ and the remaining $2^{k + 2} - 1$ to $2^{k + 2}$.
+    \label{15_k_plus_1_gap}~\item \textbf{Odd gaps:} Let $k + 1$ be a level in $T$ s.t $k \mod 2 = 1$ s.t. the first element $e_1 = 2^{k - 1} + 1$ at $k$: then $e_{1, k + 1} = 2^{k + 2}$.
+    Given that $(k, k + 1)$ are two subsequent levels, a \emph{vBE} minimal tree $T'$ exists: then $T'$ is populated sequentially with $2^k$ and $2^{k + 1}$ subsequent indexes: the first $2^k - 1$ of them allow us to get to $2^{k + 1}$ and the remaining $2^{k + 2} - 1$ to $2^{k + 2}$.
+    \label{15_k_plus_3_gap}~\item \textbf{Even gaps:} Let $k: k \mod 2 = 0$ then $e_{i + 1, k} = e_{i, k} + 3$.
+    By the above $e_{i, k}$ is populated in the minimal tree first, and the two children are populated right after it: the two children have subsequent indexes, and the following $e_{i + 1, k}$ is populated with $e_{i, k} + 3$ as $e_{i, k} + 1$ and $e_{i, k} + 2$ have been indexed in $k + 1$.
+    Also $k: k \mod 2 = 1$ then $e_{i + 1, k} = e_{i, k} + 1$ or $e_{i + 1, k} = e_{i, k} + 2$ if there's no gap or a gap, respectively.
+\end{itemize}
+
+We are then able to provide a rule for searching a given index $q$.
+We split the analysis on odd and even level cases:
+\begin{itemize}
+    \item  \textbf{Even levels:} By \ref{15_k_plus_3_gap} we have that any $e_{i, k} = e_{1, k} + 3m, i > 1$.
+    Given $\alpha = 2^k$ we are able to check in constant time if $e_{i, k} - e_{1, k} + 3m \neq 0$, where we fall through the odd-level case, or $e_{i, k} - e_{1, k} + 3m = 0$ where we answer $2^k + m$, as $2^k$ nodes have already been traversed.
+    \item \textbf{Odd levels:} By \ref{15_k_plus_1_gap} we have that any $e_{i, k + 1} = e_{1, k + 1} + (1, 2)m, i \geq 1$.
+    Given that the left child of $q$ is in an odd level, we are able to retrieve its value by its offset w.r.t. the start of the $k + 2$ level and its right child by adding $1$ to it by \ref{15_k_plus_1_gap}.
+    Since the $k + 2$ level has two nodes for each of the nodes in $k + 1$, if we are able to find the offset on level $k + 1$ we are able to search for $q$'s children with \ref{15_k_plus_3_gap}.
+    We compute $q$'s left siblings with the following:
+    \begin{equation*}
+    m = 2 \cdot (i-\alpha -\lfloor \frac{i-\alpha}{3} \rfloor)
+    \end{equation*}
+    where and is the number of gaps we skip.
+    We are then able to retrieve
+    \begin{equation*}
+    \textrm{left } = 2^{k+2}-1+6\left(i-2^k- \left\lfloor \frac{i-2^k}{3} \right\rfloor\right)
+    \end{equation*}
+    and
+    \begin{equation*}
+    \textrm{right = left + 1}
+    \end{equation*}
+
+We now analyse as the \emph{vEB layout} can be used to represent i) a static binary search tree and ii) a heap under the same hypothesis:
+    \begin{itemize}
+    \item \textbf{Static binary search tree:} As the \emph{vEB layout} populates the top tree $T_0$ first, followed by $T_1, T_2, \dots$ in sequential order, we'll be able to point to the rightmost element of the left subtree (and median leaf of the whole tree) to get the root of the search tree.
+    We then apply recursively to its left and right siblings.
+    \item \textbf{Max Heap:} In a maximum heap we are able to apply the same algorithm we applied on binary search tree with one slight edit: we pick the rightmost leaf as root and its left sibling and the median leaf as children.
+    We then shift every pointer from child to parent and child to gran-parent if the node is a left child and from child to parent and node to $2^{nd}$ left sibling if the node is a right child.
+    \item \textbf{Min Heap:} The \emph{vEB layout} implements a minimum heap as every cut populates the top tree with elements lower than the ones it populates the bottom cut with.
+    \end{itemize}
+\end{itemize}
