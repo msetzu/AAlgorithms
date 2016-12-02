@@ -2,7 +2,7 @@
 Consider $N = 2^h - 1$ keys where $h$ is a power of 2, and the implicit cache-oblivious vEB layout of their corresponding complete binary tree, where the keys are suitably permuted and stored in an array of length $N$ without using pointers (as it happens in the classical implicit binary heap but the rule here is different). The root is in the first position of the array. Find a rule that, given the position of the current node, it is possible to locate in the array the positions of its left and right children. Discuss how to apply this layout to obtain (a) a static binary search tree and (b) a heap data structure, discussing the cache complexity.
 
 \vspace{0.5cm}
-\paragraph{Solution.} We assume that the keys are stored in a zero-indexed array $A$. Given and index $0 \leq i < A.length$ we will give a rule for computing the index of its children.
+\paragraph{Solution.} We assume that the keys are stored in a zero-indexed array $T$. Given and index $0 \leq i < T.length$ we will give a rule for computing the index of its children.
 
 \begin{center}
   \begin{tikzpicture}[sibling distance=10pt]
@@ -10,7 +10,7 @@ Consider $N = 2^h - 1$ keys where $h$ is a power of 2, and the implicit cache-ob
   \end{tikzpicture}
 \end{center}
 
-First, note a simple property: if $i \bmod 3 = 0$, then the left and the right child of $i$ are stored, respectively, in positions $i+1$ and $i+2$. Observe that the index of the keys that respect this property are those in an even level (the root has level 0).
+First, note a simple property: if $i \bmod 3 = 0$, then the left and the right child of $i$ are stored, respectively, in positions $\textsc{Left}(i)=i+1$ and $\textsc{Right}(i)=i+2$. Observe that the index of the keys that respect this property are those in an even level (the root has level 0).
 
 Before we give a rule for the nodes in an odd level we notice that, in even levels, there is a gap of three indexes between two adjacent \emph{neighbours} (nodes in the same level). Instead, in odd levels: two \emph{siblings} (nodes with the same parent) are stored in adjacent positions; two neighbours that aren't siblings are separated by a gap of one index.
 
@@ -27,11 +27,27 @@ We compute $m$ as twice the difference between $i$ and the index of the first no
 
 The final rule to compute the left child of $i$ when $i \bmod 3 \neq 0$ is: $$\textsc{Left}(i)=2^{k+2}-1+6\left(i-2^k- \left\lfloor \frac{i-2^k}{3} \right\rfloor\right)$$ and the right child is $$\textsc{Right}(i)=\textsc{Left}(i)+3$$
 
-\vspace{0.5cm}
-\paragraph{Solution.}
-We define $q$ as the queried index, $T$ the \emph{vEB layout}, $h$ the height of $T$ s.t. $h = 2^l, l > 0$, $e_{l, i}$ as the $i^{th}$ element at level $l$ and $A$ the 1-indexed array.
-We then show how it can trivially be scaled to a 0-indexed array.
-Then the following holds:
+\paragraph{Binary search tree in vEB layout.} We now present a procedure to transform an array of keys $S$ to a tree $T$, stored in memory in vEB layout, that satisfies the binary search tree property (the key in each node must be greater than all keys stored in the left subtree, and not greater than all keys in the right subtree).
+\begin{algorithmic}[1]
+  \Require{$S$ sorted in ascending order}
+  \Function{ArrayToVeb}{$S$, $i_{\text{vEB}}$, $l$, $r$}
+    \If{$l > r$}
+      \State \Return{}
+    \EndIf
+    \State $m \gets \lfloor (l+r)/2 \rfloor$
+    \State $T[i_{\text{vEB}}] \gets S[m]$ \Comment{store the median in the root of the subtree}
+    \State $l_{\text{vEB}} \gets $ \Call{Left}{$i_{\text{vEB}}$}
+    \State $r_{\text{vEB}} \gets $ \Call{Right}{$i_{\text{vEB}}$}
+    \State \Call{ArrayToVeb}{$S, l_{\text{vEB}}, l, m$}
+    \State \Call{ArrayToVeb}{$S, r_{\text{vEB}}, m+1, r$}
+  \EndFunction
+\end{algorithmic}
+The recursion starts from the call $\textsc{ArrayToVeb}(S, 0, 0, S.length-1)$. At the end of the procedure we can binary search in $T$ starting from the root $T[0]$, then traversing the implicit tree with the functions $\textsc{Left}$ and $\textsc{Right}$.
+
+\paragraph{Heap tree in vEB layout.}  Given any array $S$ sorted in increasing (decreasing) order, the implicit tree with root $S[i]$, children $S[\textsc{Left}(i)]$ and $S[\textsc{Right}(i)]$, satisfies the min-heap (max-heap) property $\forall i \in [0, S.length-1]$. 
+
+\subsection{Formal description of the rule}
+We define $q$ as the queried index, $T$ the \emph{vEB layout}, $h$ the height of $T$ s.t. $h = 2^l, l > 0$, $e_{l, i}$ as the $i^{th}$ element at level $l$ and $A$ the 1-indexed array. We then show how it can trivially be scaled to a 0-indexed array. Then the following holds:
 \begin{itemize}
     \label{15_even_power} \item \textbf{Even powers:} Let $k$ be a level in $T$ s.t $k \mod 2 = 0$ s.t. the first element $e_{1, 2i}$ at $k$: then $e_1 = 2^{2i}$.
     Since $h$ is a power of two we'll have the tip of the tree as 1 | 2 - 3 | 4 - 7 - 10 - 13 | $\dots |$.
@@ -65,13 +81,4 @@ We split the analysis on odd and even level cases:
     \begin{equation*}
     \textrm{right = left + 1}
     \end{equation*}
-
-We now analyse as the \emph{vEB layout} can be used to represent i) a static binary search tree and ii) a heap under the same hypothesis:
-    \begin{itemize}
-    \item \textbf{Static binary search tree:} As the \emph{vEB layout} populates the top tree $T_0$ first, followed by $T_1, T_2, \dots$ in sequential order, we'll be able to point to the rightmost element of the left subtree (and median leaf of the whole tree) to get the root of the search tree.
-    We then apply recursively to its left and right siblings.
-    \item \textbf{Max Heap:} In a maximum heap we are able to apply the same algorithm we applied on binary search tree with one slight edit: we pick the rightmost leaf as root and its left sibling and the median leaf as children.
-    We then shift every pointer from child to parent and child to gran-parent if the node is a left child and from child to parent and node to $2^{nd}$ left sibling if the node is a right child.
-    \item \textbf{Min Heap:} The \emph{vEB layout} implements a minimum heap as every cut populates the top tree with elements lower than the ones it populates the bottom cut with.
-    \end{itemize}
 \end{itemize}
