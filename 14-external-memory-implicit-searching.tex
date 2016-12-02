@@ -21,6 +21,7 @@ $$3 \quad 6 \quad \boxed{9} \quad 12 \quad 15 \quad \boxed{18} \quad 21$$
 In the third iteration we have 2 keys and we can stop, since they can be both stored in a single block that will be the root of the tree:
 \begin{center}
   \begin{tikzpicture}[sibling distance=12pt]
+    \tikzstyle{every node}=[rectangle,draw]
     \Tree [.9|18 [.3|6 1|2 4|5 7|8 ]  [.12|15 10|11 13|14 16|17 ] [.21|$\infty$ 19|20 $\,$ $\,$ ]]  \end{tikzpicture}
 \end{center}
 The tree will be represented in a file in BFS layout:
