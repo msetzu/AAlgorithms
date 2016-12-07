@@ -9,13 +9,13 @@ Since there are $2^b$ possible configurations of the memory, we choose to create
 $${|\Sigma| \choose n/2} > 2^b$$
 With this condition we can generate $2^b$ streams (from just as many alphabets) such that, for any pair of streams, there exist at least one symbols that appear in one stream but not in the other.
 
-We can apply the pigeonhole principle: suppose that the same configuration is reached in two different executions of the algorithm on two streams with symbols, respectively, from $\Sigma_1$ and $\Sigma_2$. When we will emit as $(n+1)$-th character of the stream the symbol $a \in \Sigma_1$ such that $a \notin \Sigma_2$, and query the algorithm for the most frequent item, we will receive an answer $\mathcal{A}$. The algorithm is deterministic, therefore in the same configuration the answer will be the same for each stream. If $\mathcal{A} \neq a$, then the algorithm gave the wrong answer for the first stream. Otherwise, if $\mathcal{A} = a$, then it's correct for the first stream, but not for the second one, because $a \notin \Sigma_2$.
+We can apply the pigeonhole principle: suppose that the same configuration is reached in two different executions of the algorithm on two streams with symbols, respectively, from $\Sigma_i$ and $\Sigma_j$. When we will emit as $(n+1)$-th character of the stream the symbol $a \in \Sigma_i$ such that $a \notin \Sigma_j$, and query the algorithm for the most frequent item, we will receive an answer $\mathcal{A}$. The algorithm is deterministic, therefore in the same configuration the answer will be the same for each stream. If $\mathcal{A} \neq a$, then the algorithm gave the wrong answer for the first stream. Otherwise, if $\mathcal{A} = a$, then it's correct for the first stream, but not for the second one, because $a \notin \Sigma_j$.
 
 \begin{table}[h]
   \centering
   \begin{tabular}{l|l|l|l|l|l|l|l|l|l|l|l|l|l|}
     \cline{2-12}
-    stream with symbols from $\Sigma_1$ & ... & d & d & e & e & f & f & g & g & h & h \\ \cline{2-12} 
-    stream with symbols from $\Sigma_2$ & ... & 4 & 4 & 5 & 5 & 6 & 6 & 7 & 7 & 8 & 8 \\ \cline{2-12} 
+    stream with symbols from $\Sigma_i$ & ... & d & d & e & e & f & f & g & g & h & h \\ \cline{2-12} 
+    stream with symbols from $\Sigma_j$ & ... & 4 & 4 & 5 & 5 & 6 & 6 & 7 & 7 & 8 & 8 \\ \cline{2-12} 
   \end{tabular}
 \end{table}
