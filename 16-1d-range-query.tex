@@ -11,7 +11,6 @@ To report the keys in the given range we perform an inorder traversal of the tre
 First, this algorithm searches for the key $k_1$ thus, at the worst case it visits all the nodes in a walk from the root to a leaf with $O(\log_B N)$ block transfers. Then, it starts to report all the keys in the given range with $O(R/B)$ block transfers. Thus the I/O complexity is $O(\log_B N + R/B)$.
 
 \subsection{Second solution}
-Output sensitive algorithms minimize the number of block transfers to an $\alpha = c{R}{B}$ in a query, that is no more blocks than necessary are retrieved from memory.
 
 \paragraph{B-tree}
 By our construction a punctual query is answered with $\log_B(N)$ memory transfers.
