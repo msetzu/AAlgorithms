@@ -1,0 +1,49 @@
+\section{External memory mergesort}
+In the external-memory model (hereafter EM model), show how to implement the k-way merge (where $(k + 1)B \leq M$), namely, how to simultaneously merge $k$ sorted sequences of total length $N$, with an I/O cost of $O(\frac{N}{B})$
+where B is the block transfer size.
+Also, try to minimize and analyze the CPU time cost.
+
+\vspace{0.5cm}
+\paragraph{Solution.}
+Let
+    \begin{itemize}
+    \item $k = \frac{1}{4}\cdot \frac{M}{B}$ be the number of blocks the cache can hold.
+    \item $B_s$ the blocks reserved in cache to store temporary merges.
+    \item $N$ be the size of the problem.
+    \item $B$ the block size, with $B_i$ a pointer to the $i^{th}$ block.
+    \item $B_{i}^{c}$ the $i^{th}$ block stored in memory.
+    \item $\frac{N}{B}$ the number of blocks storing $A$ in main memory.
+    \end{itemize}
+We assume the sorted blocks we receive in input are ordered and use $\frac{1}{3} \cdot \frac{M}{B}$ to store loaded blocks in a Fibonacci min-heap fashion.
+\emph{k-way} mergesort operates on $k$ sorted blocks we load in cache.
+We implement the merge operation as follows, outputting to external memory on file $O$:
+    \begin{algorithmic}[1]
+    \Function{merge}{$a$, $b$}:
+    \For{$i \gets 0; i < k; i++$}
+        \State load($B_i$, $B_i^m$)\;           \Comment{Load blocks in cache: $O(\frac{N}{B})$}
+    \EndFor
+    \State $busy\_blocks = k - 1$\;             \Comment{\parbox[t]{.5\linewidth}{Count busy blocks, that is blocks whose pointers have not reached
+                                                        the end of the block}}
+    \State $S \gets \&S$\;                      \Comment{\parbox[t]{.5\linewidth}{At most $O(k \cdot B)$, when every sorted block is greater than the following}}
+    \While{$busy\_blocks > 0$}
+        \State $m \gets \min\{\min{B_i^c}\}$\;  \Comment{Get the current minimum of every block in cache: $O(k)$}
+        \State $B_j^c \gets B_j^c + 1$\;        \Comment{Shift to next element in block $B_j$ with current minimum element}
+        \If{$B_j == EOB$}
+            \State $busy\_blocks \gets busy\_blocks - 1$\;
+        \EndIf
+        \If{$busy\_blocks == 1$}
+            \State $S \gets S :: flush(B_j^c)$\;    \Comment{Flush remaining block}
+        \EndIf
+        \State $*S \gets m$\;
+        \State $S \gets S + 1$\;                \Comment{Increment storing blocks pointer}
+    \EndWhile
+    \State write(S, O)\;                        \Comment{Output}
+    \EndFunction
+\end{algorithmic}
+
+As we assumed, our blocks are ordered Fibonacci min-heaps, thus allowing us to merge them in $k \cdot \log(n)$ time.
+We can then store $S$ by finding the minimum element $n$ times in costant time: $n \cdot O(1) = O(n)$, giving us a total cost of
+    \begin{equation*}
+    k \cdot B + \log(k) \cdot O(k) + O(n)
+    \end{equation*}
+respectively for construction, find the minimum over $k$ Fibonacchi heaps in the \emph{merge} procedure and store it in memory.
