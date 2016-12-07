@@ -1,21 +1,18 @@
 \section{Range updates}
 
-Consider an array \emph{C} of n integers, initially all equal to zero.
-We want to support the following operations:
+Consider an array $C$ of $n$ integers, initially all equal to zero. We want to support the following operations:
 \begin{itemize}
-    \item \textbf{update(i, j, c):} where $0 \leq i \leq j \leq n - 1$ and $c$ is
-    an integer: it changes $C$ such that $C[k] = C[k] + c$ for every $i \leq k \leq j$.
-    \item \textbf{query(i)} where $0 \leq i \leq n - 1$: it returns the value of $C[i]$.
-    \item \textbf{sum(i,j)} where $0 \leq i \leq j \leq n - 1$: it returns
-                    $\Sigma_{k = 1}^{j}(C[k])$.
+  \item $update(i, j, c)$, where $0 \leq i \leq j \leq n - 1$ and $c$ is an integer: it changes $C$ such that $C[k] := C[k] + c$ for every $i \leq k \leq j$.
+  \item $query(i)$, where $0 \leq i \leq n - 1$: it returns the value of $C[i]$.
+  \item $sum(i,j)$, where $0 \leq i \leq j \leq n - 1$: it returns $\sum_{k = 1}^j C[k]$.
 \end{itemize}
 
-Design a data structure that uses $O(n)$ space and implements each operation above
-in $O(\log(n))$ time. Note that $query(i) = sum(i, i)$ but it helps to reason.
-[Hint to further save space: use an implicit tree such as the Fenwick tree (see wikipedia).]
+Design a data structure that uses $O(n)$ space, takes $O(n \log n)$ construction time, and implements each operation above in $O(\log n)$ time. Note that $query(i) = sum(i, i)$ but it helps to reason.
 
-\vspace{0.5cm}
-\paragraph{Solution.}
+[Hint: For the general case, use the segment tree seen in class, which uses $O(n \log n)$ space: prove that its space is actually $O(n)$ when it is employed for this problem.]
+
+\subsection{First solution}
+
 Let $T$ be a segmented binary tree over a continuous interval $I: [0, N - 1]$
 s.t.\ its leafs are the points in I, and the parent of two nodes comprises of their interval:
 $$  n' \cup n'' = n, n' \cap n'' = \emptyset   \textrm{ s.t. } n \text{ is the parent of } n', n''$$
@@ -139,3 +136,38 @@ The \textsc{query} function is then trivial:
     \EndIf
     \EndFunction
 \end{algorithmic}
+
+\subsection{Second solution}
+
+We use a segment binary tree $T_I$ over the interval $I = [0, n - 1]$, that is, a tree whose leaves are the points in $I$ and the parent of two nodes is the union of their interval. More formally, if $x.interval$ denotes the attribute $interval$ of the node $x$,
+\begin{enumerate}
+  \item $l.interval \cup r.interval = n.interval \iff n \text{ is the parent of $l$ and $r$}$;
+  \item $\text{if $x$ and $y$ are leaves, then } x.interval \cap y.interval = \emptyset \wedge |x.interval|=|y.interval|=1$.
+\end{enumerate}
+For example, the segment tree for $I=[0,7]$ is the following:
+\begin{center}
+  \begin{tikzpicture}[sibling distance=10pt]
+    \tikzstyle{every node}=[circle,draw]
+    \Tree [.0-7 [.0-3 [.0-1 [.0 ]  [.1 ] ] [.2-3 [.2 ] [.3 ] ] ] [.4-7 [.4-5 [.4 ] [.5 ] ] [.6-7 [.6 ] [.7 ] ] ] ]
+  \end{tikzpicture}
+\end{center}
+
+We associate with each node $x$ of $T_I$ some attributes: $x.sum$, that stores $\sum_{i \in x.interval} C[i]$; and $x.lazy$, that stores a value that need to be propagated to each descendant of $x$. This means that $x.sum$ might not be accurate at a given time for any of the requested operation.  
+
+\paragraph{Range operations.} In both operations we traverse the tree recursively starting from the root and, at \emph{each} recursive step on any internal node $x$, if $x.lazy \neq 0$: we set $x.sum \gets x.sum + |x.interval| \times x.lazy$, we propagate the lazy information to $x$'s children $x.left.lazy \gets x.lazy$, $x.right.lazy \gets x.lazy$ and, finally, we reset the information $x.lazy \gets 0$. Afterwards, if the operation is 
+\begin{itemize}
+  \item $sum(i,j)$, we do the following:
+  \begin{enumerate}
+    \item if $x.interval \cap [i,j] = \emptyset$, we return 0;
+    \item if $x.interval \subseteq [i,j]$, we return $x.sum$;
+    \item otherwise we repeat the procedure $sum(i,j)$ on $x.left$ and $x.right$, returning the sum of these calls.
+  \end{enumerate}
+
+  \item $update(i,j,c)$, we do the following:
+  \begin{enumerate}
+    \item if $x.interval \cap [i,j] = \emptyset$, we stop the recursion on this subtree;
+    \item if $x.interval \subseteq [i,j]$, we update $x.sum \gets |x.interval| \times c$, and $x.left.lazy \gets x.left.lazy + c$, $x.right.lazy \gets x.right.lazy + c$
+    \item otherwise we repeat the procedure $update(i,j,c)$ on $x.left$ and $x.right$.
+  \end{enumerate} 
+\end{itemize}
+The space occupied by $T_I$ is $\sum_{i=0}^{\log_2 n} n/2^{-i}=2n-1$.

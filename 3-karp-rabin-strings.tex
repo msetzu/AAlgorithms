@@ -1,25 +1,14 @@
 \section{Karp-Rabin fingerprinting on strings}
 
-Given a string $S: |S| = n$, and two positions $0 \leq i < j \leq (n - 1)$,
-the longest common extension $lceS(i, j)$ is the length of the maximal run of matching
-characters from those positions, namely: if $S[i] 6= S[j]$ then $lceS(i, j) = 0$;
-otherwise, $lceS(i, j) = \max{l \geq 1 : S[i ... i + l - 1] = S[j ... j + i - 1]}$.
-For example, if S = abracadabra, then $lceS(1, 2) = 0$, $lceS(0, 3) = 1$, and
-$lceS(0, 7) = 4$.
-Given S in advance for preprocessing, build a data structure for S based
-on the Karp-Rabin fingerprinting, in $O(n \ln(n)$) time, so that it supports subsequent
-    \begin{itemize}
-    \item $lceS(i, j)$: it computes the longest common extension at positions i
-    \item $equals (i, j, c)$: it checks if $S[i ... i + ` - 1] = S[j ... j + ` - 1]$ in constant time.
-    \end{itemize}
-Analyze the cost and the error probability.
-The space occupied by the data structure can be $O(n \log(n))$ but it is possible
-to use $O(n)$ space.
-[Note: in this exercise, a onetime preprocessing is performed, and then many online
-queries are to be answered on the fly.]
+Given a string $S \equiv S[0 \dots n - 1]$, and two positions $0 \leq i < j \leq n - 1$, the longest common extension $lce_S(i, j)$ is the length of the maximal run of matching characters from those positions, namely: if $S[i] \neq S[j]$ then $lce_S(i, j) = 0$; otherwise, $lce_S(i, j) = \max\{l \geq 1 : S[i \dots i + l - 1] = S[j \dots j + l - 1]\}$. For example, if $S = \texttt{abracadabra}$, then $lce_S(1, 2) = 0$, $lce_S(0, 3) = 1$, and $lce_S(0, 7) = 4$. Given $S$ in advance for preprocessing, build a data structure for $S$ based on the Karp-Rabin fingerprinting, in $O(n \log n)$ time, so that it supports subsequent online queries of the following two types:
+\begin{itemize}
+  \item $lce_S(i,j)$: it computes the longest common extension at positions $i$ and $j$ in $O(\log n)$ time.
+  \item $equal_S(i,j,l)$: it checks if $S[i \dots i+l-1] = S[j \dots j+l-1]$ in constant time.
+\end{itemize}
+Analyze the cost and the error probability. The space occupied by the data structure can be $O(n \log n)$ but it is possible to use $O(n)$ space. [Note: in this exercise, a one-time preprocessing is performed, and then many online queries are to be answered on the fly]
 
-\vspace{0.5cm}
-\paragraph{Solution.}
+\subsection{First solution}
+
 In order to save computational cycles on checks over ranges we use a similar structure
 to the one in the range updates: we compute the hashing on the first character in $O(1)$
 time, then roll the hash through the $n - 1$ remaining characters through $n O(1)$
@@ -82,3 +71,63 @@ We define \textsc{lce} as an auxiliary function
     \Return $h^{k - l}$
     \EndFunction
 \end{algorithmic}
+
+\subsection{Second solution}
+
+We interpret the string $S \in \Sigma^*$ as the polynomial $S(z)=\sum_{i=0}^{n-1}S[i]z^i$, where $S[i]$ is a symbol encoded with a number in $\{0, \dots, |\Sigma|-1\}$. Given a prime number $p$ greater than both $2n$ and $|\Sigma|$, we define the fingerprint on strings $h_p$ as:
+$$h_p(S)=h_p\left(\sum_{i=0}^{n-1}S[i] \cdot z^i\right) = \left(\sum_{i=0}^{n-1}S[i]  \cdot z^i\right) \bmod p$$
+were $z$ is randomly chosen from $\mathbb{Z}_p$.
+
+If two string $A$ and $B$ are equal, then also their fingerprints are equal. If they are different, the probability that their fingerprints are the same is at most $\frac{n}{p}<\frac{n}{2n}=\frac{1}{2}$, because there are $p$ choices for $z$ and at most $n$ roots of the polynomial $P(z)=A(z)-B(z)$ (follows from the  fundamental theorem of algebra and the fact that $A(z)$ and $B(z)$ have both degree $n$) \cite[169]{Motwani10}.
+
+\paragraph{Queries.} To implement efficiently the queries on $S$, we use an array $H$ with the hashes of the string's prefixes, formally: 
+$$H[i]=h_p(S[0..i]) \quad \forall i \in [0, n-1]$$
+where $S[i..j]$ denotes the substring $S[i]S[i+1] \dots S[j]$.
+
+With the array $H$ we can compute in constant time the fingerprint of any substring of $S$, hence we can decide --- with a probability of error --- $equal_S(i,j,l)$, by comparing the substrings' fingerprints. To compute $lce_S(i,j)$, we search with $O(\log n)$ different values of $l$ inside the interval $[0, \min(j-i,n-j)]$ until the result is found. Listing \ref{listing:lce} shows an implementation in Python.
+
+\paragraph{Analysis.} $H$ is built in $O(n)$ time, because at each iteration the fingerprint in $H[i]$ is computed in constant time from the fingerprint in $H[i-1]$. The space needed by the solution is $O(n \log p)$, because we need to store the array $H$, that has $n$ entries of size $\log_2 p$. 
+
+\begin{lstlisting}[frame=single,language=Python,caption={Source code to compute the longest common extension efficiently.},label=listing:lce]
+p = 179426549
+z = 3
+s = "abracadabra"
+
+def h(s):
+    return sum(ord(c) * z ** i for i, c in enumerate(s)) % p
+
+H = [ord(s[0]) % p] # Array with hashes of prefixes
+exp = z
+for i in range(1, len(s)): # O(n)
+    H.append((H[i-1] + (ord(s[i]) * exp) % p))
+    exp = exp * z
+
+def rollLeft(j, count): # Compute the hash of the string s[j:j+count]
+    assert count > 0 and j + count <= len(s)
+    if j == 0:
+        return H[count-1]
+    return (H[j+count-1] - H[j - 1]) / z ** j
+
+def equal(i, j, l): # O(1)
+    assert i < j and j + l - 1 < len(s) and l > 0
+    hs1 = rollLeft(i, l) # hash of s[i:i+l]
+    hs2 = rollLeft(j, l) # hash of s[j:j+l]
+    return hs1 == hs2
+
+def lceaux(i, j, intsize, maxlce): # O(logn)
+    if (intsize <= 1):
+        return 1 if equal(i, j, 1) else 0
+    if equal(i, j, intsize):  # Check if there is a longer common extension
+        if (intsize + intsize / 2 >= maxlce):
+            return maxlce
+        return lceaux(i, j, intsize + intsize / 2, maxlce)
+    else: # Check if there is a shorter common extension
+        return lceaux(i, j, intsize - intsize / 2, intsize)
+
+def lce(i, j):
+    maxlce = min(j - i, len(s) - j)
+    if (equal(i, j, maxlce)):
+        return maxlce
+    return lceaux(i, j, maxlce, maxlce)
+\end{lstlisting}
+
