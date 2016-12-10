@@ -1,18 +1,6 @@
 \section{Hashing sets}
 
-Your company has a database $S \subseteq U$ of keys. For this database, it uses
-a randomly chosen hash function $h$ from a universal family $H$ (as seen in class);
-it also keeps a bit vector $B_S$ of $m$ entries, initialized to zeroes, which are
-then set $B_S[h(k)] = 1 \forall k \in S$ (note that collisions may happen).
-Unfortunately, the database has been lost, thus only BS and h are known, and the
-rest is no more accessible.
-Now, given $k \in U$, how can you establish if $k$ was in $S$ or not?
-What is the probability of error? (Optional: can you estimate the size $|S|$ of
-$S$ looking at h and $B_S$ and what is the probability of error?)
-Later, another database R has been found to be lost: it was using the same hash
-function h, and the bit vector BR defined analogously as above.
-Using $h, B_S, B_R$, how can you establish if $k$ was in $S \cap R$ (union), $S \cup R$
-(intersection), or $S \setminus R$ (difference)? What is the probability of error?
+Your company has a database $S \subseteq U$ of keys. For this database, it uses a hash function $h$ uniformly chosen at random from a universal family $\mathcal{H}$ (as seen in class); it also keeps a bit vector $B_S$ of $m$ entries, initialized to zeroes, which are then set $B_S[h(k)] = 1$ for every $k \in S$ (note that collisions may happen). Unfortunately, the database $S$ has been lost, thus only $B_S$ and $h$ are known, and the rest is no more accessible. Now, given $k \in U$, how can you establish if $k$ was in $S$ or not? What is the probability of error? [Note: you are not choosing $k$ and $S$ randomly as the they are both given... randomization here is in the choice of $h \in \mathcal{H}$ performed when building $B_S$.] Under the hypothesis that $m \geq c|S|$ for some $c > 1$, find the expected number of 1s in $B_S$ under a uniform choice at random of $h \in \mathcal{H}$.
 
 \vspace{0.5cm}
 \paragraph{Solution.}
