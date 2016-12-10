@@ -1,36 +1,21 @@
 \section{Randomized min-cut algorithm}
 
-Consider the randomized min-cut algorithm discussed in class.
-We have seen that its probability of success is at least $\frac{1}{{{n} \choose {1}}}$,
-where $n$ is the number of its vertices.
-
+Consider the randomized min-cut algorithm discussed in class. We have seen that its probability of success is at least $1/{n \choose 2}$, where $n$ is the number of its vertices.
 \begin{itemize}
-\item Describe how to implement the algorithm when the graph is represented by adjacency
-lists, and analyze its running time.
-In particular, a contraction step can be done in $O(n)$ time.
-\item A weighted graph has a weight $w(e)$ on each edge $e$, which is a positive
-real number.
-The min-cut in this case is meant to be min-weighted cut, where the sum of the weights
-in the cut edges is minimum.
-Describe how to extend the algorithm to weighted graphs, and show that the probability
-of success is still $geq \frac{1}{{{n} \choose {2}}}$ [hint: define the weighted degree
-of a node].
-\item Show that running the algorithm multiple times independently at random, and
-taking the minimum among the min-cuts thus produced, the probability of success
-can be made at least $1 - \frac{1}{nc}$ for a constant $c > 0$
-(hence, with high probability).
+  \item Describe how to implement the algorithm when the graph is represented by adjacency lists, and analyze its running time. In particular, a contraction step can be done in $O(n)$ time.
+  \item A weighted graph has a weight $w(e)$ on each edge $e$, which is a positive real number. The min-cut in this case is meant to be min-weighted cut, where the sum of the weights in the cut edges is minimum. Describe how to extend the algorithm to weighted graphs, and show that the probability of success is still $\geq 1/{n \choose 2}$ [hint: define the weighted degree of a node].
+  \item Show that running the algorithm multiple times independently at random, and taking the minimum among the min-cuts thus produced, the probability of success can be made at least $1 - 1/n^c$ for a constant $c > 0$ (hence, with high probability).
 \end{itemize}
 
 \vspace{0.5cm}
-\paragraph{Contraction algorithm.}
-We assume that the adjacency lists $Adj[x]$ are sorted $\forall x \in V$. We also note that the multigraph is undirected, therefore $v\in Adj[u]$ if and only if $u\in Adj[v]$. We maintain an attribute $pe$ in each edge to store the number of parallel edges.
+\paragraph{Contraction step.} We assume that the adjacency lists $Adj[x]$ are sorted $\forall x \in V$. We also note that the multigraph is undirected, therefore $v\in Adj[u]$ if and only if $u\in Adj[v]$. We maintain an attribute $pe$ in each edge to store the number of parallel edges.
 
 To contract an edge $(u, v)$, we have to merge the two adjacency lists $Adj[u]$ and $Adj[v]$ into a single \emph{sorted} adjacency list $Adj[uv]$ --- like the merge procedure in merge sort --- ensuring that:
 \begin{itemize}
   \item if the current node in $Adj[u]$ is $v$, skip the node, since it will not appear in $Adj[uv]$ (do the same with $Adj[v]$ and $u$);
   \item if the current nodes are equal to $x$, add $x$ to $Adj[uv]$ and set $(uv, x).pe = (u,x).pe + (v,x).pe$.
 \end{itemize}
-Finally, we replace $Adj[u]$ and $Adj[v]$ with the newly created $Adj[uv]$.
+Finally, we replace $Adj[u]$ and $Adj[v]$ with the newly created $Adj[uv]$. The total cost of this step is $O(n)$.
 
 \paragraph{Weighted graph extension.}
 We now extend the above to weighted multi-graph by re-conducting it to the non-weighted case.
