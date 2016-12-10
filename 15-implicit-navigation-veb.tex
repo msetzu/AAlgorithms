@@ -2,7 +2,7 @@
 Consider $N = 2^h - 1$ keys where $h$ is a power of 2, and the implicit cache-oblivious vEB layout of their corresponding complete binary tree, where the keys are suitably permuted and stored in an array of length $N$ without using pointers (as it happens in the classical implicit binary heap but the rule here is different). The root is in the first position of the array. Find a rule that, given the position of the current node, it is possible to locate in the array the positions of its left and right children. Discuss how to apply this layout to obtain (a) a static binary search tree and (b) a heap data structure, discussing the cache complexity.
 
 \vspace{0.5cm}
-\paragraph{Solution.} We assume that the keys are stored in a zero-indexed array $T$. Given and index $0 \leq i < T.length$ we will give a rule for computing the index of its children.
+\subsection{Solution.} We assume that the keys are stored in a zero-indexed array $T$. Given and index $0 \leq i < T.length$ we will give a rule for computing the index of its children.
 
 \begin{center}
   \begin{tikzpicture}[sibling distance=10pt]
@@ -11,75 +11,69 @@ Consider $N = 2^h - 1$ keys where $h$ is a power of 2, and the implicit cache-ob
   \end{tikzpicture}
 \end{center}
 
-First, note a simple property: if $i \bmod 3 = 0$, then the left and the right child of $i$ are stored, respectively, in positions $\textsc{Left}(i)=i+1$ and $\textsc{Right}(i)=i+2$. Observe that the index of the keys that respect this property are those in an even level (the root has level 0).
+As  by hypothesis, we'll assume $H = 2^k, k \in \mathcal{Z} \setminus \{0, 1\} $.
+\label{15_shift_layouts}~\paragraph{Shifted layouts} We start by introducing the notion of \emph{shifted layout}: a \emph{shifted layout L'} of a layout \emph{L} is a layout of the same size whose \emph{a} root is shifted from the one of \emph{L} of an offset \emph{g}:
+	\begin{equation}
+	\textsc{height(L)} == \textsc{height(L')}, L'.root = L.root + a
+	\end{equation}
 
-Before we give a rule for the nodes in an odd level we notice that, in even levels, there is a gap of three indexes between two adjacent \emph{neighbours} (nodes in the same level). Instead, in odd levels: two \emph{siblings} (nodes with the same parent) are stored in adjacent positions; two neighbours that aren't siblings are separated by a gap of one index.
+Then
+	\begin{equation}
+	n \in L, n' \in L': n.index == n'.index \to n'.position == n.position + a \forall n \in L, n' \in L'
+	\end{equation}
+Trivially, as the two layouts are shifted in the root, the same shift is propagated to the remaining nodes in the layout.
 
-Let $k$ be the largest even power of 2 such that $2^k<i$ (for example, if $i=8$, such is power is $2$). Notice that $2^k$ is the number of nodes in the $k$-th level of the tree, and:
-\begin{itemize}
-  \item the number of neighbour of $i$ is $2^{k+1}-1$;
-  \item the index of the first node in the same level of $i$ is $2^k=\alpha$;
- \item the index of the first node in the same level of $i$'s children is $2^{k+2}-1=\beta$.
-\end{itemize}
+\label{15_odd_levels_contiguity}~\paragraph{Contiguous children} Given a layout \emph{L}, we are able to \emph{cut} it until we reach a base case of layout \emph{L'} of height $2$ and root \emph{a}.
+It is trivial to see as this is populated as the following shows:
+	\begin{center}
+	\begin{tikzpicture}[sibling distance=10pt]
+	\Tree [.a [.a+1 ] [.a+2 ] ]
+	\end{tikzpicture}
+	\end{center}
+by the definition of base case for the \emph{vEB construction}.
+Then, provided we know to be in the \emph{a} index we are able to answer trivially with
+	\begin{gather*} \label{15_contiguity}
+	\textsc{LEFT(a)} = a + 1	\\
+	\textsc{RIGHT(a)} = a + 2	\\
+	\end{gather*}
 
-Now, since we know the index of the first key in the same level of $i$'s children, and this level is even, by our previous observation about gaps of three indexes, we can find the left child of $i$ with the following $$\beta+3m \quad \text{ where $m$ is the number of neighbours on the left of $i$'s left child}$$
+\label{15_even_levels_gap}~\paragraph{Non-contiguous children} Given a layout \emph{L}, we are able to \emph{cut} it until we reach a base case of
+	\begin{center}
+	\begin{tikzpicture}[sibling distance=10pt]
+	\Tree [.a
+	[.a+1
+		[.{$a+\gamma_a$} [.{$a+\gamma_a + 1$} ]  [.{$a+\gamma_a + 2$} ] ]
+		[.{$a+\gamma_a + S$} [.{$a+\gamma_a + S + 1$} ] [.{$a+\gamma_a + S + 2$} ] ] ]
+	[.a+2
+		[.{$a+\gamma_a + 2 \cdot S$} [.{$\dots$} ] [.{$\dots$} ] ] [.{$a+\gamma_a + 3 \cdot S$} [.{$\dots$} ] 
+	[.{$\dots$} ] ] ] ]
+	\end{tikzpicture}
+	\end{center}
+The first two levels are trivial by \ref{15_even_levels_gap}.
+From the second to the third we find instead a jump $\gamma_a$.
+By construction of the \emph{layout} the position $a + \gamma_a$ is populated right after $a + 2$: in this trivial case we have a jump of size $2$.
+This holds also for $a + \gamma_a + S$, as it is populated right after $a + \gamma_a + 2$ and so on and so forth on the same level.
+Given that \emph{height(T)} $= 4$ we have jumps $\gamma_a = 2$: this does not hold for any height: let $H = 2h$ be the height of a \emph{vEB tree} s.t. $h > 1$, $a$ be a node at level $h + 1$, $b$ be a node at level $l \not h +1$, then $\gamma_a = 2^{h} - 1$ and $\gamma_a > \gamma_b \forall b$.
+By construction the jump $\gamma$ and the gap $S$ grow exponentially w.r.t. the level of the tree $T$: given that the \emph{vEB} construction halves the height of the current tree at every recursion, such height is maximum at the very first recursion.
+Moreover, given that the sub-tree rooted in $a + \gamma_a + S$ is populated contiguously, $T_{a + \gamma_a} \in [a + \gamma_a, a + \gamma_a + 1, \dots, a + \gamma_a + S - 1]$: that is given any $n \in [a + \gamma_a, a + \gamma_a + S - 1]$ we can know in which subtree $T_i$ rooted in $a + \gamma_a + k \cdot S$ $n$ is contained:
+	\begin{equation} \label{15_wide_scroll}
+	t = n - (a + \gamma_a) / S
+	\end{equation}
 
-We compute $m$ as twice the difference between $i$ and the index of the first node in the same level minus the number of gaps (that have size one, by the observation on odd levels): $m=2(i-\alpha-\lfloor \frac{i-\alpha}{3} \rfloor)$.
+\label{15_powers_of_two}~\paragraph{Powers of two} Let $l \in [1, H]$ be a level for the \emph{vEB tree} $T$ s.t. the first root of that cut $a = 2^{2^{k}}$.
+Then $\exists b: b = 2^{2^{2k}}$ and $b$ is the first root at level $2l$.
+\paragraph{Proof} Let $H = 2h$ the whole \emph{vEB tree} and $T_0$ the first top cut from $1$ to $h$ and $T_1$ the bottom cut from $h + 1$ to $2h$.
+By construction $T_0$ is populated contiguously with $[1, 2^h]$.
+The $2^h$ leafs at $h$ create $2^{h + 1}$ nodes, roots for $T_1$: given that the cut was of size $h$ each of the $2^{h + 1}$ sub-trees has $2^h - 1$ nodes, for a total of $(2^{h + 1}) \cdot (2^{h - 1}) = 2^{2h} = 2^H$.
 
-The final rule to compute the left child of $i$ when $i \bmod 3 \neq 0$ is: $$\textsc{Left}(i)=2^{k+2}-1+6\left(i-2^k- \left\lfloor \frac{i-2^k}{3} \right\rfloor\right)$$ and the right child is $$\textsc{Right}(i)=\textsc{Left}(i)+3$$
-
-\paragraph{Binary search tree in vEB layout.} We now present a procedure to transform an array of keys $S$ to a tree $T$, stored in memory in vEB layout, that satisfies the binary search tree property (the key in each node must be greater than all keys stored in the left subtree, and not greater than all keys in the right subtree).
-\begin{algorithmic}[1]
-  \Require{$S$ sorted in ascending order}
-  \Function{ArrayToVeb}{$S$, $i_{\text{vEB}}$, $l$, $r$}
-    \If{$l > r$}
-      \State \Return{}
-    \EndIf
-    \State $m \gets \lfloor (l+r)/2 \rfloor$
-    \State $T[i_{\text{vEB}}] \gets S[m]$ \Comment{store the median in the root of the subtree}
-    \State $l_{\text{vEB}} \gets $ \Call{Left}{$i_{\text{vEB}}$}
-    \State $r_{\text{vEB}} \gets $ \Call{Right}{$i_{\text{vEB}}$}
-    \State \Call{ArrayToVeb}{$S, l_{\text{vEB}}, l, m$}
-    \State \Call{ArrayToVeb}{$S, r_{\text{vEB}}, m+1, r$}
-  \EndFunction
-\end{algorithmic}
-The recursion starts from the call $\textsc{ArrayToVeb}(S, 0, 0, S.length-1)$. At the end of the procedure we can binary search in $T$ starting from the root $T[0]$, then traversing the implicit tree with the functions $\textsc{Left}$ and $\textsc{Right}$.
-
-\paragraph{Heap tree in vEB layout.}  Given any array $S$ sorted in increasing (decreasing) order, the implicit tree with root $S[i]$, children $S[\textsc{Left}(i)]$ and $S[\textsc{Right}(i)]$, satisfies the min-heap (max-heap) property $\forall i \in [0, S.length-1]$. 
-
-\subsection{Formal description of the rule}
-We define $q$ as the queried index, $T$ the \emph{vEB layout}, $h$ the height of $T$ s.t. $h = 2^l, l > 0$, $e_{l, i}$ as the $i^{th}$ element at level $l$ and $A$ the 1-indexed array. We then show how it can trivially be scaled to a 0-indexed array. Then the following holds:
-\begin{itemize}
-    \label{15_even_power} \item \textbf{Even powers:} Let $k$ be a level in $T$ s.t $k \mod 2 = 0$ s.t. the first element $e_{1, 2i}$ at $k$: then $e_1 = 2^{2i}$.
-    Since $h$ is a power of two we'll have the tip of the tree as 1 | 2 - 3 | 4 - 7 - 10 - 13 | $\dots |$.
-    \label{15_2-level_stripe}~\item \textbf{2-levels stripes:} Let $k$ be a level in $T$ s.t $k \mod 2 = 0$ s.t. the first element $e_1 = 2^k$ at $k: e_{1, k} = 2^k$: then $e_{1, k + 1} = 2^{k + 2}$.
-    Given that $(k, k + 1)$ are two subsequent levels, a \emph{vBE} minimal tree $T'$ exists: then $T'$ is populated sequentially with $2^k$ and $2^{k + 1}$ subsequent indexes: the first $2^k - 1$ of them allow us to get to $2^{k + 1}$ and the remaining $2^{k + 2} - 1$ to $2^{k + 2}$.
-    \label{15_k_plus_1_gap}~\item \textbf{Odd gaps:} Let $k + 1$ be a level in $T$ s.t $k \mod 2 = 1$ s.t. the first element $e_1 = 2^{k - 1} + 1$ at $k$: then $e_{1, k + 1} = 2^{k + 2}$.
-    Given that $(k, k + 1)$ are two subsequent levels, a \emph{vBE} minimal tree $T'$ exists: then $T'$ is populated sequentially with $2^k$ and $2^{k + 1}$ subsequent indexes: the first $2^k - 1$ of them allow us to get to $2^{k + 1}$ and the remaining $2^{k + 2} - 1$ to $2^{k + 2}$.
-    \label{15_k_plus_3_gap}~\item \textbf{Even gaps:} Let $k: k \mod 2 = 0$ then $e_{i + 1, k} = e_{i, k} + 3$.
-    By the above $e_{i, k}$ is populated in the minimal tree first, and the two children are populated right after it: the two children have subsequent indexes, and the following $e_{i + 1, k}$ is populated with $e_{i, k} + 3$ as $e_{i, k} + 1$ and $e_{i, k} + 2$ have been indexed in $k + 1$.
-    Also $k: k \mod 2 = 1$ then $e_{i + 1, k} = e_{i, k} + 1$ or $e_{i + 1, k} = e_{i, k} + 2$ if there's no gap or a gap, respectively.
-\end{itemize}
-
-We are then able to provide a rule for searching a given index $q$.
-We split the analysis on odd and even level cases:
-\begin{itemize}
-    \item  \textbf{Even levels:} By \ref{15_k_plus_3_gap} we have that any $e_{i, k} = e_{1, k} + 3m, i > 1$.
-    Given $\alpha = 2^k$ we are able to check in constant time if $e_{i, k} - e_{1, k} + 3m \neq 0$, where we fall through the odd-level case, or $e_{i, k} - e_{1, k} + 3m = 0$ where we answer $2^k + m$, as $2^k$ nodes have already been traversed.
-    \item \textbf{Odd levels:} By \ref{15_k_plus_1_gap} we have that any $e_{i, k + 1} = e_{1, k + 1} + (1, 2)m, i \geq 1$.
-    Given that the left child of $q$ is in an odd level, we are able to retrieve its value by its offset w.r.t. the start of the $k + 2$ level and its right child by adding $1$ to it by \ref{15_k_plus_1_gap}.
-    Since the $k + 2$ level has two nodes for each of the nodes in $k + 1$, if we are able to find the offset on level $k + 1$ we are able to search for $q$'s children with \ref{15_k_plus_3_gap}.
-    We compute $q$'s left siblings with the following:
-    \begin{equation*}
-    m = 2 \cdot (i-\alpha -\lfloor \frac{i-\alpha}{3} \rfloor)
-    \end{equation*}
-    where and is the number of gaps we skip.
-    We are then able to retrieve
-    \begin{equation*}
-    \textrm{left } = 2^{k+2}-1+6\left(i-2^k- \left\lfloor \frac{i-2^k}{3} \right\rfloor\right)
-    \end{equation*}
-    and
-    \begin{equation*}
-    \textrm{right = left + 1}
-    \end{equation*}
-\end{itemize}
+\paragraph{Algorithm} We can now combine the above to create an algorithm to find the children of a node $i$:
+	\begin{enumerate}
+	\item Find $K = 2^{2^k}$ the largest power of a power of two lower than $i$: by \ref{15_powers_of_two} it will be in either the top or bottom half of $T$.
+	Let $l$ be the level of $K$ and $T'$ the respective cut.
+	\item By \ref{15_even_levels_gap} find the sub-tree $T'$ and relative root $a$ with \ref{15_wide_scroll}.
+	Compute its root $a = K + t \cdot (K - 1)$ by \ref{15_wide_scroll}.
+	By \ref{15_shift_layouts} $T'$ is a shifted tree of height $h$ with offset $K - 1$: scale it back together with $i$ and recursively apply on $T'$, cumulating the offsets and the levels as you go.
+	\item Once a base case of \emph{height($T'$)} $= 2$ we have two cases: i) $i$ is the root, and we can return $i + 1, i + 2$ by \ref{15_contiguity}; ii) $i$ is not the root and a jump $\gamma_i$ has to be computed.
+	By \ref{15_even_levels_gap} we are able to do so, provided we have the level.
+	Note as at step $2$ of the algorithm we have also cumulated the levels, thus allowing us to do so.
+	\end{enumerate}
