@@ -19,7 +19,7 @@ The Count-Min (CM) sketch data structure, with parameters $\varepsilon$ and $\de
 \end{itemize}
 The parameters specify that the error in answering a query is in within a factor of $\varepsilon$ with probability $1-\delta$.
 When an update $(i, v)$ arrives, the table is updated as follows: 
-$$ T[i, h_j(i)] = T[i, h_j(i)] + v \qquad \forall j = 1, \dots, r $$ 
+$$ T[j, h_j(i)] = T[j, h_j(i)] + v \qquad \forall j = 1, \dots, r $$ 
 A point query returns an approximation $\tilde{F}[i]$ of $F[i]$. If we assume that $F[i] \geq 0$, then:
 $$\tilde{F}[i]=\min_{j\in[1,r]} T[j, h_j(i)]$$ with the guarantees:
 \begin{enumerate}
@@ -41,7 +41,7 @@ with the guarantee that $\prob{F[i]-3\varepsilon\norm{F} \leq \tilde{F}[i] \leq 
   \end{equation}
   The probability that any count is off by more than $3\varepsilon\norm{F}$ is:
   \begin{align*}
-    &  \prob{|T[i, h_j(i)]-F[i]| \geq 3\varepsilon\norm{F}} &  \\
+    &  \prob{|T[j, h_j(i)]-F[i]| \geq 3\varepsilon\norm{F}} &  \\
     &= \prob{|F[i]+X_{i,j}-F[i]| \geq 3\varepsilon\norm{F}} & \text{by construction of $T$} \\
     &= \prob{|X_{i,j}| \geq 3\varepsilon\norm{F}} & \\
     &\leq \frac{\E{|X_{i,j}|}}{3\varepsilon\norm{F}} & \text{by the Markov inequality} \\
