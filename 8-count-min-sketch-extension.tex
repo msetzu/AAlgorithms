@@ -39,7 +39,7 @@ with the guarantee that $\prob{F[i]-3\varepsilon\norm{F} \leq \tilde{F}[i] \leq 
     \label{cm-sketch-1}
   	\E{|X_{i,j}|} = \E{\sum_{k=1}^n I_{i,j,k}|F[k]|} \leq \sum_{k=1}^n |F[k]|\E{I_{i,j,k}} \leq \frac{\varepsilon}{e}\norm{F}
   \end{equation}
-  The probability that any count is off by more than $3\varepsilon\norm{F}$ is:
+  The probability that any count (estimate of $F[i]$) is off by more than $3\varepsilon\norm{F}$ is:
   \begin{align*}
     &  \prob{|T[j, h_j(i)]-F[i]| \geq 3\varepsilon\norm{F}} &  \\
     &= \prob{|F[i]+X_{i,j}-F[i]| \geq 3\varepsilon\norm{F}} & \text{by construction of $T$} \\
@@ -48,8 +48,10 @@ with the guarantee that $\prob{F[i]-3\varepsilon\norm{F} \leq \tilde{F}[i] \leq 
     &\leq \frac{\varepsilon\norm{F}}{e} \frac{1}{3\varepsilon\norm{F}} & \text{by \eqref{cm-sketch-1}} \\
     &= \frac{1}{3e} < \frac{1}{8} &
   \end{align*}
-  Applying Chernoff bounds...
-  % TODO: finish
+  
+  The median is a bad choice if more than half of the $r = \ln 1/\delta$ estimates are bad. We define $Y$ to be the number of bad estimates: $Y = \sum_{j=1}^r Y_j$, where $Y_j$ is 1 if $|X_{i,j}| \geq 3\varepsilon\norm{F}$ and 0 otherwise. Hence the median is a bad choice if the sum $Y$ is at least $r/2$, and this happens with probability:
+  $$\prob{Y > \frac{1}{2}\ln\frac{1}{\delta}}$$
+  We can apply the Theorem \ref{theorem:chernoff} (with $\mu = \E{Y} = \sum_{j=1}^r \prob{j \text{ is a bad estimate}} < r/8$) to upper bound this probability. 
 \end{proof}
 
 \subsection{Second solution}
