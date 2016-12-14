@@ -77,3 +77,22 @@ The $2^h$ leafs at $h$ create $2^{h + 1}$ nodes, roots for $T_1$: given that the
 	By \ref{15_even_levels_gap} we are able to do so, provided we have the level.
 	Note as at step $2$ of the algorithm we have also cumulated the levels, thus allowing us to do so.
 	\end{enumerate}
+
+\paragraph{Binary search tree in vEB layout.} We now present a procedure to transform an array of keys $S$ to a tree $T$, stored in memory in vEB layout, that satisfies the binary search tree property (the key in each node must be greater than all keys stored in the left subtree, and not greater than all keys in the right subtree).
+\begin{algorithmic}[1]
+	\Require{$S$ sorted in ascending order}
+	\Function{ArrayToVeb}{$S$, $i_{\text{vEB}}$, $l$, $r$}
+		 \If{$l > r$}
+		   \State \Return{}
+		 \EndIf
+	 \State $m \gets \lfloor (l+r)/2 \rfloor$
+	 \State $T[i_{\text{vEB}}] \gets S[m]$ \Comment{store the median in the root of the subtree}
+	 \State $l_{\text{vEB}} \gets $ \Call{Left}{$i_{\text{vEB}}$}
+	 \State $r_{\text{vEB}} \gets $ \Call{Right}{$i_{\text{vEB}}$}
+	 \State \Call{ArrayToVeb}{$S, l_{\text{vEB}}, l, m$}
+	 \State \Call{ArrayToVeb}{$S, r_{\text{vEB}}, m+1, r$}
+	\EndFunction
+\end{algorithmic}
+The recursion starts from the call $\textsc{ArrayToVeb}(S, 0, 0, S.length-1)$. At the end of the procedure we can binary search in $T$ starting from the root $T[0]$, then traversing the implicit tree with the functions $\textsc{Left}$ and $\textsc{Right}$.
+
+\paragraph{Heap tree in vEB layout.}  Given any array $S$ sorted in increasing (decreasing) order, the implicit tree with root $S[i]$, children $S[\textsc{Left}(i)]$ and $S[\textsc{Right}(i)]$, satisfies the min-heap (max-heap) property $\forall i \in [0, S.length-1]$.
