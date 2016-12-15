@@ -47,6 +47,6 @@ A search algorithm is then straightforward: starting from the root we traverse t
 	\State \Call{ArrayToVeb}{$S, r_{\text{vEB}}, m+1, r$}
 	\EndFunction
 \end{algorithmic}
-The recursion starts from the call $\textsc{ArrayToVeb}(S, 0, 0, S.length-1)$. At the end of the procedure we can binary search in $T$ starting from the root $T[0]$, then traversing the implicit tree with the functions $\textsc{Left}$ and $\textsc{Right}$. This binary search will traverse $\log_2 N$ nodes, and those nodes are in subtrees of height $O(\log_2 B)$ (in turn stored in blocks of size $B$), thus the cost of a search is $O(\log_2 N / \log_2 B)=O(\log_B N)$ block transfers.
+The recursion starts from the call $\textsc{ArrayToVeb}(S, 0, 0, S.length-1)$. At the end of the procedure we can binary search in $T$ starting from the root $T[0]$, then traversing the implicit tree with the functions $\textsc{Left}$ and $\textsc{Right}$.
 
 \paragraph{Heap tree in vEB layout.}  Given any array $S$ sorted in increasing (decreasing) order, the implicit tree with root $S[i]$, children $S[\textsc{Left}(i)]$ and $S[\textsc{Right}(i)]$, satisfies the min-heap (max-heap) property $\forall i \in [0, S.length-1]$.
