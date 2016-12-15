@@ -1,0 +1,24 @@
+\section{Suffix sorting in EM}
+Using the DC3 algorithm seen in class, and based on a variation of mergesort, design an EM algorithm to build the suffix array for a text of $N$ symbols.
+The I/O complexity should be the same as that of standard sorting, namely, $O(\frac{N}{B} log_{\frac{M}{B}} \frac{N}{B})$ block transfers.
+
+\vspace{0.5cm}
+\paragraph{Solution .}
+We improve the \emph{DC3} algorithm by exploiting the multi-way mergesort defined in exercise 17.
+To give a proper overview we'll insert the complete algorithm, highlighting the differences introduced.
+
+\subparagraph{Samples construction}
+We split our string $A$ of size $3N$ in two chunks $S_0, S_1, S_2$ each of size $N$ according to the index of each character: $c \in S_i \iff i \mod 3 = i$.
+We are able to do so in linear $O(N)$ time and $\frac{N}{B}$ cache loads, as a linear scan is sufficient.
+
+\subparagraph{Sample sorting}
+We now twitch a little bit the \emph{DC3}: instead of operating a traditional radix-sort in order to sort $S_{1,2}$ we apply our multi-way merge-sort on $k = \frac{M}{B}$ \emph{3-grams}, ordering them in $\frac{M}{B} \log_k(\frac{M}{B})$.
+The use of multi-way merge-sort allows us to reduce computation time and cache cost, thus allowing us to stay in the boundary of $O(\frac{N}{B} log_{\frac{M}{B}} \frac{N}{B})$.
+Storage of $S^-1[A]$ still takes linear time and $\frac{M}{B} + \frac{1}{3} \cdot \frac{M}{B}$ cache writes, as $\frac{1}{3} \cdot \frac{M}{B}$ single values (the ranks) need to be stored.
+
+\subparagraph{Non-sample sorting}
+As operations over $S_0$ are trivial lexicographic comparisons, we are able to load them in $\frac{3N}{B}$ cache loads and sort them using again our multi-way merge-sort obtaining the above results.
+We can further improve by then writing the merge 3-tuples of $S_{0,1}, S_{0,2}, S_{1,2}$ to disk in linear time: as they are constructed with $\frac{M}{B}$ cache loads for $S_{1,2}$, $\frac{M}{B}$ cache loads for $S_{0}$ and $\frac{M}{B}$ cache loads for their respective ranks.
+
+\subparagraph{Merging}
+We then merge the ranks computed in the sample and non-sample sorting of step 2 and 3 of the algorithm with the multi-way merge-sort whose comparison operator is the same used by the classical \emph{DC3} algorithm.
