@@ -1,10 +1,17 @@
 \section{External memory mergesort}
-In the external-memory model (hereafter EM model), show how to implement the k-way merge (where $(k + 1)B \leq M$), namely, how to simultaneously merge $k$ sorted sequences of total length $N$, with an I/O cost of $O(\frac{N}{B})$
-where B is the block transfer size.
-Also, try to minimize and analyze the CPU time cost.
+In the external-memory model (hereafter EM model), show how to implement the $k$-way merge (where $(k + 1)B \leq M$), namely, how to simultaneously merge $k$ sorted sequences of total length $N$, with an I/O cost of $O(N/B)$ where $B$ is the block transfer size. Also, try to minimize and analyze the CPU time cost.
 
-\vspace{0.5cm}
-\paragraph{Solution.}
+\subsection{First solution}
+
+We keep in main memory $k$ input buffers $B_1, B_2, \dots, B_k$ --- one for each sorted sequence $s_1, s_2, ..., s_k$ that we need to merge --- and 1 output buffer $B_{out}$. At each step we find the smallest unchosen element among the input buffers and copy this element to $B_{out}$. When $B_{out}$ is full, we write it to the end of a file $F$, then we clear $B_{out}$'s content.
+
+For each input buffer we store a pointer $p_i$ to its first unchosen element. When a pointer $p_i$ reaches the end of the buffer $B_i$, we need to load in $B_i$ the next portion of the corresponding sorted sequence $s_i$ and reset $p_i$. We also store a pointer to the next free slot in $B_{out}$.
+
+\paragraph{I/O complexity.} The $k$-way merge ends when we reach the end of every sorted sequence: we performed $\Theta(N/B)$ read operations for the sorted sequences, and $\Theta(N/B)$ writes to $F$, thus the total I/O complexity is $\Theta(N/B)$.
+
+\paragraph{Minimizing CPU time.} The CPU complexity of searching the smallest element among the unchosen elements of the input buffers is $O(k)$. We can improve the algorithm by replacing the linear search with a minimum priority queue of the unchosen elements: in this way we can extract the smallest element in $O(1)$, advance the pointer $p_i$ of the corresponding input buffer $B_i$ and finally insert $B_i[p_i]$ in the priority queue in $O(\log k)$ time.
+
+\subsection{Second solution}
 Let
     \begin{itemize}
     \item $k = \frac{1}{4}\cdot \frac{M}{B}$ be the number of blocks the cache can hold.
