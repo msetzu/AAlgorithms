@@ -1,0 +1,34 @@
+\section{Greedy  2-approximation for  MAX-CUT  on  weighted  graphs}
+Prove  that  the  greedy algorithm for \emph{MAX-CUT} described in class gives also a $2$-approximation for weighted graphs with positive weights.
+
+\paragraph{Solution.}
+Let $G$ be our undirected weighted graph with $n$ nodes and $m$ edges.
+As stated in class, the greedy algorithm scans sequentially the ordered nodes, deciding at each iteration $i$ whether to add the node $v$ to the cut or not by computing the following:
+	\begin{algorithmic}[1]
+	\Function{add?}{$v$, $S$}
+	\State $S' \gets S \cup \{v\}$\;
+	\If{$E(S') > E(S)$}
+		\State $S \gets S'$\;
+	\EndIf
+	\EndFunction
+	\end{algorithmic}
+With a weighted graph we need to slightly modify the above:
+	\begin{algorithmic}[1]
+	\Function{add?}{$v$, $S$}
+	\State $S' \gets S \cup \{v\}$\;
+	\If{$\sum_{n \in S'}{w(n)} > \sum_{n \in S}{w(n)}$}
+	\State $S \gets S'$\;
+	\EndIf
+	\EndFunction
+\end{algorithmic}
+The above is computed for each vertex $v$ in local search but only $r_v = \abs{E_v}, E_v = \{v' | \exists e(v + \delta, v) \in E\}$ for the greedy algorithm, that is the nodes with a greater ordering and with a colliding edge on $v$.
+By applying the above function we have an $r'_v$.
+We also know that in a non-weighted case, given any vertex $u$, at least $\frac{r_u}{2}$ vertexes are in the cut: if this was not true, then we could add one cut, switching $v$ from $S$ to $\bar{S}$ or vice versa increasing the number of nodes in the cut.
+A weighted variant is trivial: as the non-weighted case chooses to switch $v$ according to $\sum{r^i}$, we choose to switch according to the weight sum $\mathcal{W} = \sum{\omega(r^i)}$.
+It follows that $r'_v = \sum{\omega(\text{edges incident to v in the cut})} \geq \sum{\omega(\frac{\text{incident edges on v})}{2}}$. \\
+Therefore we have the weights in the cut
+\begin{equation}
+E_{\omega} = \frac{1}{2} \cdot \sum_{v \in V}{\frac{\omega(r'_v)}{2}} =
+\frac{1}{4} \sum_{v \in V}{\omega(r'_v)} =
+\frac{1}{4} \cdot 2\mathcal{W(G)} = \frac{\mathcal{W(G)}}{2}
+\end{equation}

@@ -2,97 +2,51 @@
 Consider $N = 2^h - 1$ keys where $h$ is a power of 2, and the implicit cache-oblivious vEB layout of their corresponding complete binary tree, where the keys are suitably permuted and stored in an array of length $N$ without using pointers (as it happens in the classical implicit binary heap but the rule here is different). The root is in the first position of the array. Find a rule that, given the position of the current node, it is possible to locate in the array the positions of its left and right children. Discuss how to apply this layout to obtain (a) a static binary search tree and (b) a heap data structure, discussing the cache complexity.
 
 \vspace{0.5cm}
-\subsection{Solution.} We assume that the keys are stored in a zero-indexed array $T$. Given and index $0 \leq i < T.length$ we will give a rule for computing the index of its children.
+\paragraph{Solution.} We assume that the keys are stored in a zero-indexed array $A$ s.t. $\log A = H$. Given and index $0 \leq i < A.length$ we will give a rule for computing the index of its children.
 
 \begin{center}
-  \begin{tikzpicture}[sibling distance=10pt]
-    \tikzstyle{every node}=[circle,draw]
-    \Tree [.0 [.1 [.3 [.4 ]  [.5 ] ] [.6 [.7 ] [.8 ] ] ] [.2 [.9 [.10 ] [.11 ] ] [.12 [.13 ] [.14 ] ] ] ]
-  \end{tikzpicture}
+	\begin{tikzpicture}[sibling distance=10pt]
+	\Tree [.0 [.1 [.3 [.4 ]  [.5 ] ] [.6 [.7 ] [.8 ] ] ] [.2 [.9 [.10 ] [.11 ] ] [.12 [.13 ] [.14 ] ] ] ]
+	\end{tikzpicture}
 \end{center}
 
-As  by hypothesis, we'll assume $H = 2^k, k \in \mathcal{Z} \setminus \{0, 1\} $.
-\label{15_shift_layouts}~\paragraph{Shifted layouts} We start by introducing the notion of \emph{shifted layout}: a \emph{shifted layout L'} of a layout \emph{L} is a layout of the same size whose \emph{a} root is shifted from the one of \emph{L} of an offset \emph{g}:
-	\begin{equation}
-	\textsc{height(L)} == \textsc{height(L')}, L'.root = L.root + a
-	\end{equation}
+First, we define the \emph{cut distance} for a given node $v$.
+Given that $T$ has height $h = 2^k$, each cut halves the current sub-tree $T', height(T') = 2{k'}$ producing sub-trees of height $\frac{2^{k'}}{2} = 2^{{k'} - 1}$.
+Since the base case for the construction algorithm is $height(T') = 2$, this operation is repeated until a sub-tree of height $2$ is reached: therefore each node $v$ is at distance $d \leq 2$ from its next cut in the construction.
+\subparagraph{Left and right children on $d(v) = 2$} By the above we have that on any even level (those for which $d(v) = 2$ holds) $l$ will have a left child $v' = v + 1$ and a right child in position $v'' = v + 2$.
+As by construction the base case for $height(T') = 2$ is populated contiguously top-down left-to-right resulting in the above.
+\subparagraph{Left and right children on $d(v) = 1$} By the above we have that on any even level (those for which $d(v) = 1$ holds) $l$ will have a left child $v' = v + \delta$ and a right child in position $v'' = v + \gamma$ for some $\delta, \gamma$.
+The \emph{vEB} construction allocates space for each index crossing a path in a top-down left-to-right, as stated previously.
+Now, since we are crossing a cut, we can either compute the size $\abs{T_{ls}}$ of all the $2LS$ sub-trees allocated before the left child or the size of the tree $T_{top}$ of height $l$ on top of $v$ and the size of the sub-trees on the left of our $v$.
+\begin{equation} \label{15_top_size}
+\abs{T_{top}} = 2^{l+1} - 1
+\end{equation}
+\begin{equation} \label{15_left_sub-trees_siblings}
+\abs{T_{ls}} = 2^{H - l} \cdot 2LS
+\end{equation}
 
-Then
-	\begin{equation}
-	n \in L, n' \in L': n.index == n'.index \to n'.position == n.position + a \forall n \in L, n' \in L'
-	\end{equation}
-Trivially, as the two layouts are shifted in the root, the same shift is propagated to the remaining nodes in the layout.
+Therefore our left child as children given by the size of the top tree $T_{top} + $ the size of its left siblings sub-trees $LSS$:
+\begin{equation} \label{15_children}
+\abs{T_{ls}} + \abs{T_{top}} = (2^{H - l})(2LS) + (2^{l+1} - 1)
+\end{equation}
 
-\label{15_odd_levels_contiguity}~\paragraph{Contiguous children} Given a layout \emph{L}, we are able to \emph{cut} it until we reach a base case of layout \emph{L'} of height $2$ and root \emph{a}.
-It is trivial to see as this is populated as the following shows:
-	\begin{center}
-	\begin{tikzpicture}[sibling distance=10pt]
-	\Tree [.a [.a+1 ] [.a+2 ] ]
-	\end{tikzpicture}
-	\end{center}
-by the definition of base case for the \emph{vEB construction}.
-Then, provided we know to be in the \emph{a} index we are able to answer trivially with
-	\begin{gather*} \label{15_contiguity}
-	\textsc{LEFT(a)} = a + 1	\\
-	\textsc{RIGHT(a)} = a + 2	\\
-	\end{gather*}
-
-\label{15_even_levels_gap}~\paragraph{Non-contiguous children} Given a layout \emph{L}, we are able to \emph{cut} it until we reach a base case of
-	\begin{center}
-	\begin{tikzpicture}[sibling distance=10pt]
-	\Tree [.a
-	[.a+1
-		[.{$a+\gamma_a$} [.{$a+\gamma_a + 1$} ]  [.{$a+\gamma_a + 2$} ] ]
-		[.{$a+\gamma_a + S$} [.{$a+\gamma_a + S + 1$} ] [.{$a+\gamma_a + S + 2$} ] ] ]
-	[.a+2
-		[.{$a+\gamma_a + 2 \cdot S$} [.{$\dots$} ] [.{$\dots$} ] ] [.{$a+\gamma_a + 3 \cdot S$} [.{$\dots$} ] 
-	[.{$\dots$} ] ] ] ]
-	\end{tikzpicture}
-	\end{center}
-The first two levels are trivial by \ref{15_even_levels_gap}.
-From the second to the third we find instead a jump $\gamma_a$.
-By construction of the \emph{layout} the position $a + \gamma_a$ is populated right after $a + 2$: in this trivial case we have a jump of size $2$.
-This holds also for $a + \gamma_a + S$, as it is populated right after $a + \gamma_a + 2$ and so on and so forth on the same level.
-Given that \emph{height(T)} $= 4$ we have jumps $\gamma_a = 2$: this does not hold for any height: let $H = 2h$ be the height of a \emph{vEB tree} s.t. $h > 1$, $a$ be a node at level $h + 1$, $b$ be a node at level $l \not h +1$, then $\gamma_a = 2^{h} - 1$ and $\gamma_a > \gamma_b \forall b$.
-By construction the jump $\gamma$ and the gap $S$ grow exponentially w.r.t. the level of the tree $T$: given that the \emph{vEB} construction halves the height of the current tree at every recursion, such height is maximum at the very first recursion.
-Moreover, given that the sub-tree rooted in $a + \gamma_a + S$ is populated contiguously, $T_{a + \gamma_a} \in [a + \gamma_a, a + \gamma_a + 1, \dots, a + \gamma_a + S - 1]$: that is given any $n \in [a + \gamma_a, a + \gamma_a + S - 1]$ we can know in which subtree $T_i$ rooted in $a + \gamma_a + k \cdot S$ $n$ is contained:
-	\begin{equation} \label{15_wide_scroll}
-	t = n - (a + \gamma_a) / S
-	\end{equation}
-
-\label{15_powers_of_two}~\paragraph{Powers of two} Let $l \in [1, H]$ be a level for the \emph{vEB tree} $T$ s.t. the first root of that cut $a = 2^{2^{k}}$.
-Then $\exists b: b = 2^{2^{2k}}$ and $b$ is the first root at level $2l$.
-\paragraph{Proof} Let $H = 2h$ the whole \emph{vEB tree} and $T_0$ the first top cut from $1$ to $h$ and $T_1$ the bottom cut from $h + 1$ to $2h$.
-By construction $T_0$ is populated contiguously with $[1, 2^h]$.
-The $2^h$ leafs at $h$ create $2^{h + 1}$ nodes, roots for $T_1$: given that the cut was of size $h$ each of the $2^{h + 1}$ sub-trees has $2^h - 1$ nodes, for a total of $(2^{h + 1}) \cdot (2^{h - 1}) = 2^{2h} = 2^H$.
-
-\paragraph{Algorithm} We can now combine the above to create an algorithm to find the children of a node $i$:
-	\begin{enumerate}
-	\item Find $K = 2^{2^k}$ the largest power of a power of two lower than $i$: by \ref{15_powers_of_two} it will be in either the top or bottom half of $T$.
-	Let $l$ be the level of $K$ and $T'$ the respective cut.
-	\item By \ref{15_even_levels_gap} find the sub-tree $T'$ and relative root $a$ with \ref{15_wide_scroll}.
-	Compute its root $a = K + t \cdot (K - 1)$ by \ref{15_wide_scroll}.
-	By \ref{15_shift_layouts} $T'$ is a shifted tree of height $h$ with offset $K - 1$: scale it back together with $i$ and recursively apply on $T'$, cumulating the offsets and the levels as you go.
-	\item Once a base case of \emph{height($T'$)} $= 2$ we have two cases: i) $i$ is the root, and we can return $i + 1, i + 2$ by \ref{15_contiguity}; ii) $i$ is not the root and a jump $\gamma_i$ has to be computed.
-	By \ref{15_even_levels_gap} we are able to do so, provided we have the level.
-	Note as at step $2$ of the algorithm we have also cumulated the levels, thus allowing us to do so.
-	\end{enumerate}
+A search algorithm is then straightforward: starting from the root we traverse the node as a binary tree, keeping track of the variables needed by \ref{15_children}, namely level and left siblings (each increasing by 1 and by a factor of $2$ or $2 + 1$ respectively).
 
 \paragraph{Binary search tree in vEB layout.} We now present a procedure to transform an array of keys $S$ to a tree $T$, stored in memory in vEB layout, that satisfies the binary search tree property (the key in each node must be greater than all keys stored in the left subtree, and not greater than all keys in the right subtree).
 \begin{algorithmic}[1]
 	\Require{$S$ sorted in ascending order}
 	\Function{ArrayToVeb}{$S$, $i_{\text{vEB}}$, $l$, $r$}
-		 \If{$l > r$}
-		   \State \Return{}
-		 \EndIf
-	 \State $m \gets \lfloor (l+r)/2 \rfloor$
-	 \State $T[i_{\text{vEB}}] \gets S[m]$ \Comment{store the median in the root of the subtree}
-	 \State $l_{\text{vEB}} \gets $ \Call{Left}{$i_{\text{vEB}}$}
-	 \State $r_{\text{vEB}} \gets $ \Call{Right}{$i_{\text{vEB}}$}
-	 \State \Call{ArrayToVeb}{$S, l_{\text{vEB}}, l, m$}
-	 \State \Call{ArrayToVeb}{$S, r_{\text{vEB}}, m+1, r$}
+	\If{$l > r$}
+	\State \Return{}
+	\EndIf
+	\State $m \gets \lfloor (l+r)/2 \rfloor$
+	\State $T[i_{\text{vEB}}] \gets S[m]$ \Comment{store the median in the root of the subtree}
+	\State $l_{\text{vEB}} \gets $ \Call{Left}{$i_{\text{vEB}}$}
+	\State $r_{\text{vEB}} \gets $ \Call{Right}{$i_{\text{vEB}}$}
+	\State \Call{ArrayToVeb}{$S, l_{\text{vEB}}, l, m$}
+	\State \Call{ArrayToVeb}{$S, r_{\text{vEB}}, m+1, r$}
 	\EndFunction
 \end{algorithmic}
-The recursion starts from the call $\textsc{ArrayToVeb}(S, 0, 0, S.length-1)$. At the end of the procedure we can binary search in $T$ starting from the root $T[0]$, then traversing the implicit tree with the functions $\textsc{Left}$ and $\textsc{Right}$. This binary search will traverse $\log_2 N$ nodes, and those nodes are in subtrees of height $O(\log_2 B)$ (in turn stored in blocks of size $B$), thus the cost of a search is $O(\log_2 N / \log_2 B)=O(\log_B N)$ block transfers.
+The recursion starts from the call $\textsc{ArrayToVeb}(S, 0, 0, S.length-1)$. At the end of the procedure we can binary search in $T$ starting from the root $T[0]$, then traversing the implicit tree with the functions $\textsc{Left}$ and $\textsc{Right}$.
 
 \paragraph{Heap tree in vEB layout.}  Given any array $S$ sorted in increasing (decreasing) order, the implicit tree with root $S[i]$, children $S[\textsc{Left}(i)]$ and $S[\textsc{Right}(i)]$, satisfies the min-heap (max-heap) property $\forall i \in [0, S.length-1]$.
