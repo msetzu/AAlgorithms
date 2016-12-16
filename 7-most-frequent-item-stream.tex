@@ -11,53 +11,39 @@ $> \frac{n}{2}$ should be exploited.
 
 \vspace{0.5cm}
 \paragraph{Solution.}
-We'll use the notation of the previous section.
+We'll use the following notation:
+\begin{itemize}
+  \item $j^i$ is the $i$-th most frequent element.
+  \item $C$ is the frequencies function: $C(j^i) = \#\text{occurencies of } C^i$. 
+\end{itemize}
 Before illustrating our solution we prove that the following hold:
     \begin{itemize}
-    \label{frequence_dominance}\item \textbf{Given the $j^{1}$ element, $C(j^{1}) > C(j^{i}) \forall i \in S$.}
+    \label{frequence_dominance}\item Given the $j^{1}$ element, $C(j^{1}) > C(j^{i}) \forall i \in S$.
     \item Following the previous, $C(j^{i}) < C(j^{i}),  i > 1$ element.
-    \item \textbf{There are at most $\frac{n}{2} - 1$ elements in S:} given that $j^{1}$
-    appears at least $\frac{n}{2} + 1$ times, in the best case scenario every
-    other $\frac{n}{2} - 1$ element is different, giving $\frac{n}{2} - 1$
-    different elements.
-    \label{sub-stream_dominance}~\item \textbf{$j^{1}$ has sub-stream dominance:}
-    $\exists S' \subseteq S: j^{1} \textrm{ is the most frequent item} \in S'$:
-    trivially, since it is the most frequent element, $S'$ is always a sub-stream
-    dominant sub-stream.
+    \item There are at most $\frac{n}{2} - 1$ elements in S: given that $j^{1}$ appears at least $\frac{n}{2} + 1$ times, in the best case scenario every other $\frac{n}{2} - 1$ element is different, giving $\frac{n}{2} - 1$ different elements.
     \end{itemize}
 
-\paragraph{Recursive sub-streams} It is trivial to show that if we were to have
-$\frac{n}{2}$ counters, $\Sigma^{\frac{n}{2}}_{i = 0, i \neq 1}(C(j^{i}) < C(j^{1})$
+\paragraph{Recursive sub-streams} It is trivial to show that if we were to have $\frac{n}{2}$ counters,
+\begin{equation*}
+\sum^{\frac{n}{2}}_{i = 0, i \neq 1}\left( C(j^{i}) < C(j^{1}) \right)
+\end{equation*}
 by~\ref{frequence_dominance}.
-Though trivial, by combining it with~\ref{sub-stream_dominance} we can assert that
-given $S' = S[0, \frac{n}{2}], S'' = S[\frac{n}{2}, n], k = \textrm{ number of elements } \in S$
+We can also assert that given
+\begin{equation*}
+  S' = S[0, \frac{n}{2}], S'' = S[\frac{n}{2} + 1, n], k = \text{number of elements} \in S
+\end{equation*}
     \begin{itemize}
-    \item \textbf{$j^{1}$} is the sub-stream dominant element in either $S', S''$:
-    by contradiction, let us assume that is false. Then
-    $\exists j_{o} \neq j^{1}: C(j_{o})$ in $S' > C(j^{1}$, $\exists j_{o}: C(j_{o})$ in $S'' > C(j^{1}$;
-    given that $S'S'' = S$, that would make $C(j_{o}) = C(j^{1})$: contradiction.
-    \item More generally, given two sub-streams $S', S''$, the sub-stream
-    dominant element of $S'S''$ is one of the sub-stream dominants in
-    $S'$ or $S''$ and its frequencies are defined by
-    $$e - k - 1\textrm{ in } S', \frac{n}{2} + 1 - (e - k - 1) \textrm{ in } S''$$
-    where $e$ is an arbitrary number of appearances of $j^{2}: e < \frac{n}{2} + 1$
-    The reader will see as the $+1$ in the right side guarantees the
-    sub-stream dominant to be maximum.
+    \item \textbf{$j^{1}$} is the sub-stream dominant element in either $S', S''$: by contradiction, let us assume that is false.
+    Then $\exists j_{o} \neq j^{1}: C(j_{o})$ in $S' > C(j^{1}$, $\exists j_{o}: C(j_{o})$ in $S'' > C(j^{1})$; given that $S'S'' = S$, that would make $C(j_{o}) = C(j^{1})$: contradiction.
+    \item More generally, given two sub-streams $S', S''$, the sub-stream dominant element of $S'S''$ is one of the sub-stream dominants in $S'$ or $S''$ and its frequencies are defined by $$e - k - 1\textrm{ in } S', \frac{n}{2} + 1 - (e - k - 1) \textrm{ in } S''$$ where $e$ is an arbitrary number of appearances of $j^{2}: e < \frac{n}{2} + 1$.
+    The reader will see as the $+1$ in the right side guarantees the sub-stream dominant to be maximum.
     The sides can be swapped without hurting generality.
     \end{itemize}
 
-In order to better illustrate, we provide an algorithm (the Boyer–Moore majority vote algorithm) that exploits the
-sub-stream dominance.
-Our idea is to \emph{go up} with our counter when we are fed an object we've
-already met, and to \emph{go down} when we are fed an object different from
-us.
-Once we reach the bottom (0), we know by~\ref{sub-stream_dominance} that
-we either reached zero for an object $\neq j^{1}$, and we can ignore it,
-or we reached zero for $j^{1}$, that being the most frequent element will
-have sub-stream dominance in the remaining sequence, which means it will
-\emph{go upper} than any other element in that sub-stream.
-Given that any other element has lower frequency, the most frequent of
-them, $j^{2}$ will \emph{go down} $e < \frac{n}{2} + 1$ times.
+In order to better illustrate, we provide an algorithm (the Boyer–Moore majority vote algorithm) that exploits the sub-stream dominance.
+Our idea is to \emph{go up} with our counter when we are fed an object we've already met, and to \emph{go down} when we are fed an object different from us.
+Once we reach the bottom (0), we know that we either reached zero for an object $\neq j^{1}$, and we can ignore it, or we reached zero for $j^{1}$, that being the most frequent element will have sub-stream dominance in the remaining sequence, which means it will \emph{go upper} than any other element in that sub-stream.
+Given that any other element has lower frequency, the most frequent of them, $j^{2}$ will \emph{go down} $e < \frac{n}{2} + 1$ times.
 
 \begin{algorithmic}[1]
   \Function{majority\_vote\_algorithm}{$S$}:

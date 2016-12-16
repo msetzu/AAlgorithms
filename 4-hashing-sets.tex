@@ -6,33 +6,25 @@ Your company has a database $S \subseteq U$ of keys. For this database, it uses 
 \paragraph{Solution.}
 Trivially for $B_s[h(k)] = 0$ we can answer \textsc{false} with $\prob{error} = 0$.
 Let us analyse the opposite case, $B_s[h(k)] = 1$.
-Let $i \in [0,m]$ be some index s.t. $B_s[i] = 1$, and let $cl_{S}(i)$ be the list of
-$k \in S: h(k) = 1$ for some set $S \in \displaystyle {\mathcal {P}}(S)$.
-We can then denote the sets $cl_{U} := {k_{U} : k_{U} \in U, h(k) = i},
-cl_{S} := {k_{S} : k_{S} \in S, h(k) = i}$; it is trivial to show that
+Let $i \in [0,m]$ be some index s.t. $B_s[i] = 1$, and let $cl_{S}(i)$ be the list of $k \in S: h(k) = 1$ for some set $S \in \displaystyle {\mathcal {P}}(S)$.
+We can then denote the sets $cl_{U} := \{k_{U} : k_{U} \in U, h(k) = i\}, cl_{S} := \{k_{S} : k_{S} \in S, h(k) = i\}$; it is trivial to show that
     \begin{itemize}
     \label{6_cl_inclusion} \item $cl_{S} \subseteq cl_{U}$ as $S \in U$.
-    \label{6_cl_length} \item $| cl_{S}(k) | \leq | cl_{U}(k) | \forall k \in U$ as $S \in U$.
+    \label{6_cl_length} \item $| cl_{S}(k) | \leq | cl_{U}(k) | \forall k \in U$ as $S \subseteq U$.
     \end{itemize}
-Let us not try and estimate $|cl_{S}(k)|$: given $h$ is universal, we have an
-expected value of collisions of $\E{X_{k}} \approx \frac{1}{m} \forall k \in S$,
-that is
+Let us now try and estimate $|cl_{S}(k)|$: given $h$ is universal, we have an expected number of collisions of $\E{X_{k}} \approx \frac{1}{m} \forall k \in S$, that is
 \begin{align*}
     \prob{h(k^{0}) = c} = \frac{1}{m}                               \\
-    \prob{h(k^{1}) = c} = \frac{1}{m^{2}}                           \\
-    \prob{h(k^{i - 1}) = c, \and h(k^{i} = c) = \frac{1}{m^{i}}}    \\
+    \prob{h(k^{0}) = c, h(k^{1}) = c} = \frac{1}{m^{2}}                           \\
+    \prob{h(k^{j}) = c, \dots, h(k^{j + i} = c) = \frac{1}{m^{i - j}}}    \\
     \prob{h(k) = c, \forall k \in S} = \frac{1}{m^{|S|}}
 \end{align*}
-We can similarly compute the probability of not collision by simply replacing
-$\frac{1}{m}$ with $(1 - \frac{1}{m}): \prob{h(k) != c, \forall k \in S} = 1 - \frac{1}{m^{|S|}}$.
+We can similarly compute the probability of not collision by simply replacing $\frac{1}{m}$ \\ with $(1 - \frac{1}{m}): \prob{h(k) != c, \forall k \in S} = 1 - \frac{1}{m^{|S|}}$.
 
-Given our estimate of the collision list, we can now compute an estimate of the
-error probability: by~\ref{6_cl_inclusion}, we give an erroneous answer whenever
-$k \in cl_{U}(k), k \notin cl_{S}(k)$, that is we have a margin of error of
-$cl_{U}(k) \setminus cl_{S}(k)$ whose size is $|cl_{U}(k)| - |cl_{S}(k)|$.
+Given our estimate of the collision list, we can now compute an estimate of the error probability: by~\ref{6_cl_inclusion}, we give an erroneous answer whenever $k \in cl_{U}(k), k \notin cl_{S}(k)$, that is we have a margin of error of $cl_{U}(k) \setminus cl_{S}(k)$ whose size is $|cl_{U}(k)| - |cl_{S}(k)|$.
 Given the set of $k$ for which $h(k) = i$ the \emph{bad answers} are then
     \begin{equation}
-    1 - \prob{\textrm{good answer}} = 1 - \left(1 - \frac{1}{m}\right)^{|S|}
+    1 - \prob{\textrm{S hit the given cell}} = 1 - \left(1 - \frac{1}{m}\right)^{|S|}
     \end{equation}
 We now provide a lower and upper bound for the said value.
 The lower bound is given by the \emph{perfect hash} with no collisions: given
@@ -56,13 +48,13 @@ We define a random variable $X_{k}$:
     \end{equation*}
 and one over the ones in $B_{s}$, $X$:
     \begin{equation}
-        X = \Sigma_{k = 0}^{m - 1}X_k
+        X = \sum_{k = 0}^{m - 1}X_k
     \end{equation}
 We compute the relative expected value $\E{X}$:
     \begin{align*}
-       \E{X} & = \E{\Sigma_{k = 0}^{m - 1}X_k} \\
-       & = \Sigma_{k = 0}^{m - 1}\prob{B_{s}[k] = 1} \\
-       & = \Sigma_{k = 0}^{m - 1}\frac{\alpha}{m} \leq \frac{m}{c}
+       \E{X} & = \E{\sum_{k = 0}^{m - 1}X_k} \\
+       & = \sum_{k = 0}^{m - 1} \left( \prob{B_{s}[k] = 1} \right) \\
+       & = \sum_{k = 0}^{m - 1} \left( \frac{\alpha}{m}\right) \leq \frac{m}{c}
    \end{align*}
-where $\prob{B_{s}[k] = 1} = \frac{\alpha}{m}$ as $\alpha$ are the favorable cases
+where $\prob{B_{s}[k] = 1} = \frac{\alpha}{m}$ as $\alpha$ are the favourable cases
 (i.e. the collisions for a generic bucket $B_s[i]$), and $m$ is the size of $B_s$.

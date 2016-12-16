@@ -10,12 +10,12 @@ Consider the randomized min-cut algorithm discussed in class. We have seen that 
 \vspace{0.5cm}
 \paragraph{Contraction step.} We assume that the adjacency lists $Adj[x]$ are sorted $\forall x \in V$. We also note that the multigraph is undirected, therefore $v\in Adj[u]$ if and only if $u\in Adj[v]$. We maintain an attribute $pe$ in each edge to store the number of parallel edges.
 
-To contract an edge $(u, v)$, we have to merge the two adjacency lists $Adj[u]$ and $Adj[v]$ into a single \emph{sorted} adjacency list $Adj[uv]$ --- like the merge procedure in merge sort --- ensuring that:
+To contract an edge $(u, v)$, we have to merge the two adjacency lists $Adj[u]$ and $Adj[v]$ into a single \emph{sorted} adjacency list $Adj[uv]$ --- like the merge procedure in merge sort - ensuring that:
 \begin{itemize}
   \item if the current node in $Adj[u]$ is $v$, skip the node, since it will not appear in $Adj[uv]$ (do the same with $Adj[v]$ and $u$);
   \item if the current nodes are equal to $x$, add $x$ to $Adj[uv]$ and set $(uv, x).pe = (u,x).pe + (v,x).pe$.
 \end{itemize}
-Finally, we replace $Adj[u]$ and $Adj[v]$ with the newly created $Adj[uv]$. The total cost of this step is $O(n)$.
+Finally, we replace $Adj[u]$ and $Adj[v]$ with the newly created $Adj[uv]$. The total cost of this step is $O(n)$, as at most both lists containing $n$ elements each are scanned.
 
 \paragraph{Weighted graph extension.}
 We now extend the above to weighted multi-graph by re-conducting it to the non-weighted case.
@@ -42,10 +42,10 @@ The algorithm does not need to be edited but in the computation of the min cut, 
 \paragraph{Error probability.}
 By the analysis seen in class we have an error probability of
 \begin{equation*}
-1 - \Pr({\text{success}}) = 1 - \frac{1}{{{n} \choose {1}}}
+1 - \Pr({\text{success}}) = 1 - \frac{1}{{{n} \choose {2}}}
 \end{equation*}
 if we then run the algorithm some $d \cdot \frac{1}{{{n} \choose {2}}}$ times, the probability of success becomes
 \begin{equation*}
-1 - \left(1 - \frac{1}{{{n} \choose {2}}} \right)^{c \cdot \frac{1}{{{n} \choose {2}}}} \geq 1 - e^{d}
+1 - \left(1 - \frac{1}{{{n} \choose {2}}} \right)^{d \cdot \frac{1}{{{n} \choose {2}}}} \geq 1 - e^{d}
 \end{equation*}
 by $d = c \ln(c)$ we have an error probability of $\leq \frac{1}{n^c}$.
