@@ -29,23 +29,19 @@ $L$ is associated with a rank-select data structure.
 \end{enumerate}
 We can determine (with a probability of error) whether a key $k$ belongs to the set $S \subset U$, by testing whether $B[i+h_{h(k)}(k)]$ is equal to 1, where $i=\phi(h(k))$ is the starting position of the $h(k)$th bitvector, and $h_{h(k)}(k)$ is the offset for the secondary level.
 
-\paragraph{Hash functions space optimization.} We now try to improve the space for the hash functions parameters $a_j, b_j, p_j$.
-First, we select the lowest $p_j$ possible, that is, the first $p_j > n_j^2$: by
-\href{https://en.wikipedia.org/wiki/Bertrand\%27s_postulate}{Bertrand postulate}
-such a prime $p_j$ exists for $n_j^2 \leq p_j \leq 2n_j^2 - 2$.
-We therefore need a space of at most $2n_j^2$ bits for each parameter in an unary
-encoding.
-Since we have $a \in \mathbb{Z}_{p_j}^*, b \in \mathbb{Z}_{p_j}$, we have a space
-of $3 \cdot 2n_j^2$ for a triple $(a_j, b_j, p_j)$ of any given hash function.
-Let us now compute the space for the $n$ hash functions:
-$$Y=3n+3 \sum_{j=0}^{n-1}2n_j^2 = 3n+6 \sum_{j=0}^{n-1}n_j^2$$
-where $3n$ is the number of 1s that separate the unary encoding of the parameters. We have also an auxiliary space $o(Y)$ due to the rank-select data structure. 
+\paragraph{Hash functions space optimization.} We now try to improve the space for the hash functions parameters $a_j, b_j, p_j$. First, we select the lowest $p_j$ possible, that is, the first $p_j > n_j^2$: by \href{https://en.wikipedia.org/wiki/Bertrand\%27s_postulate}{Bertrand postulate} such a prime $p_j$ exists for $n_j^2 \leq p_j \leq 2n_j^2 - 2$. Since $(a_j, b_j)$ are chosen in $\mathbb{Z}_{p_j}^* \times \mathbb{Z}_{p_j}$ we need at most $\log_2 (2n_j^2-2) < \log_2 (2n_j^2) = 1 + 2\log_2 n_j$ bits for the binary representation of each parameter, and three times that space for the triple $(a_j, b_j, p_j)$. Let us now compute the space for the $n$ hash functions:
+\begin{equation*}
+  Y = \sum_{j=0}^{n-1} 3{(1 + 2\log_2 n_j)}
+    = 3n + 6\sum_{j=0}^{n-1} \log_2 n_j
+    \leq 3n + 6\sum_{j=0}^{n-1} n_j
+\end{equation*}
 
 \paragraph{Space.} The space occupied by the whole data structure is:
 \begin{itemize}
-  \item $X=\sum_{j=0}^{n-1}n_j^2$ bits for $B$;
-  \item $X+n$ bits for $L$, since $X$ is the number of 0s and $n$ is the number of 1s in $L$;
-  \item $o(X+n)$ bits for the rank-select auxiliary data structure for $L$;
-  \item $Y+o(Y)$ bits for the hash functions, as shown in the previous paragraph.
+  \item $X = \sum_{j=0}^{n-1}n_j^2$ bits for $B$;
+  \item $X + n$ bits for $L$, since $X$ is the number of 0s and $n$ is the number of 1s in $L$;
+  \item $o(X + n)$ bits for the rank-select auxiliary data structure for $L$;
+  \item $Y \leq 3n + 6\sum_{j=0}^{n-1} n_j$ bits for the hash functions, as shown in the previous paragraph.
 \end{itemize}
-Since $\E{\sum_{j=0}^{n-1}n_j^2} < 2n$, as shown in the perfect hashing analysis \cite[281]{Cormen09}, the total space is $O(n)$.
+Since $\E{\sum_{j=0}^{n-1}n_j^2} < 2n$, as shown in the perfect hashing analysis \cite[281]{Cormen09}, the total space is 
+$$2n + 3n + 3n + 12n = 20n \in O(n)$$
