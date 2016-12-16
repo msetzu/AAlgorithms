@@ -20,7 +20,7 @@ that is
 \begin{align*}
     \prob{h(k^{0}) = c} = \frac{1}{m}                               \\
     \prob{h(k^{1}) = c} = \frac{1}{m^{2}}                           \\
-    \prob{h(k^{i - 1}) = c \and h(k^{i} = c) = \frac{1}{m^{i}}}    \\
+    \prob{h(k^{i - 1}) = c, \and h(k^{i} = c) = \frac{1}{m^{i}}}    \\
     \prob{h(k) = c, \forall k \in S} = \frac{1}{m^{|S|}}
 \end{align*}
 We can similarly compute the probability of not collision by simply replacing
@@ -32,7 +32,7 @@ $k \in cl_{U}(k), k \notin cl_{S}(k)$, that is we have a margin of error of
 $cl_{U}(k) \setminus cl_{S}(k)$ whose size is $|cl_{U}(k)| - |cl_{S}(k)|$.
 Given the set of $k$ for which $h(k) = i$ the \emph{bad answers} are then
     \begin{equation}
-    1 - \prob{\textrm{good answer}) = 1 - {(1 - \frac{1}{m}}}^{|S|}
+    1 - \prob{\textrm{good answer}} = 1 - \left(1 - \frac{1}{m}\right)^{|S|}
     \end{equation}
 We now provide a lower and upper bound for the said value.
 The lower bound is given by the \emph{perfect hash} with no collisions: given

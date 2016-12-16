@@ -25,7 +25,7 @@ The above is computed for each vertex $v$ in local search but only $r_v = \abs{E
 By applying the above function we have an $r'_v$.
 We also know that in a non-weighted case, given any vertex $u$, at least $\frac{r_u}{2}$ vertexes are in the cut: if this was not true, then we could add one cut, switching $v$ from $S$ to $\bar{S}$ or vice versa increasing the number of nodes in the cut.
 A weighted variant is trivial: as the non-weighted case chooses to switch $v$ according to $\sum{r^i}$, we choose to switch according to the weight sum $\mathcal{W} = \sum{\omega(r^i)}$.
-It follows that $r'_v = \sum{\omega(\text{edges incident to v in the cut})} \geq \sum{\omega(\frac{\text{incident edges on v})}{2}}$. \\
+It follows that $r'_v = \sum{\omega(\text{edges incident to v in the cut}}) \geq \sum{\omega(\frac{\text{incident edges on v})}{2}}$. \\
 Therefore we have the weights in the cut
 \begin{equation}
 E_{\omega} = \frac{1}{2} \cdot \sum_{v \in V}{\frac{\omega(r'_v)}{2}} =
