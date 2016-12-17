@@ -2,10 +2,14 @@
 Given two input arrays $A$ and $\pi^{-1}$, where $A$ contains $N$ elements and $\pi^{-1}$ contains a permutation of $\{1, \dots, N\}$, describe and analyse an optimal external-memory algorithm for producing an output array $C$ of $N$ elements such that $C[i] = A[\pi[i]]$ for $1 \leq i \leq N$.
 
 \vspace{0.5cm} \paragraph{Solution.}
-We define an array $\pi^{-1}$ s.t. $\pi^{-1}[i] = j : \pi[j] = i$, that is the inverse mapping of $\pi$: \emph{position} $\to$ \emph{index}.
-We define an array $A\pi^{-1}$ s.t. $A\pi^{-1}[i] = (A[i], \pi^{-1}[i])$ of the form (element, shuffled index): note as we need to load $2 \cdot \frac{N}{B}$ blocks.
-We then sort $A\pi^{-1}$ with the previously defined k-way mergesort in $O(n \cdot \log(n))$ time and $O(\frac{N}{B})$ loads.
-By filtering $A\pi^{-1}$ over the first pair's element we have the ordered $C$ we wanted to obtain, and we are able to write it to memory with $O(\frac{N}{B})$ memory transfers.
+\begin{enumerate}
+\item We define an array $\pi^{-1}$ s.t. $\pi^{-1}[i] = j : \pi[j] = i$, that is the inverse mapping of $\pi$: \emph{destination} $\to$ \emph{departure}.
+\item We define an array $I\pi^{-1}$ s.t. $I\pi^{-1}[i] = (\pi^{-1}, i)$ of the form (departure, destination): note as we need to load $\frac{N}{B}$ blocks.
+\item We then sort $I\pi^{-1}$ according to the destination with the previously defined k-way mergesort in $O(n \cdot \log(n))$ time and $O(\frac{N}{B})$ loads.
+$I\pi^{-1}$ now holds the ordered destinations with respective index where to pick the elements from (the departure).
+\item We can now build $A\pi^{-1}$ with entries $(I\pi^{-1}[i], A[i])$ of the form (destination, element), again in $O(\frac{N}{B})$ cache loads.
+\item We run one more ordering over such tuples in $A\pi^{-1}$, this time according to the destination: we now have an ordered mapping \emph{element} $\to$ \emph{destination} and we are able to write it to memory with $O(\frac{N}{B})$ memory transfers.
+\end{enumerate}
 We then have a total of
 \begin{equation*}
 m = 2 \cdot \frac{N}{B} + O(\frac{N}{B}) + O(\frac{N}{B}) \in O(\frac{N}{B})
