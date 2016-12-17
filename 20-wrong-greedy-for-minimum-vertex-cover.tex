@@ -6,27 +6,26 @@ Choose each time a vertex $v$ with the largest number of incident edges in the c
 Add $v$ to $\tilde{S}$ and remove its incident edges.
 Repeat the process on the resulting graph as long as there are edges in it.
 Return $\abs{\tilde{S}}$ as the a approximation of the minimal size of a vertex cover for the original input graph.
-Generalize your argument to show that the above greedy algorithm cannot actually provide an
-$r$-approximation for any given constant $r >1$.
+Generalize your argument to show that the above greedy algorithm cannot actually provide an $r$-approximation for any given constant $r >1$.
 
 \paragraph{Solution}
-We split the $N = 3n$ nodes in two partitions of sizes $n, 2n$ that we call $L, R$ respectively.
+We create a class of graphs $G = (V, E), \abs{V} = N$ s.t. $V$ is partitioned in $S, R$ s.t. $\abs{S} = k, \abs{R} = \sum_{i = 1}^{k} \left(\lfloor{\frac{k}{i}} \rfloor \right)$ respectively and define them as \emph{senders} and \emph{receivers}.
+
 We then build the edges in the following way in order to obtain a minimum cover $L$:
 	\begin{enumerate}
-	\item If $\abs{R} = 0$ we stop.
-	\item Split the current slice $R$ in half: let $R^i$ be this slice.
-	\item For every node $n \in R^i$ build $i$ outgoing edges to each of the $\abs{L}$ nodes $\in L$.
-	Note as for $\abs{R^0} = \frac{2n}{2} = n$ each node reaches exactly one node $\in L$.
-	Halving $R^0$ we double the number of outgoing edges to $L$, we maintain the number of outgoing edges from $R$ constant.
+	\item For the current iteration $i$, if $\lfloor{\frac{k}{i}}\rfloor = 0$ we stop.
+	\item Split the current slice $R$, consider the first $\lfloor{\frac{k}{i}}\rfloor$ vertexes: let $R^i$ be this slice.
+	\item For every vertex $v \in R^i$ build $\frac{m}{\lfloor{\frac{k}{i}}\rfloor}$ outgoing edges to each of the $m$ nodes $\in R$.
 	We can then repeat step $1$ with $R \gets R \setminus R^i$.
 	\end{enumerate}
-Once the above procedure ends, we have $deg(n) = deg(n') $ for any $n, n' \in L$ because at each split every node in $L$ received an incoming edge.
-Each node in $L$ will have an incoming edge for every node $n \in L$.
+Once the above procedure ends, we have partitions vertexes of size $k \in S: deg(v) = 1$, one partition of vertexes of size $\lfloor{\frac{k}{2}}\rfloor \in S: deg(v) = \lfloor{\frac{k}{2}}\rfloor \forall v \in S$, etc. 
+Each node in $R$ will have an incoming edge for every node $n \in L$ and will therefore be in the minimum vertex cover, as by hypothesis $\abs{S} < \abs{R}$
 The greedy algorithm then starts by removing the highest-degree node: we find this on top of $R$, as it was doubled at each iteration.
-It is therefore forced to reach $R^0 = 1$ where $deg(n) = 1$.
-As this was the very first cut, we have to remove $n$ nodes.
-The set $\tilde{S}$ has then $\sum_{i = 2}^{n}\frac{n}{i}$ nodes:
-	\begin{equation*}
-	\sum_{i = 2}^{n}\frac{n}{i} = n \sum_{i = 2}^{n}\frac{1}{i} \approx n \ln n
-	\end{equation*}
-Since $n \ln n > n = $ minimum cover, we have a generalization for any $n$.
+By construction we have $k$ \emph{senders} partitions whose highest degree is $k$ (note as the degree increases in the summation up to $\lfloor{\frac{k}{i}}\rfloor$ for $i = k$).
+The \emph{receivers} have a maximum degree of $\sum_{i = 1}^{k} \lfloor{\frac{k}{i}}\rfloor \approx k \ln k$,
+as each of them received an incoming edge from each partitions $\in S$ that we asserted being $\lfloor{\frac{k}{i}}\rfloor$ by construction.
+The greedy algorithm will start removing from the vertex with highest degree: it will be forced to remove from the last built slices up to $\lfloor{\frac{k}{i}}\rfloor > \frac{m}{\lfloor{\frac{k}{i}}\rfloor}$, thus cutting at least $k \ln k > m$ vertexes before cutting in the minimum cover $S$.
+We can build a family of such graphs by making $k$ grow at will: as $k \ln k > r \forall k$ such family will have an increasingly larger \emph{r-approximation}:
+\begin{equation*}
+  k \ln k > rk \text{ }\forall k
+\end{equation*}
