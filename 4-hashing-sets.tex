@@ -14,12 +14,15 @@ We can then denote the sets $cl_{U} := \{k_{U} : k_{U} \in U, h(k) = i\}, cl_{S}
     \end{itemize}
 Let us now try and estimate $|cl_{S}(k)|$: given $h$ is universal, we have an expected number of collisions of $\E{X_{k}} \approx \frac{1}{m} \forall k \in S$, that is
 \begin{align*}
-    \prob{h(k^{0}) = c} = \frac{1}{m}                               \\
-    \prob{h(k^{0}) = c, h(k^{1}) = c} = \frac{1}{m^{2}}                           \\
-    \prob{h(k^{j}) = c, \dots, h(k^{j + i} = c) = \frac{1}{m^{i - j}}}    \\
-    \prob{h(k) = c, \forall k \in S} = \frac{1}{m^{|S|}}
+    \prob{h(k^{0}) = c} = \frac{1}{m}                               					\\
+    \prob{h(k^{0}) = c, h(k^{1}) = c} = \left(\frac{1}{m}\right)^{2}                    \\
+    \prob{h(k^{j}) = c, \dots, h(k^{j + i} = c)} = \left(\frac{1}{m}\right)^{j - i}    	\\
+    \prob{h(k) = c, \forall k \in S} = \left(\frac{1}{m}\right)^{|S|}
 \end{align*}
-We can similarly compute the probability of not collision by simply replacing $\frac{1}{m}$ \\ with $(1 - \frac{1}{m}): \prob{h(k) != c, \forall k \in S} = 1 - \frac{1}{m^{|S|}}$.
+We can similarly compute the probability of not collision by simply replacing $\frac{1}{m}$ with $(1 - \frac{1}{m})$:
+\begin{equation*}
+  \prob{h(k) != c, \forall k \in S} = \left(1 - \frac{1}{m}\right)^{|S|}
+\end{equation*}
 
 Given our estimate of the collision list, we can now compute an estimate of the error probability: by~\ref{6_cl_inclusion}, we give an erroneous answer whenever $k \in cl_{U}(k), k \notin cl_{S}(k)$, that is we have a margin of error of $cl_{U}(k) \setminus cl_{S}(k)$ whose size is $|cl_{U}(k)| - |cl_{S}(k)|$.
 Given the set of $k$ for which $h(k) = i$ the \emph{bad answers} are then

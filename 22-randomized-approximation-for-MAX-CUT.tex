@@ -1,0 +1,31 @@
+\section{Randomized 2-approximation for MAX-CUT}
+
+Prove  that  the  following  randomized algorithm provides a $2$-approximation for MAX-CUT in expectation, namely, the expected cut size is at least half of the optimal cut size.
+Here are the steps.
+\emph{(1)} For each vertex $v \in V$,  toss  an  unbiased  coin:  if  it  is  tail, insert $v$ into $C$; else, insert $v$ into $V \setminus C$.
+\emph{(2)} Start out with an empty set $T$.
+For each edge $\{v, w\} \in E$, such that $v \in C$ and $w \in V \setminus C$, add $\{v, w\}$ to $T$.
+Return $\abs{T}$ as approximated solution.
+
+\vspace{0.5cm}
+\paragraph{Solution.}
+We define the indicator variable $X_{v, w}$:
+\begin{equation*}
+X_{v, w} =   \begin{cases}
+            1   & \text{if } \{v, w\} \in T \\
+            0   & \text{otherwise}
+            \end{cases}
+\end{equation*}
+with $\Pr(X_{v, w} = 1) = \Pr(v \in C, w \notin C || v \notin C, w \in C) = \frac{1}{4} + \frac{1}{4} = \frac{1}{2}$ and expected value $\E{X} = \frac{1}{2} \cdot 1 + \frac{1}{2} \cdot 0 = \frac{1}{2}$.
+We then define the indicator variable $X$ for all the cuts we might have:
+\begin{equation*}
+X = \sum_{(v, w) \in E} X_{v, w}
+\end{equation*}
+with it expected value $\E{X}$:
+\begin{equation*}
+\E{X} = \E{\sum_{(v, w) \in E} X_{v, w}} = \sum_{(v, w) \in E} \E{X_{v, w}} = \frac{1}{2} \abs{E}
+\end{equation*}
+Given $OPT \geq \frac{1}{2} \abs{E}$ optimal cut and $X$, the cut we obtain through the above algorithm:
+\begin{equation*}
+\E{X} = \frac{1}{2} \abs{E} \geq \frac{1}{2} \abs{OPT}
+\end{equation*}

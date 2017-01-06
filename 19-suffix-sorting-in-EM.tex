@@ -12,7 +12,7 @@ We split our string $A$ of size $3N$ in two chunks $S_0, S_1, S_2$ each of size 
 We are able to do so in linear $O(N)$ time and $\frac{N}{B}$ cache loads, as a linear scan is sufficient.
 
 \subparagraph{Sample sorting}
-We now twitch a little bit the \emph{DC3}: instead of operating a traditional radix-sort in order to sort $S_{1,2}$ we apply our multi-way merge-sort on $k = \frac{M}{B}$ \emph{3-grams}, ordering them in $\frac{M}{B} \log_k(\frac{M}{B})$.
+We now twitch a little bit the \emph{DC3}: instead of operating a traditional radix-sort in order to sort $S_{1,2}$ we apply our multi-way merge-sort on $k = \frac{M}{B}$ \emph{3-grams}, ordering them in $\frac{N}{B} log_{\frac{M}{B}} \frac{N}{B}$.
 The use of multi-way merge-sort allows us to reduce computation time and cache cost, thus allowing us to stay in the boundary of $O(\frac{N}{B} log_{\frac{M}{B}} \frac{N}{B})$.
 Storage of $S^-1[A]$ still takes linear time and $\frac{M}{B} + \frac{1}{3} \cdot \frac{M}{B}$ cache writes, as $\frac{1}{3} \cdot \frac{M}{B}$ single values (the ranks) need to be stored.
 

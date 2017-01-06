@@ -9,8 +9,9 @@ Given two input arrays $A$ and $\pi^{-1}$, where $A$ contains $N$ elements and $
 	\item We can now build $A\pi^{-1}$ with entries $(\pi^{-1}[i].destination, A[i])$ of the form (destination, element).
 	As we ordered by the departures we scan $A$ sequentially: $A\pi^{-1} = [(destination, A[0]),$ \\$(destination, A[1]), (destination, A[2]), \dots]$: again we have $O(\frac{N}{B})$ block transfers.
 	\item We run one more ordering over such tuples in $A\pi^{-1}$, this time according to the destination: we now have an ordered mapping \emph{destination}($\pi[i]$) $\to$ \emph{element} and we are able to write it to memory with $O(\frac{N}{B})$ block transfers:
-	\begin{equation*}
-	  A\pi^{1}_ord = [(0, A[x]), (1, A[x]), (2, A[y]), (3, A[x]), \dots ] = [(0, A[\pi[0]]), (1, A[\pi[1]]), (2, A[\pi[2]]), (3, A[\pi[3]]), \dots ] 
-	\end{equation*}
+	\begin{gather*}
+	  sort(A\pi^{1}) = [(0, A[x]), (1, A[x]), (2, A[y]), (3, A[x]), \dots ] = \\
+	  = [(0, A[\pi[0]]), (1, A[\pi[1]]), (2, A[\pi[2]]), (3, A[\pi[3]]), \dots ] 
+	\end{gather*}
 \end{enumerate}
 The I/O complexity of the solution is dominated by the cost of sorting, that is $O(\frac{N}{B} log_{\frac{M}{B}} \frac{N}{B})$.

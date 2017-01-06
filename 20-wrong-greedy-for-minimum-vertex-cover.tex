@@ -19,7 +19,7 @@ We then build the edges in the following way in order to obtain a minimum cover 
 	We can then repeat step $1$ with $R \gets R \setminus R^i$.
 	\end{enumerate}
 Once the above procedure ends, we have partitions vertexes of size $k \in S: deg(v) = 1$, one partition of vertexes of size $\lfloor{\frac{k}{2}}\rfloor \in S: deg(v) = \lfloor{\frac{k}{2}}\rfloor \forall v \in S$, etc. 
-Each node in $R$ will have an incoming edge for every node $n \in L$ and will therefore be in the minimum vertex cover, as by hypothesis $\abs{S} < \abs{R}$
+Each node in $R$ will have an incoming edge for every node $n \in L$ and will therefore be in the minimum vertex cover, as by hypothesis $\abs{S} > \abs{R}$
 The greedy algorithm then starts by removing the highest-degree node: we find this on top of $R$, as it was doubled at each iteration.
 By construction we have $k$ \emph{senders} partitions whose highest degree is $k$ (note as the degree increases in the summation up to $\lfloor{\frac{k}{i}}\rfloor$ for $i = k$).
 The \emph{receivers} have a maximum degree of $\sum_{i = 1}^{k} \lfloor{\frac{k}{i}}\rfloor \approx k \ln k$,
@@ -27,5 +27,5 @@ as each of them received an incoming edge from each partitions $\in S$ that we a
 The greedy algorithm will start removing from the vertex with highest degree: it will be forced to remove from the last built slices up to $\lfloor{\frac{k}{i}}\rfloor > \frac{m}{\lfloor{\frac{k}{i}}\rfloor}$, thus cutting at least $k \ln k > m$ vertexes before cutting in the minimum cover $S$.
 We can build a family of such graphs by making $k$ grow at will: as $k \ln k > r \forall k$ such family will have an increasingly larger \emph{r-approximation}:
 \begin{equation*}
-  k \ln k > rk \text{ }\forall k
+  k \ln k > rk \text{ }\forall k, r
 \end{equation*}
