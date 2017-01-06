@@ -25,7 +25,7 @@ with it expected value $\E{X}$:
 \begin{equation*}
 \E{X} = \E{\sum_{(v, w) \in E} X_{v, w}} = \sum_{(v, w) \in E} \E{X_{v, w}} = \frac{1}{2} \abs{E}
 \end{equation*}
-Given $OPT \geq \frac{1}{2} \abs{E}$ optimal cut and $X$, the cut we obtain through the above algorithm:
+Given $\abs{OPT} \leq \abs{E}$ optimal cut and $X$, the cut we obtain through the above algorithm:
 \begin{equation*}
-\E{X} = \frac{1}{2} \abs{E} \geq \frac{1}{2} \abs{OPT}
+\E{X} = \frac{1}{2} \abs{E} \leq \frac{1}{2} \abs{OPT}
 \end{equation*}
