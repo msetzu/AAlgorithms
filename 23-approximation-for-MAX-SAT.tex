@@ -1,0 +1,13 @@
+\section{Approximation for MAX-SAT}
+
+In the MAX-SAT problem, we want to maximize the number of satisfied clauses in a CNF Boolean formula. Consider the following approximation algorithm for the problem. Let $F$ be the given formula, $x_1, x_2, \dots, x_n$ its Boolean variables, and $c_1, c_2, \dots, c_m$ its clauses. Pick arbitrary Boolean values $b_1, b_2, \dots, b_n$, where $b_i \in  \{0,1\} \; (1 \leq i \leq n)$. Compute the number $m_0$ of satisfied clauses by the assignment having $x_i := b_i \; (1 \leq i \leq n)$. Compute the number $m_1$ of satisfied clauses by the complement of the assignment, namely, having $x_i := \overline{b}_i \; (1 \leq i \leq n)$, where $\overline{b}_i$ denotes the negation (complement) of $b_i$. If $m_0 > m_1$, return the assignment $x_i := b \; (1 \leq i \leq n)$; else, return the assignment $x_i := \overline{b}_i \; (1 \leq i \leq n)$. Show that the above algorithm provides an $r$-approximation for MAX-SAT, and specify for which value of $r > 1$ (explaining why). Discuss how the choice of $b_1, b_2, \dots, b_n$ can impact the value of $r$, giving an explanation in your discussion. Optional: create an instance of the MAX-SAT problem where the returned value is exactly $1/r$ of the optimal solution, specifying which values of $b_1, b_2, \dots, b_n$ have been employed.
+
+\vspace{0.5cm}
+\paragraph{Solution.} Let $b=(b_1, b_2, \dots, b_n)$ the assignment and $\overline{b}$ its bitwise complement. Any clause in $F$ is always satisfied by $b$ or $\overline{b}$ (or both). Let $u$ be the number of clauses only satisfied by $b$, $v$ the number of clauses only satisfied by $\overline{b}$, and $w$ the number of clauses satisfied by both $b$ and $\overline{b}$.
+
+For example, in $F=c_1 \wedge c_2 \wedge c_3 = (x_1 \vee \neg x_2) \wedge (x_2 \vee \neg x_2) \wedge (\neg x_3 \vee x_4)$, the assignment $b = (1, 0, 1, 1)$ satisfies $c_1, c_2, c_3$, while $\overline{b} = (0, 1, 0, 0)$ satisfies $c_2, c_3$, thus $u=1, v=0, w=2$.
+
+We can rewrite and bound the approximation $\widetilde{C} = \max\{m_0, m_1\}$ returned by the algorithm as $$\widetilde{C} = \max\{u+w, v+w\}=w+\max\{u, v\}\geq w + \frac{u+v}{2} \geq \frac{1}{2} (u+v+w).$$
+
+Since the optimal solution $C^*$ is at most the number of clauses $m$, which in turn is at most $u+v+w$, it follows that
+$$\frac{C^*}{\widetilde{C}} \leq \frac{u+v+w}{\frac{1}{2}(u+v+w)} = 2.$$
