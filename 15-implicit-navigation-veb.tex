@@ -17,13 +17,14 @@ Since the base case for the construction algorithm is $height(T') = 2$, this ope
 As by construction the base case for $height(T') = 2$ is populated contiguously top-down left-to-right resulting in the above.
 \subparagraph{Left and right children on $d(v) = 1$} By the above we have that on any even level (those for which $d(v) = 1$ holds) $l$ will have a left child $v' = v + \delta$ and a right child in position $v'' = v + \gamma$ for some $\delta, \gamma$.
 The \emph{vEB} construction allocates space for each index crossing a path in a top-down left-to-right, as stated previously.
-Now, since we are crossing a cut, we can either compute the size $\abs{T_{ls}}$ of all the $2LS$ sub-trees allocated before the left child or the size of the tree $T_{top}$ of height $l$ on top of $v$ and the size of the sub-trees on the left of our $v$.
+Now, since we are crossing a cut, we can either compute the size $\abs{T_{ls}}$ of all the $2LS$ sub-trees allocated before the left child and the size of the tree $T_{top}$ of height $l$ on top of $v$ and the size of the sub-trees on the left of our $v$.
 \begin{equation} \label{15_top_size}
-\abs{T_{top}} = 2^{l+1} - 1
+\abs{T_{top}} = 2^{l} - 1
 \end{equation}
 \begin{equation} \label{15_left_sub-trees_siblings}
-\abs{T_{ls}} = 2^{H - l} \cdot 2LS
+\abs{T_{ls}} = \text{tree size } · \text{ number of trees }= 2^{H - l} \cdot 2LS
 \end{equation}
+with $2^{H - l}$ as size as we are at the $l$ level of a complete binary tree and $2LS$ siblings as the $LS$ nodes at level $l$ had two children each, again because we are in a complete binary tree.
 
 Therefore our left child as children given by the size of the top tree $T_{top} + $ the size of its left siblings sub-trees $LSS$:
 \begin{equation} \label{15_children}
@@ -48,5 +49,11 @@ A search algorithm is then straightforward: starting from the root we traverse t
 	\EndFunction
 \end{algorithmic}
 The recursion starts from the call $\textsc{ArrayToVeb}(S, 0, 0, S.length-1)$. At the end of the procedure we can binary search in $T$ starting from the root $T[0]$, then traversing the implicit tree with the functions $\textsc{Left}$ and $\textsc{Right}$.
+
+\begin{center}
+	\begin{tikzpicture}[sibling distance=10pt]
+	\Tree [.8 [.4 [.2 [.1 ]  [.3 ] ] [.6 [.5 ] [.7 ] ] ] [.12 [.10 [.9 ] [.11 ] ] [.14 [.13 ] [.15 ] ] ] ]
+	\end{tikzpicture}
+\end{center}
 
 \paragraph{Heap tree in vEB layout.}  Given any array $S$ sorted in increasing (decreasing) order, the implicit tree with root $S[i]$, children $S[\textsc{Left}(i)]$ and $S[\textsc{Right}(i)]$, satisfies the min-heap (max-heap) property $\forall i \in [0, S.length-1]$.

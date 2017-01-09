@@ -27,12 +27,12 @@ We then have the weight for the overall graph:
 and for the min cut: $\omega_{min}$.
 Similarly as we've seen in class we can define $\omega_G$ in function of $\omega_{min}$:
 \begin{equation*}
-\omega_G = \frac{\sum^{n} \left( \omega(n) \right)}{2} = \frac{n \cdot \omega_{min}}{2}
+\omega_G \geq \frac{\sum^{n} \left( \omega(n) \right)}{2} \geq \frac{n \cdot \omega_{min}}{2}
 \end{equation*}
 
-Giving us an error probability of
+We associate to each edge a probability $\Pr(e) < 1: \sum_{e \in G.E} \Pr(e)= 1$ proportionate to its weight: the more the weight, the more the probability it's chosen, giving us an error probability of
 \begin{equation*}
-\Pr(error) = \frac{\textsc{weight(min-cut)}}{\textsc{weight(graph)}} = \frac{\omega_{min}}{\omega_G} = \frac{\omega_{min}}{\frac{n \cdot \omega_{min}}{2}} = \frac{2}{n}
+\Pr(error) = \frac{\Pr(e \in C \text{ is chosen})}{\Pr(e \in E \text{ is chosen })} = \frac{\textsc{weight(min-cut)}}{\textsc{weight(graph)}} = \frac{\omega_{min}}{\omega_G} = \frac{\omega_{min}}{\frac{n \cdot \omega_{min}}{2}} = \frac{2}{n}
 \end{equation*}
 That is, we reach the same error probability seen in class.
 Therefore we can safely assume that the analysis is the same.
@@ -48,4 +48,4 @@ if we then run the algorithm some $d \cdot \frac{1}{{{n} \choose {2}}}$ times, t
 \begin{equation*}
 1 - \left(1 - \frac{1}{{{n} \choose {2}}} \right)^{d \cdot \frac{1}{{{n} \choose {2}}}} \geq 1 - e^{d}
 \end{equation*}
-by $d = c \ln(c)$ we have an error probability of $\leq \frac{1}{n^c}$.
+by $d = c \ln(n)$ we have an error probability of $\leq \frac{1}{n^c}$.
