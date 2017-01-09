@@ -7,9 +7,7 @@ Consider an array $C$ of $n$ integers, initially all equal to zero. We want to s
   \item $sum(i,j)$, where $0 \leq i \leq j \leq n - 1$: it returns $\sum_{k = 1}^j C[k]$.
 \end{itemize}
 
-Design a data structure that uses $O(n)$ space, takes $O(n \log n)$ construction time, and implements each operation above in $O(\log n)$ time. Note that $query(i) = sum(i, i)$ but it helps to reason.
-
-[Hint: For the general case, use the segment tree seen in class, which uses $O(n \log n)$ space: prove that its space is actually $O(n)$ when it is employed for this problem.]
+Design a data structure that uses $O(n)$ space, takes $O(n \log n)$ construction time, and implements each operation above in $O(\log n)$ time. Note that $query(i) = sum(i, i)$ but it helps to reason. [Hint: For the general case, use the segment tree seen in class, which uses $O(n \log n)$ space: prove that its space is actually $O(n)$ when it is employed for this problem.]
 
 \subsection{First solution}
 
@@ -193,7 +191,7 @@ We associate with each node $x$ of $T_I$ some attributes: $x.sum$, that stores $
   \item $update(i,j,c)$, we do the following:
   \begin{enumerate}
     \item if $x.interval \cap [i,j] = \emptyset$, we stop the recursion on this subtree;
-    \item if $x.interval \subseteq [i,j]$, we update $x.sum \gets |x.interval| \times c$, and $x.left.lazy \gets x.left.lazy + c$, $x.right.lazy \gets x.right.lazy + c$
+    \item if $x.interval \subseteq [i,j]$, we update $x.sum \gets |x.interval| \times c$, and $x.left.lazy \gets x.left.lazy + c$, $x.right.lazy \gets x.right.lazy + c$;
     \item otherwise we repeat the procedure $update(i,j,c)$ on $x.left$ and $x.right$.
   \end{enumerate} 
 \end{itemize}

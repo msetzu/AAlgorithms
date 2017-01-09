@@ -52,23 +52,23 @@ As we've seen by~\ref{p_over_m} at most $\frac{p}{m}$ such $l$ exist for $(a x +
 \begin{proof}
 We will show that both sides of  \eqref{equation:pairwise-independence} are approximately equal to $\frac{1}{m^2}$.
 
-Given a hash function $h_{a,b} \in \mathcal{H}$, and two distinct inputs $x_1, x_2 \in \mathbb{N}$, let:
+Given a hash function $h_{a,b} \in \mathcal{H}$, and two distinct inputs $x_1, x_2 \in \mathbb{N}$, let
 \begin{align*}
-  r = (a x_1 + b) \bmod p\\
-  s = (a x_2 + b) \bmod p
+  r = (a x_1 + b) \bmod p,\\
+  s = (a x_2 + b) \bmod p.
 \end{align*}
 Notice that $r \ne s$ because $r - s \equiv a(x_1-x_2) \pmod p $,  both $a$ and $x_1-x_2$ are nonzero modulo a prime number, and so their product is nonzero.
 
 Since there are a total of $p(p-1)$ pairs of $(r, s)$ such that $r \ne s$ ($p^2$ choices subtracted the number of pairs where $r=s$), there is a one-to-one correspondence between pairs $(a, b)\in \mathbb{Z}_p^*\times\mathbb{Z}_p$ and pairs $(r, s)$. Therefore, for the left-hand side of \eqref{equation:pairwise-independence}:
-$$\probs{h_{a,b}\in\mathcal{H}}{(h(x_1)= c_1, h(x_2) = c_2)} = \probs{r\ne s\in\mathbb{Z}_p^2}{r \bmod m = c_1, s \bmod m = c_2}$$
+$$\probs{h_{a,b}\in\mathcal{H}}{h(x_1)= c_1, h(x_2) = c_2} = \probs{r\ne s\in\mathbb{Z}_p^2}{r \bmod m = c_1, s \bmod m = c_2}.$$
 
 There are about $p / m$ values of $r$ that satisfy $r \bmod m=c_1$, and the same goes for $c_2$ and $s$. Hence, there are about $(p / m)^2$ choices for the pair $(r, s) \in \mathbb{Z}_p^2$ that satisfy $r \bmod m = c_1 \wedge s \bmod m = c_2$. Dividing the favorable cases with the all possible cases:
-$$\frac{\lfloor p / m \rfloor^2}{p(p-1)}\le\prob{r \bmod m = c_1, s \bmod m = c_2}\le \frac{(\lfloor p / m \rfloor + 1)^2}{p(p-1)}$$
+$$\frac{\lfloor p / m \rfloor^2}{p(p-1)}\le\prob{r \bmod m = c_1, s \bmod m = c_2}\le \frac{(\lfloor p / m \rfloor + 1)^2}{p(p-1)}.$$
 Thus, $\prob{h(x_1)= c_1, h(x_2) = c_2}\approx \frac{1}{m^2}$.
 
 \vspace{10pt}
-The right-hand side of \eqref{equation:pairwise-independence} is equal to  $\frac{1}{m^2}$, because both probabilities are $\frac{1}{m}$. Take for example $\prob{h(x_2) = c_2}$: there are about $p / m$ values of $s$ that satisfy $s \bmod m = c_2$, out of $p$ values for $s$. Hence:
-$$\prob{h(x_2) = c_2} = \prob{s \bmod m = c_2} \approx \frac{\frac{p}{m}}{p} = \frac{1}{m}$$
+The right-hand side of \eqref{equation:pairwise-independence} is equal to  $\frac{1}{m^2}$, because both probabilities are $\frac{1}{m}$. Take for example $\prob{h(x_2) = c_2}$: there are about $p / m$ values of $s$ that satisfy $s \bmod m = c_2$, out of $p$ values for $s$. Hence,
+$$\prob{h(x_2) = c_2} = \prob{s \bmod m = c_2} \approx \frac{\frac{p}{m}}{p} = \frac{1}{m}.$$
 
 
 \end{proof}

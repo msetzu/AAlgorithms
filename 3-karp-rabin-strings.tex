@@ -28,7 +28,7 @@ properties hold:
 accordingly, as our $rabin$ function multiplies by an $a^{i}$ costant.
 
 \begin{algorithmic}[1]
-  \Function{equals}{$i$, $j$, $length$}:
+  \Function{equals}{$i$, $j$, $length$}
     \State $h_i = h[i + length] - h[i - 1]$\;
     \State $h_j = h[j + length] - h[j - 1]$\;
 
@@ -48,7 +48,7 @@ of the strings and runs recursively on the half with different hashing.
 We define \textsc{lce} as an auxiliary function
 
 \begin{algorithmic}[1]
-  \Function{lce}{$i$, $j$, $l$}:
+  \Function{lce}{$i$, $j$, $l$}
     \State eq = \Call{equals}{$i$, $j$}\;
 
     \If{eq}
@@ -67,21 +67,21 @@ We define \textsc{lce} as an auxiliary function
     \Return{$h^{i} - h^{j} == 0$}\;
     \EndFunction
 
-    \Function{inv}{$h$, $k$, $l$}:
+    \Function{inv}{$h$, $k$, $l$}
     \Return $h^{k - l}$
     \EndFunction
 \end{algorithmic}
 
 \subsection{Second solution}
 
-We interpret the string $S \in \Sigma^*$ as the polynomial $S(z)=\sum_{i=0}^{n-1}S[i]z^i$, where $S[i]$ is a symbol encoded with a number in $\{0, \dots, |\Sigma|-1\}$. Given a prime number $p$ greater than both $2n$ and $|\Sigma|$, we define the fingerprint on strings $h_p$ as:
-$$h_p(S)=h_p\left(\sum_{i=0}^{n-1}S[i] \cdot z^i\right) = \left(\sum_{i=0}^{n-1}S[i]  \cdot z^i\right) \bmod p$$
+We interpret the string $S \in \Sigma^*$ as the polynomial $S(z)=\sum_{i=0}^{n-1}S[i]z^i$, where $S[i]$ is a symbol encoded with a number in $\{0, \dots, |\Sigma|-1\}$. Given a prime number $p$ greater than both $2n$ and $|\Sigma|$, we define the fingerprint on strings $h_p$ as
+$$h_p(S)=h_p\left(\sum_{i=0}^{n-1}S[i] \cdot z^i\right) = \left(\sum_{i=0}^{n-1}S[i]  \cdot z^i\right) \bmod p,$$
 were $z$ is randomly chosen from $\mathbb{Z}_p$.
 
 If two string $A$ and $B$ are equal, then also their fingerprints are equal. If they are different, the probability that their fingerprints are the same is at most $\frac{n}{p}<\frac{n}{2n}=\frac{1}{2}$, because there are $p$ choices for $z$ and at most $n$ roots of the polynomial $P(z)=A(z)-B(z)$ (follows from the  fundamental theorem of algebra and the fact that $A(z)$ and $B(z)$ have both degree $n$) \cite[169]{Motwani10}.
 
 \paragraph{Queries.} To implement efficiently the queries on $S$, we use an array $H$ with the hashes of the string's prefixes, formally: 
-$$H[i]=h_p(S[0..i]) \quad \forall i \in [0, n-1]$$
+$$H[i]=h_p(S[0..i]) \quad \forall i \in [0, n-1],$$
 where $S[i..j]$ denotes the substring $S[i]S[i+1] \dots S[j]$.
 
 With the array $H$ we can compute in constant time the fingerprint of any substring of $S$, hence we can decide --- with a probability of error --- $equal_S(i,j,l)$, by comparing the substrings' fingerprints. To compute $lce_S(i,j)$, we search with $O(\log n)$ different values of $l$ inside the interval $[0, \min(j-i,n-j)]$ until the result is found. Listing \ref{listing:lce} shows an implementation in Python.
@@ -115,10 +115,10 @@ def equal(i, j, l): # O(1)
     return hs1 == hs2
 
 def lceaux(i, j, intsize, maxlce): # O(logn)
-    if (intsize <= 1):
+    if intsize <= 1:
         return 1 if equal(i, j, 1) else 0
     if equal(i, j, intsize):  # Check if there is a longer common extension
-        if (intsize + intsize / 2 >= maxlce):
+        if intsize + intsize / 2 >= maxlce:
             return maxlce
         return lceaux(i, j, intsize + intsize / 2, maxlce)
     else: # Check if there is a shorter common extension
@@ -126,7 +126,7 @@ def lceaux(i, j, intsize, maxlce): # O(logn)
 
 def lce(i, j):
     maxlce = min(j - i, len(s) - j)
-    if (equal(i, j, maxlce)):
+    if equal(i, j, maxlce):
         return maxlce
     return lceaux(i, j, maxlce, maxlce)
 \end{lstlisting}
