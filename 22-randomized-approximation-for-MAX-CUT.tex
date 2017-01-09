@@ -9,14 +9,21 @@ Return $\abs{T}$ as approximated solution.
 
 \vspace{0.5cm}
 \paragraph{Solution.}
-We define the indicator variable $X_{v, w}$:
+We define the indicator variable $X_{v, w}$ in order to establish whether $e\{v, w\} \in T$:
 \begin{equation*}
 X_{v, w} =   \begin{cases}
 1   & \text{if } \{v, w\} \in T \\
 0   & \text{otherwise}
 \end{cases}
 \end{equation*}
-with $\Pr(X_{v, w} = 1) = \Pr(v \text{ colored }, w \text{ not colored } \lor v \text{ not colored }, w \text{ colored }) = \Pr(v \in C, w \notin C \lor v \notin C, w \in C) = \frac{1}{4} + \frac{1}{4} = \frac{1}{2}$ and expected value $\E{X_{v,w}} = \frac{1}{2} \cdot 1 + \frac{1}{2} \cdot 0 = \frac{1}{2}$.
+with 
+\begin{gather*}
+\Pr(X_{v, w} = 1) = \Pr(v \text{ colored }, w \text{ not colored } \lor v \text{ not colored }, w \text{ colored }) = \\
+\Pr(v \in C, w \notin C \lor v \notin C, w \in C) =
+\frac{1}{4} + \frac{1}{4} = \frac{1}{2}
+\end{gather*}
+and expected value $\E{X_{v,w}} = \frac{1}{2} \cdot 1 + \frac{1}{2} \cdot 0 = \frac{1}{2}$.
+
 We then define the indicator variable $X$ for all the cuts we might have:
 \begin{equation*}
 X = \sum_{(v, w) \in E} X_{v, w}
@@ -25,11 +32,11 @@ with expected value $\E{X}$:
 \begin{equation*}
 \E{X} = \E{\sum_{(v, w) \in E} X_{v, w}} = \sum_{(v, w) \in E} \E{X_{v, w}} = \frac{1}{2} \abs{E}
 \end{equation*}
-Given $\abs{OPT} \leq \abs{E}$ optimal cut and $X$, the cut we obtain through the above algorithm:
+The cut we obtain through the above algorithm:
 \begin{equation*}
 \E{X} = \frac{1}{2} \abs{E}
 \end{equation*}
-with an approximated solution $r$ of:
+Given $\abs{OPT} \leq \abs{E}$ optimal cut we have an approximated solution $r$ of:
 \begin{equation*}
 r = \frac{\abs{OPT}}{\E{X}} \leq \frac{\abs{E}}{\frac{1}{2}\abs{E}} = 2 
 \end{equation*}
