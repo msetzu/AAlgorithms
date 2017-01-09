@@ -4,7 +4,7 @@ Given two input arrays $A$ and $\pi^{-1}$, where $A$ contains $N$ elements and $
 \vspace{0.5cm}
 \paragraph{Solution.}
 \begin{enumerate}
-	\item We define an array $\pi^{-1}$ such that $I\pi^{-1}[i] = (\pi, i)$ of the form (departure, destination): note as we need $O(\frac{N}{B})$ block transfers.
+	\item We define an array $\pi^{-1}$ such that $\pi^{-1}[i] = (\pi, i)$ of the form (departure, destination): note as we need $O(\frac{N}{B})$ block transfers.
 	\item We then sort $\pi^{-1}$ according to the departure with the previously defined $k$-way mergesort in $O(\frac{N}{B} log_{\frac{M}{B}} \frac{N}{B})$ block transfers. $\pi^{-1}$ now holds the ordered departures with respective index where to send the elements to (the destination).
 	\item We can now build $A\pi^{-1}$ with entries $(\pi^{-1}[i].destination, A[i])$ of the form (destination, element).
 	As we ordered by the departures we scan $A$ sequentially: $A\pi^{-1} = [(destination, A[0]),$ \\$(destination, A[1]), (destination, A[2]), \dots]$: again we have $O(\frac{N}{B})$ block transfers.
