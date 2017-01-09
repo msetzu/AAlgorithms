@@ -51,6 +51,6 @@ We implement the merge operation as follows, outputting to external memory on fi
 As we assumed, our blocks are ordered Fibonacci min-heaps, thus allowing us to merge them in $k \cdot \log(n)$ time.
 We can then store $S$ by finding the minimum element $n$ times in costant time: $n \cdot O(1) = O(n)$, giving us a total cost of
     \begin{equation*}
-    k \cdot B + \log(k) \cdot O(k) + O(n)
+    k \cdot B + \log(k) \cdot O(k) + O(n) = O(k) + O(k \log(k)) + O(n)
     \end{equation*}
 respectively for construction, find the minimum over $k$ Fibonacchi heaps in the \emph{merge} procedure and store it in memory.
