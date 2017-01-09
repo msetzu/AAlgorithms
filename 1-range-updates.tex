@@ -13,130 +13,157 @@ Design a data structure that uses $O(n)$ space, takes $O(n \log n)$ construction
 
 \subsection{First solution}
 
-Let $T$ be a segmented binary tree over a continuous interval $I: [0, N - 1]$
-s.t.\ its leafs are the points in I, and the parent of two nodes comprises of their interval:
-$$  n' \cup n'' = n, n' \cap n'' = \emptyset   \textrm{ s.t. } n \text{ is the parent of } n', n''$$
+Let $T$ be a segmented binary tree over a continuous interval $I: [0, N -1]$ s.t. $2^{height(T) - 1} = N$, that is, $T$ stores $N$ singleton interval in its leaves.
+Then $T \in O(n)$:
+\begin{equation*}
+\abs{T - \text{last\_level}} = \sum_{i=0}^{height(T) - 2}2^i = 2^{height(T) - 1} - 1 = N - 1
+\end{equation*}
+therefore
+\begin{equation*}
+\abs{T} = N + N - 1 = 2N - 1 = 2N
+\end{equation*}
 
-$T$ will keep track of the prefix sums for every interval.
-We define a function
-\begin{equation}
-    s': [0, n - 1] \to \mathbb{N}
-\end{equation}
-that given a node in $T$ returns the value associated with $I$, namely the
-cumulative sum of that interval.
+We build $2$ isomorphic trees $S$ and $L$ s.t. $\abs{T} + \abs{S} + \abs{L} = 6n \in O(n)$ defined as \emph{sum tree} and \emph{lazy tree} respectively.
+$S.node$ will hold the cumulative sum for the interval it represents, while $L.node$ will hold a \emph{lazy} value of the sum, not propagated to the sub-intervals of the given node.
+That is, $sum(node) = S.node + L.node$.
+With this in mind, let us define \emph{sum} and \emph{update}.
+\begin{itemize}
+\item \textbf{update(i, j, k):} We operate on an half-lazy basis: as updating each node comprising the query interval, we split it "to the right": given an interval $[i, j] \exists l \in (i, j) \text{ s.t. } T.node.interval\_end = l, node \in T$.
+That is, we can always split a given interval $I'$ in an interval sharing its starting position and comprising part of the interval.
+As we have singleton intervals in the leaves, this is trivial to show.
+We are able to apply the above updating the values of $S$ and $L$ as we traverse the tree: starting from the root, update $S.node = k * I.size$ (node = root at the first iteration); pick the $S.Rchild$ child "to the right" of the interval and update $L.Rchild = k$, and apply the recursive call on the $S.Lchild$ child "to the left".
+We can easily reverse this procedure with a "to the left" policy.
+Now, as the $S.Rchild$ update comprised the whole interval, each node receives its update in the top-down traversal, while $S.Lchild$ is taken care of recursively until it reaches the interval maximum, which is updated in $S$ and its right sibling which is updated in $L$.
+As at each level we split in half, we have $\log N$ operations on update.
+\item \textbf{sum(i, j):} We sum as stated above by traversing the tree and cumulating lazy values in the traversal, summing $S.node$ as we find nodes in the interval.
+Given that this is a trivial traversal of a binary tree, $\log N$ operations are involved (actually $\leq 2N$ as also lazy values are summed).
+Query is a trivial \textbf{sum(i, i)}, the same holds.
+\end{itemize}
 
-In order to reduce the computational cost, we introduce a lazy algorithm
-that doesn't propagate sums over $T$ as they are streamed in the input,
-which means $s'(i)$ might not be accurate at a given time $t$ for any of the
-requested operation.
-
-We'll instead either compute over $T$ or update $T$ as necessary.
-Let us define a function to do so:
-\begin{equation}
-    l: \mathbb{N} \to (\mathbb{N} \cup \{\epsilon\}, \mathbb{N})
-\end{equation}
-to keep track of our lazy sums:
-\begin{equation}
-    s(n) = \begin{cases}
-            \epsilon, \_            &   \textrm{if no lazy prefix sum is in that interval} \\
-            k, m                    &   \textrm{if a lazy sum of k is to be propagated to m}\\
-            \end{cases}
-\end{equation}
-The \textsc{query} function is then trivial:
-
-\begin{algorithmic}[1]
-    \Function{query}{$I$, $i$, $sum$}:
-    \If{$I.size = 1$}                       \Comment{Return found value}
-      \State \Return $I.sum$
-    \EndIf
-    \If{lazy(I), $i \in I.left, i \notin I.right$}     \Comment{Lazy on left child}
-      \State $lazy(I) \gets False$
-      \State \Call{query}{$I.left$, $i$, $sum + I.sum$}
-    \EndIf
-    \If{lazy(I), $i \in I.right, i \notin I.left$} \Comment{Lazy on right child}
-      \State $lazy(I) \gets False$
-      \State \Call{query}{$I.right$, $i$, $sum + I.sum$}
-    \EndIf
-    \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on both}
-      \State $lazy(I) \gets False$
-      \State \Call{query}{$I.right$, $i$, $j$, $sum + I.sum$} +
-            \Call{query}{$I.left$, $i$, $j$, $sum + I.sum$}
-    \EndIf
-    \If{!lazy(I), $i \in I.left$}             \Comment{Not lazy on left child}
-      \State \Call{query}{$I.left$, $i$, $sum$}
-    \EndIf
-    \If{!lazy(I), $i \in I.right$}        \Comment{Not lazy on right child}
-      \State \Call{query}{$I.right$, $i$, $sum$}
-    \EndIf
-    \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy both}
-      \State \Call{sum}{$I.right$, $i$, $sum$}
-    \EndIf
-    \EndFunction
-\end{algorithmic}
-
-\begin{algorithmic}[1]
-    \Function{sum}{$I$, $i$, $j$, $sum$}:
-    \If{$I.size = 1$}                                   \Comment{Return}
-      \State \Return{$I.sum + sum$}\;
-    \EndIf
-    \If{lazy(I), $i \in I.left, i \notin I.right$}     \Comment{Lazy on left}
-      \State $lazy(I) \gets False$
-      \State \Call{sum}{$I.left$, $i$, $j$, $sum + I.sum$}
-    \EndIf
-    \If{lazy(I), $i \in I.right, i \notin I.left$} \Comment{Lazy on right}
-      \State $lazy(I) \gets False$
-      \State \Call{sum}{$I.right$, $i$, $j$, $sum + I.sum$}
-    \EndIf
-    \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on both}
-      \State $lazy(I) \gets False$
-      \State \Call{sum}{$I.right$, $i$, $j$, $sum + I.sum$} +
-                \Call{sum}{$I.left$, $i$, $j$, $sum + I.sum$}
-    \EndIf
-    \If{!lazy(I), $i \in I.left$}                        \Comment{Not lazy on both}
-      \State \Call{sum}{$I.left$, $i$, $sum$}
-    \EndIf
-    \If{!lazy(I), $i \in I.right$}                       \Comment{Not lazy on both}
-      \State \Call{sum}{$I.right$, $i$, $sum$}
-    \EndIf
-    \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy on both}
-      \State \Call{sum}{$I.right$, $i$, $sum$}
-    \EndIf
-    \EndFunction
-\end{algorithmic}
-
-\begin{algorithmic}[1]
-    \Function{update}{$I$, $i$, $j$, $k$}:
-    \If{$I.size = 1$}                                   \Comment{Return}
-        \State \Return $I.val \gets I.val + update$\;
-        \State \Return $I.val += update$\;
-    \EndIf
-    \If{lazy(I), $i \in I.left, i \notin I.right$}     \Comment{Lazy on left}
-        \State $lazy(I.left) \gets True$
-        \State $I.left.val \gets k$
-    \EndIf
-    \If{lazy(I), $i \in I.right, i \notin I.left$} \Comment{Lazy on right}
-        \State $lazy(I.right) \gets True$
-        \State $I.right.val \gets k$
-    \EndIf
-    \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on both}
-        \State $lazy(I) \gets True$
-        \State $I.val \gets k$
-    \EndIf
-    \If{!lazy(I), $i \in I.left$}                        \Comment{Not lazy}
-        \State \Call{update}{$I.left$, $i$, $update$}
-        \State update($I.left$, $i$, $update$)
-    \EndIf
-    \If{!lazy(I), $i \in I.right$}                       \Comment{Not lazy}
-        \State \Call{update}{$I.right$, $i$, $update$}
-        \State update($I.right$, $i$, $update$)
-    \EndIf
-    \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy}
-        \State \Call{update}{$I.right$, $i$, $update$}
-        \State update($I.right$, $i$, $update$)
-    \EndIf
-    \EndFunction
-\end{algorithmic}
-
+%Let $T$ be a segmented binary tree over a continuous interval $I: [0, N - 1]$
+%s.t.\ its leafs are the points in I, and the parent of two nodes comprises of their interval:
+%$$  n' \cup n'' = n, n' \cap n'' = \emptyset   \textrm{ s.t. } n \text{ is the parent of } n', n''$$
+%
+%$T$ will keep track of the prefix sums for every interval.
+%We define a function
+%\begin{equation}
+%    s': [0, n - 1] \to \mathbb{N}
+%\end{equation}
+%that given a node in $T$ returns the value associated with $I$, namely the
+%cumulative sum of that interval.
+%
+%In order to reduce the computational cost, we introduce a lazy algorithm
+%that doesn't propagate sums over $T$ as they are streamed in the input,
+%which means $s'(i)$ might not be accurate at a given time $t$ for any of the
+%requested operation.
+%
+%We'll instead either compute over $T$ or update $T$ as necessary.
+%Let us define a function to do so:
+%\begin{equation}
+%    l: \mathbb{N} \to (\mathbb{N} \cup \{\epsilon\}, \mathbb{N})
+%\end{equation}
+%to keep track of our lazy sums:
+%\begin{equation}
+%    s(n) = \begin{cases}
+%            \epsilon, \_            &   \textrm{if no lazy prefix sum is in that interval} \\
+%            k, m                    &   \textrm{if a lazy sum of k is to be propagated to m}\\
+%            \end{cases}
+%\end{equation}
+%The \textsc{query} function is then trivial:
+%
+%\begin{algorithmic}[1]
+%    \Function{query}{$I$, $i$, $sum$}:
+%    \If{$I.size = 1$}                       \Comment{Return found value}
+%      \State \Return $I.sum$
+%    \EndIf
+%    \If{lazy(I), $i \in I.left, i \notin I.right$}     \Comment{Lazy on left child}
+%      \State $lazy(I) \gets False$
+%      \State \Call{query}{$I.left$, $i$, $sum + I.sum$}
+%    \EndIf
+%    \If{lazy(I), $i \in I.right, i \notin I.left$} \Comment{Lazy on right child}
+%      \State $lazy(I) \gets False$
+%      \State \Call{query}{$I.right$, $i$, $sum + I.sum$}
+%    \EndIf
+%    \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on both}
+%      \State $lazy(I) \gets False$
+%      \State \Call{query}{$I.right$, $i$, $j$, $sum + I.sum$} +
+%            \Call{query}{$I.left$, $i$, $j$, $sum + I.sum$}
+%    \EndIf
+%    \If{!lazy(I), $i \in I.left$}             \Comment{Not lazy on left child}
+%      \State \Call{query}{$I.left$, $i$, $sum$}
+%    \EndIf
+%    \If{!lazy(I), $i \in I.right$}        \Comment{Not lazy on right child}
+%      \State \Call{query}{$I.right$, $i$, $sum$}
+%    \EndIf
+%    \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy both}
+%      \State \Call{sum}{$I.right$, $i$, $sum$}
+%    \EndIf
+%    \EndFunction
+%\end{algorithmic}
+%
+%\begin{algorithmic}[1]
+%    \Function{sum}{$I$, $i$, $j$, $sum$}:
+%    \If{$I.size = 1$}                                   \Comment{Return}
+%      \State \Return{$I.sum + sum$}\;
+%    \EndIf
+%    \If{lazy(I), $i \in I.left, i \notin I.right$}     \Comment{Lazy on left}
+%      \State $lazy(I) \gets False$
+%      \State \Call{sum}{$I.left$, $i$, $j$, $sum + I.sum$}
+%    \EndIf
+%    \If{lazy(I), $i \in I.right, i \notin I.left$} \Comment{Lazy on right}
+%      \State $lazy(I) \gets False$
+%      \State \Call{sum}{$I.right$, $i$, $j$, $sum + I.sum$}
+%    \EndIf
+%    \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on both}
+%      \State $lazy(I) \gets False$
+%      \State \Call{sum}{$I.right$, $i$, $j$, $sum + I.sum$} +
+%                \Call{sum}{$I.left$, $i$, $j$, $sum + I.sum$}
+%    \EndIf
+%    \If{!lazy(I), $i \in I.left$}                        \Comment{Not lazy on both}
+%      \State \Call{sum}{$I.left$, $i$, $sum$}
+%    \EndIf
+%    \If{!lazy(I), $i \in I.right$}                       \Comment{Not lazy on both}
+%      \State \Call{sum}{$I.right$, $i$, $sum$}
+%    \EndIf
+%    \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy on both}
+%      \State \Call{sum}{$I.right$, $i$, $sum$}
+%    \EndIf
+%    \EndFunction
+%\end{algorithmic}
+%
+%\begin{algorithmic}[1]
+%    \Function{update}{$I$, $i$, $j$, $k$}:
+%    \If{$I.size = 1$}                                   \Comment{Return}
+%        \State \Return $I.val \gets I.val + update$\;
+%        \State \Return $I.val += update$\;
+%    \EndIf
+%    \If{lazy(I), $i \in I.left, i \notin I.right$}     \Comment{Lazy on left}
+%        \State $lazy(I.left) \gets True$
+%        \State $I.left.val \gets k$
+%    \EndIf
+%    \If{lazy(I), $i \in I.right, i \notin I.left$} \Comment{Lazy on right}
+%        \State $lazy(I.right) \gets True$
+%        \State $I.right.val \gets k$
+%    \EndIf
+%    \If{lazy(I), $i \in I.right, i \in I.left$}      \Comment{Lazy on both}
+%        \State $lazy(I) \gets True$
+%        \State $I.val \gets k$
+%    \EndIf
+%    \If{!lazy(I), $i \in I.left$}                        \Comment{Not lazy}
+%        \State \Call{update}{$I.left$, $i$, $update$}
+%        \State update($I.left$, $i$, $update$)
+%    \EndIf
+%    \If{!lazy(I), $i \in I.right$}                       \Comment{Not lazy}
+%        \State \Call{update}{$I.right$, $i$, $update$}
+%        \State update($I.right$, $i$, $update$)
+%    \EndIf
+%    \If{!lazy(I), $i \in I.right, i \in I.left$}         \Comment{Not lazy}
+%        \State \Call{update}{$I.right$, $i$, $update$}
+%        \State update($I.right$, $i$, $update$)
+%    \EndIf
+%    \EndFunction
+%\end{algorithmic}
+%
 \subsection{Second solution}
 
 We use a segment binary tree $T_I$ over the interval $I = [0, n - 1]$, that is, a tree whose leaves are the points in $I$ and the parent of two nodes is the union of their interval. More formally, if $x.interval$ denotes the attribute $interval$ of the node $x$,
