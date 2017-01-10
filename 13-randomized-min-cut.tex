@@ -10,21 +10,31 @@ Consider the randomized min-cut algorithm discussed in class. We have seen that 
 \vspace{0.5cm}
 \paragraph{Contraction step.} We assume that the adjacency lists $Adj[x]$ are sorted $\forall x \in V$. We also note that the multigraph is undirected, therefore $v\in Adj[u]$ if and only if $u\in Adj[v]$. We maintain an attribute $pe$ in each edge to store the number of parallel edges.
 
-To contract an edge $(u, v)$, we have to merge the two adjacency lists $Adj[u]$ and $Adj[v]$ into a single \emph{sorted} adjacency list $Adj[uv]$ --- like the merge procedure in merge sort - ensuring that:
+To contract an edge $(u, v)$, we have to merge the two adjacency lists $Adj[u]$ and $Adj[v]$ into a single \emph{sorted} adjacency list $Adj[uv]$ --- like the merge procedure in merge sort --- ensuring that:
 \begin{itemize}
   \item if the current node in $Adj[u]$ is $v$, skip the node, since it will not appear in $Adj[uv]$ (do the same with $Adj[v]$ and $u$);
   \item if the current nodes are equal to $x$, add $x$ to $Adj[uv]$ and set $(uv, x).pe = (u,x).pe + (v,x).pe$.
 \end{itemize}
 Finally, we replace $Adj[u]$ and $Adj[v]$ with the newly created $Adj[uv]$. The total cost of this step is $O(n)$, as at most both lists containing $n$ elements each are scanned.
 
-\paragraph{Weighted graph extension.}
-We now extend the above to weighted multi-graph by re-conducting it to the non-weighted case.
-First we'll define the \emph{min-weighted cut}, the weighted cut where $\min_{|c| > 0} C = \min_{C} \sum{\omega(c)}$, that is the sum of the weights determines the weight of the overall cut.
-We then have the weight for the overall graph: 
+\paragraph{Weighted graph extension.} The min-weighted cut problem asks to find a cut $(S, \overline{S})$, that is, a partition of $V$ in two non empty subsets $S \subset V$ and $\overline{S}=V \setminus S$, that minimizes the sum of weights of the edges that cross the cut, formally $$\min \sum_{\substack{e=(u,v)\in E \\ u \in S, v \in \overline{S}}} \omega(e).$$
+
+The Karger's algorithm for weighted graphs is
+\begin{algorithmic}[1]
+  \Function{Min-Cut-Size}{$G$}
+    \While{$|V| > 2$}
+	  \State Choose an edge $e$ at random with probability $\frac{\omega(e)}{\sum_{e' \in E} \omega(e')}$
+	  \State $G \gets$ \Call{ContractEdge}{$G,e$}
+	\EndWhile
+	\State \Return $\omega(e)$ where $e$ is the edge that connects the two remaining nodes
+  \EndFunction
+\end{algorithmic}
+
+\paragraph{Error probability.} We then have the weight for the overall graph: 
 \begin{equation*}
 \omega_G = \sum^{n}\left( \omega(n) \right)
 \end{equation*}
-and for the min cut: $\omega_{min}$.
+and for the min-cut: $\omega_{min}$.
 Similarly as we've seen in class we can define $\omega_G$ in function of $\omega_{min}$:
 \begin{equation*}
 \omega_G \geq \frac{\sum^{n} \left( \omega(n) \right)}{2} \geq \frac{n \cdot \omega_{min}}{2}
@@ -37,9 +47,9 @@ We associate to each edge a probability $\Pr(e) < 1: \sum_{e \in G.E} \Pr(e)= 1$
 That is, we reach the same error probability seen in class.
 Therefore we can safely assume that the analysis is the same.
 
-The algorithm does not need to be edited but in the computation of the min cut, which is now $\omega_c$ and not $\sum^{e^{i, j}} \left( e_i \right)$ where $e_i$ is an edge between $i, j$ last remaining nodes in the cut.
+The algorithm does not need to be edited but in the computation of the min-cut, which is now $\omega_c$ and not $\sum^{e^{i, j}} \left( e_i \right)$ where $e_i$ is an edge between $i, j$ last remaining nodes in the cut.
 
-\paragraph{Error probability.}
+\paragraph{Probability of success after multiple executions.}
 By the analysis seen in class we have an error probability of
 \begin{equation*}
 1 - \Pr({\text{success}}) = 1 - \frac{1}{{{n} \choose {2}}}
