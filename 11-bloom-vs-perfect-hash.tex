@@ -15,7 +15,7 @@ of bits per key required by $T$ with that required by Bloom filters.
 \paragraph{Solution.}
 We extend the data structure discussed in Section \ref{section:space-efficient-perfect-hash} with an additional array $C$ that stores the $n$ signatures. Leveraging the fact that $B$ has as many 1s as the number of signatures we need to store, we fill the array $C$ with the signatures in this way: the entry $C[i]$ contains the signature $s(k)$ in binary if and only if $k$ is the key that caused a the $i$th one in $B$. We also need an additional space of $o(X)$ to perform rank-select operations  on $B$ in $O(1)$.
 
-With this new data structure, given a key $l \in U$, to check whether it belongs to $S$ we check whether $B[i]=1$ where $i=\phi(h(l))+h_{h(l)}(l)$ as before, but also:
+With this new data structure, given a key $l \in U$, to check whether it belongs to $S$ we check whether $B[i]=1$ where $i=\phi(h(l))+h_{h(l)}(l)$ as before, but also
 \begin{equation}
   \label{equation:query-signature}
   C[rank_1(i)-1] \stackrel{?}{=} s(l).

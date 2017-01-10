@@ -13,16 +13,16 @@ Operations $rank_0(i)$ and $select_0(j)$ can be defined in the same way as above
 \vspace{0.5cm}
 \paragraph{Solution.} The two-level hashing layers are comprised of:
 \begin{enumerate}
-  \item A hash function $h$ and $n$ pointers, each addressing one bitvector $B_j$ of size $n_j^2$.
+  \item a hash function $h$ and $n$ pointers, each addressing one bitvector $B_j$ of size $n_j^2$;
   \item $n$ hash functions $h_j$ hashing to their relative bitvector $B_j$ of size $n_j^2$.
 \end{enumerate}
-Instead of storing a vector of pointers to the secondary hash tables, we merge the bitvectors $B_j$, one after the other, in a flat array $B=B_0B_1 \cdots B_{n-1}$. Note that, except for the $n$ pointers removed at the first level, the space is neither reduced nor increased, as no further bits are used to separate two adjacent buckets. We then store the size of each $B_j$ in unary in an auxiliary bitvector $L$:
+Instead of storing a vector of pointers to the secondary hash tables, we merge the bitvectors $B_j$, one after the other, in a flat array $B=B_0B_1 \cdots B_{n-1}$. Note that, except for the $n$ pointers removed at the first level, the space is neither reduced nor increased, as no further bits are used to separate two adjacent buckets. We then store the size of each $B_j$ in unary in an auxiliary bitvector
 $$L = \overbrace{00 \dots 0}^{n_0^2 \text{ times}} 1 
       \overbrace{00 \dots 0}^{n_1^2 \text{ times}} 1 \cdots
-      \overbrace{00 \dots 0}^{n_{n-1}^2 \text{ times}} 1$$
+      \overbrace{00 \dots 0}^{n_{n-1}^2 \text{ times}} 1.$$
 $L$ is associated with a rank-select data structure.
 
-\paragraph{Queries.} The starting index of $B_j$ in $B$ is computed in $O(1)$ with the following function on $L$: $$\phi(j)=rank_0(select_1(j))$$ This operation:
+\paragraph{Queries.} The starting index of $B_j$ in $B$ is computed in $O(1)$ with the following function on $L$: $$\phi(j)=rank_0(select_1(j)).$$ This operation:
 \begin{enumerate}
   \item finds the position of the $j$th 1 with $select_1(j)$, that is, the index in $L$ that precedes the start of the unary representation of $n_j^2$;
   \item calculates the sum of the sizes of the preceding bitvectors ($\sum_{i=0}^{j-1} n_i^2$) by computing the number of $0$s with $rank_0(select_1(j))$ (this is the starting position of the desired bitvector).
@@ -33,7 +33,7 @@ We can determine (with a probability of error) whether a key $k$ belongs to the 
 \begin{equation*}
   Y = \sum_{j=0}^{n-1} 3{(1 + 2\log_2 n_j)}
     = 3n + 6\sum_{j=0}^{n-1} \log_2 n_j
-    \leq 3n + 6\sum_{j=0}^{n-1} n_j
+    \leq 3n + 6\sum_{j=0}^{n-1} n_j.
 \end{equation*}
 
 \paragraph{Space.} The space occupied by the whole data structure is:
@@ -44,4 +44,4 @@ We can determine (with a probability of error) whether a key $k$ belongs to the 
   \item $Y \leq 3n + 6\sum_{j=0}^{n-1} n_j$ bits for the hash functions, as shown in the previous paragraph.
 \end{itemize}
 Since $\E{\sum_{j=0}^{n-1}n_j^2} < 2n$, as shown in the perfect hashing analysis \cite[281]{Cormen09}, the total space is 
-$$2n + 3n + 3n + 12n = 20n \in O(n)$$
+$$2n + 3n + 3n + 12n = 20n.$$

@@ -2,7 +2,7 @@
 Given a static input array $A$ of $N$ keys in the EMM (external memory or cache-aware model), describe how to organize the keys inside $A$ by suitably permuting them during a preprocessing step, so that any subsequent search of a key requires $O(\log_B N)$ block transfers using just $O(1)$ memory words of auxiliary storage (besides those necessary to store $A$). Clearly, the CPU complexity should remain $O(\log N)$. Discuss the I/O complexity of the above preprocessing, assuming that it can uses $O(N/B)$ blocks of auxiliary storage. (Note that the additional $O(N/B)$ blocks are employed only during the preprocessing; after that, they are discarded as the search is implicit and thus just $O(1)$ words can be employed.)
 
 \vspace{0.5cm}
-\paragraph{Solution.} The idea is to construct a B-tree, a balanced search tree where each node has $B$ keys. The keys inside a node $x$ divide the interval of keys stored below $x$ in $B+1$ intervals, therefore each node has $B+1$ children. We don't store pointers explicitly, the index of the $j$-th child of a node $i$ is
+\paragraph{Solution.} The idea is to construct a B-tree, a balanced search tree where each node has $B$ keys. The keys inside a node $x$ divide the interval of keys stored below $x$ in $B+1$ intervals, therefore each node has $B+1$ children. We don't store pointers explicitly, the index of the $j$th child of a node $i$ is
 $$i(B+1)+B(j+1) \quad \text{ where } 1 \leq j \leq B+1 \text{ and } 0 \leq i < A.length$$
 This is a generalization of the formula for implicit binary heaps, in which $B=1$.
 

@@ -4,17 +4,17 @@ As discussed in class, for a min-wise independent family $\mathcal{H}$, we can a
 
 \vspace{0.5cm}
 \paragraph{Solution.}  We claim that
-$$\langle \min(\min h_1(A), \min h_1(B)), \dots, \min(\min h_k(A), \min h_k(B))\rangle$$
+$$\marray{\min(\min h_1(A), \min h_1(B)), \dots, \min(\min h_k(A), \min h_k(B))}$$
 which can be computed from $s(A)$ and $s(B)$ with $\Theta(k)$ comparisons, is equivalent to
-$$s(A \cup B) = \langle \min h_1(A \cup B), \dots , \min h_k(A \cup B) \rangle$$
-In fact, note that $\forall i \in [1, k]$, $$\min h_i(A \cup B) = \min (h_i(A) \cup h_i(B)) = \min ( \min h_i(A), \min h_i(B))$$
+$$s(A \cup B) = \marray{\min h_1(A \cup B), \dots , \min h_k(A \cup B)}.$$
+In fact, note that $\forall i \in [1, k]$, $$\min h_i(A \cup B) = \min (h_i(A) \cup h_i(B)) = \min ( \min h_i(A), \min h_i(B)).$$
 The second equality is a trivial property of the union, for $h_i(A \cup B) = h_i(A) \cup h_i(B)$ we give the following
 \begin{proof}
   First we prove that $h_i(A \cup B) \subseteq h_i(A) \cup h_i(B)$:
-  $$l \in h_i(A \cup B) \implies \exists s \in A \cup B \text{ such that } h_i(s) = l$$
+  $$l \in h_i(A \cup B) \implies \exists s \in A \cup B \text{ such that } h_i(s) = l.$$
  Since $s \in A \cup B \implies s \in A \vee s \in B$, we have two cases: if $s\in A$, then $h_i(s) \in h_i(A)$, hence $ h_i(s) \in h_i(A)\cup h_i(B)$; if instead $s\in B$, then $h_i(s) \in h_i(B) $, hence $ h_i(s) \in h_i(A)\cup h_i(B)$.
 
   Now we prove $h_i(A) \cup h_i(B) \subseteq h_i(A \cup B)$:
-  $$l \in h_i(A) \cup h_i(B) \implies l \in h_i(A) \vee l \in h_i(B)$$
+  $$l \in h_i(A) \cup h_i(B) \implies l \in h_i(A) \vee l \in h_i(B).$$
   If $l \in h_i(A)$, then $\exists s \in A$ such that $h_i(s)=l$; since $s \in A \implies s \in A \cup B$, we have $h_i(s) \in h_i(A \cup B)$. If instead $l \in h_i(B)$, then $\exists s \in B$ such that $h_i(s)=l$; since $s \in B \implies s \in A \cup B$, we have $h_i(s) \in h_i(A \cup B)$.
 \end{proof}
