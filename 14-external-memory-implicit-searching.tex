@@ -3,7 +3,7 @@ Given a static input array $A$ of $N$ keys in the EMM (external memory or cache-
 
 \vspace{0.5cm}
 \paragraph{Solution.} The idea is to construct a B-tree, a balanced search tree where each node has $B$ keys. The keys inside a node $x$ divide the interval of keys stored below $x$ in $B+1$ intervals, therefore each node has $B+1$ children. We don't store pointers explicitly, the index of the $j$th child of a node $i$ is
-$$i(B+1)+B(j+1) \quad \text{ where } 1 \leq j \leq B+1 \text{ and } 0 \leq i < A.length$$
+$$i(B+1)+jB \quad \text{ where } 1 \leq j \leq B+1 \text{ and } 0 \leq i < A.length.$$
 This is a generalization of the formula for implicit binary heaps, in which $B=1$.
 
 Assuming that $A$ is sorted, we construct the tree as follows:
