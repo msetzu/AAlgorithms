@@ -20,10 +20,12 @@
 \usetikzlibrary{matrix}
 \addbibresource{bibliography.bib}
 
-\DeclarePairedDelimiter\abs{\lvert}{\rvert}  % Define abs-like syntax
-\DeclarePairedDelimiter\norm{\lVert}{\rVert}
-\DeclareMathOperator*{\median}{median}       % Median operator with subscript support
-\DeclareMathOperator*{\mprob}{\mathbb{P}}    % Probability with subscript support
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}      % Define absolute value notation
+\DeclarePairedDelimiter\norm{\lVert}{\rVert}     % Define norm notation
+\DeclarePairedDelimiter\marray{\langle}{\rangle} % Define array notation
+
+\DeclareMathOperator*{\median}{median}    % Define median with subscript support
+\DeclareMathOperator*{\mprob}{\mathbb{P}} % Define probability with subscript support
 
 \newcommand*{\E}[1]{\mathbb{E}\left[{#1}\right]}      % Define expected value
 \newcommand*{\prob}[1]{\mprob\left[{#1}\right]}       % Define probability
