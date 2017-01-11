@@ -30,27 +30,40 @@ The Karger's algorithm for weighted graphs is
   \EndFunction
 \end{algorithmic}
 
-\paragraph{Error probability.} We then have the weight for the overall graph: 
+\paragraph{Error probability.} We define the weighted degree of a vertex $v$ as sum of the edges' weights incident to it:
 \begin{equation*}
-\omega_G = \sum^{n}\left( \omega(n) \right)
+\omega_{v} = \sum_{e\{v, \_\} \in E}\omega(e) + \sum_{e\{\_, v\} \in E}\omega(e)
 \end{equation*}
-and for the min-cut: $\omega_{min}$.
-Similarly as we've seen in class we can define $\omega_G$ in function of $\omega_{min}$:
+We can then define the min cut as the partition whose weighted degrees sum is minimum:
 \begin{equation*}
-\omega_G \geq \frac{\sum^{n} \left( \omega(n) \right)}{2} \geq \frac{n \cdot \omega_{min}}{2}
+\omega_{min} = \sum_{e \in \text{min cut}}\omega(e)
 \end{equation*}
 
-We associate to each edge a probability $\Pr(e) < 1: \sum_{e \in G.E} \Pr(e)= 1$ proportionate to its weight: the more the weight, the more the probability it's chosen, giving us an error probability of
+Now, each vertex $v$ has weighted degree $\geq \omega_{min}$: if this were to be false a vertex with a degree $\omega_v < \omega_{min}$ would exist and be the min cut itself.
+By hypothesis $\omega_{min}$ was the min cut, hence the contradiction.
+This allows us to give a lower bound for the weighted degree of the entire graph $G$:
 \begin{equation*}
-\Pr(error) = \frac{\Pr(e \in C \text{ is chosen})}{\Pr(e \in E \text{ is chosen })} = \frac{\textsc{weight(min-cut)}}{\textsc{weight(graph)}} = \frac{\omega_{min}}{\omega_G} = \frac{\omega_{min}}{\frac{n \cdot \omega_{min}}{2}} = \frac{2}{n}
+\omega_G \geq \frac{n\omega_{min}}{2}
 \end{equation*}
-That is, we reach the same error probability seen in class.
-Therefore we can safely assume that the analysis is the same.
-
-The algorithm does not need to be edited but in the computation of the min-cut, which is now $\omega_c$ and not $\sum^{e^{i, j}} \left( e_i \right)$ where $e_i$ is an edge between $i, j$ last remaining nodes in the cut.
+The algorithm chooses an edge $e$ with probability proportional to the edge's weight $\omega(e): \prob{e \text{ is chosen}} = \frac{\omega(e)}{\mathcal{\omega_G}}$.
+Thus we have an error when one of the edges $e$ belonging to the min cut is chosen:
+\begin{equation*}
+\prob{\text{error}} = \frac{\omega_{min}}{\omega_G} \leq \frac{\omega_{min}}{\frac{n \cdot \omega_{min}}{2}} = \frac{2}{n}
+\end{equation*}
+on a single cut.
+It follows trivially that we have a success probability of at least
+\begin{equation*}
+\prob{\text{success}} \geq 1 - \prob{\text{error}} = 1 - \frac{2}{n} = \frac{n - 2}{n}
+\end{equation*}
+On the next one, we are going to obtain the same error on a lesser graph with $n - 1$ vertexes and without the $e$ edge: the error probability is increased to $\frac{2}{n - 1}$ and consequently decreases the success probability: $1 - \Pr(error) = 1 - \frac{2}{n - 1} = \frac{n - 1 - 2}{n - 1}$.
+This process is then repeated until $n = 2$.
+As these events are independent one another we have a success probability of at least:
+\begin{equation*}
+\prod_{i = 2}^{n - 2} \frac{n - i}{n - i + 2} = {{n}\choose{2}}^{-1}
+\end{equation*}
 
 \paragraph{Probability of success after multiple executions.}
-By the analysis seen in class we have an error probability of
+As previously stated we have an error probability of
 \begin{equation*}
 1 - \Pr({\text{success}}) = 1 - \frac{1}{{{n} \choose {2}}}
 \end{equation*}
