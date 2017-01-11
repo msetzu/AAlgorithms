@@ -7,7 +7,7 @@ In the MAX-SAT problem, we want to maximize the number of satisfied clauses in a
 
 For example, in $F=c_1 \wedge c_2 \wedge c_3 = (x_1 \vee \neg x_2) \wedge (x_2 \vee \neg x_2) \wedge (\neg x_3 \vee x_4)$, the assignment $b = (1, 0, 1, 1)$ satisfies $c_1, c_2, c_3$, while $\overline{b} = (0, 1, 0, 0)$ satisfies $c_2, c_3$, thus $u=1, v=0, w=2$.
 
-We can rewrite and bound the approximation $\widetilde{C} = \max\{m_0, m_1\}$ returned by the algorithm as $$\widetilde{C} = \max\{u+w, v+w\}=w+\max\{u, v\}\geq w + \frac{u+v}{2} \geq \frac{1}{2} (u+v+w).$$
+We can rewrite and bound the approximation $\widetilde{C} = \max\{m_0, m_1\}$ returned by the algorithm as $$\widetilde{C} = \max\{u+w, v+w\}=w+\max\{u, v\} \geq w + \frac{u+v}{2} \geq \frac{w}{2} + \frac{u+v}{2} = \frac{1}{2} (u+v+w).$$
 
 Since the optimal solution $C^*$ is at most the number of clauses $m$, which in turn is at most $u+v+w$, it follows that
 $$\frac{C^*}{\widetilde{C}} \leq \frac{u+v+w}{\frac{1}{2}(u+v+w)} = 2.$$
