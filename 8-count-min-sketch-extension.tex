@@ -12,7 +12,7 @@ and decrement can be now seen as $(i, 1)$ and $(i, -1)$.
 \subsection{First solution}
 
 Let $F$ be the implicit vector of size $n$ that receives updates $(i, v)$ such that $F[i]=F[i]+v$ (initially, $F[i]=0 \; \forall i \in [1, n]$).
-The Count-Min (CM) sketch data structure, with parameters $\varepsilon$ and $\delta$, consists of:
+The Count-Min (CM) sketch data structure \cite{Cormode05}, with parameters $\varepsilon$ and $\delta$, consists of:
 \begin{itemize}
   \item a table $T$ of size $r\times c$, where $r=\ln\frac{1}{\delta}$ and $c=\frac{e}{\varepsilon}$, that we use to approximate queries on $F$;
   \item $r$ hash functions $h_1, \dots, h_r$, chosen uniformly at random from a pairwise-independent family, that maps from $\{1,\dots,n\}$ to $\{1,\dots,c\}$.

@@ -2,7 +2,7 @@
 Consider $N = 2^h - 1$ keys where $h$ is a power of 2, and the implicit cache-oblivious vEB layout of their corresponding complete binary tree, where the keys are suitably permuted and stored in an array of length $N$ without using pointers (as it happens in the classical implicit binary heap but the rule here is different). The root is in the first position of the array. Find a rule that, given the position of the current node, it is possible to locate in the array the positions of its left and right children. Discuss how to apply this layout to obtain (a) a static binary search tree and (b) a heap data structure, discussing the cache complexity.
 
 \vspace{0.5cm}
-\paragraph{Solution.} We assume that the keys are stored in a zero-indexed array $A$ s.t. $\log A = H$. Given and index $0 \leq i < A.length$ we will give a rule for computing the index of its children.
+\paragraph{Solution.} We assume that the keys are stored in a zero-indexed array $A$ s.t. $\log A = H$. Given and index $0 \leq i < A.length$ we will give a rule for computing the index of its children \cite{Ladner02}.
 
 \begin{center}
 	\begin{tikzpicture}[sibling distance=10pt]
